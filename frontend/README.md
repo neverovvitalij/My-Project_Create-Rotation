@@ -1,38 +1,128 @@
-# React App for the React Course
+Rotationsplan Management System
 
-## Available Scripts
+Overview
 
-In the project directory, you can run:
+The Rotationsplan Management System is a web application designed to manage rotation schedules, station lists, and working personnel efficiently. Each registered user can create and manage rotation plans independently for their own production line without accessing data from other users.
 
-### `npm start`
+Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+User authentication (registration, login, and password reset)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Independent rotation queue management per user
 
-### `npm test`
+Station and personnel list management
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+High-priority personnel assignments
 
-### `npm run build`
+Excel export for rotation plans
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Technologies Used
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Frontend: React, MobX, React Router
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Backend: Node.js, Express, MongoDB, Mongoose
 
-### `npm run eject`
+Authentication: JWT (JSON Web Tokens)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Styling: CSS Modules
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Data Export: ExcelJS
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Installation
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Prerequisites
+
+Ensure you have the following installed on your system:
+
+Node.js (v18 or higher)
+
+MongoDB (Atlas or local instance)
+
+npm or yarn
+
+Setup
+
+Clone the repository:
+
+git clone https://github.com/neverovvitalij/My-Project_Create-Rotation
+cd rotationsplan
+
+Install dependencies for both frontend and backend:
+
+npm install
+
+Environment Variables
+
+Create a .env file in the backend directory and configure the following variables:
+
+PORT=8001
+CLIENT_URL=http://localhost:3000
+DB_URL=mongodb+srv://your-db-url
+JWT_SECRET=your-secret-key
+MAIL_USER=your-email@example.com
+MAIL_PASS=your-email-password
+
+Running the Application
+
+Start the Backend
+
+npm run dev
+
+Start the Frontend
+
+cd frontend
+npm start
+
+API Endpoints
+
+Authentication
+
+POST /api/registration - Register a new user
+
+POST /api/login - User login
+
+POST /api/logout - User logout
+
+POST /api/request-reset-password - Request password reset
+
+POST /api/reset-password - Reset password
+
+Rotation Management
+
+POST /api/rotation/create - Create a new rotation queue
+
+GET /api/rotation - Fetch all rotations for a user
+
+PUT /api/rotation/:id - Update a rotation plan
+
+DELETE /api/rotation/:id - Delete a rotation plan
+
+Station and Personnel Management
+
+POST /api/stations - Add a new station
+
+GET /api/stations - Retrieve all stations for a user
+
+DELETE /api/stations/:id - Remove a station
+
+POST /api/personnel - Add personnel to a station
+
+GET /api/personnel - Fetch personnel list
+
+Export Data
+
+GET /api/export/excel - Generate and download an Excel file for the rotation plan
+
+Deployment
+
+To deploy the application, configure an online database (MongoDB Atlas) and deploy both frontend and backend using services like:
+
+Frontend: Vercel, Netlify
+
+Backend: Heroku, Railway, Render
+
+Ensure environment variables are set correctly in your deployment service.
+
+Contact
+
+For support, contact: vitalij.neverov@gmail.com
