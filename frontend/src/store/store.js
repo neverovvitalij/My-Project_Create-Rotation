@@ -1,8 +1,8 @@
 import { makeAutoObservable } from 'mobx';
-import AuthServise from './services/AuthServise.js';
-import UserService from './services/UserService.js';
-import StationsService from './services/StationsService.js';
-import RotationPlanService from './services/RotationPlanService.js';
+import AuthServise from '../services/AuthService.js';
+import WorkerService from '../services/WorkerService.js';
+import StationsService from '../services/StationsService.js';
+import RotationPlanService from '../services/RotationPlanService.js';
 
 export default class Store {
   user = {};
@@ -80,9 +80,9 @@ export default class Store {
 
   async loadData() {
     try {
-      const personsResponse = await UserService.fetchPersons();
+      const workersResponse = await WorkerService.fetchWorkers();
       const stationsResponse = await StationsService.getStations();
-      this.setEmployeeList(personsResponse.data);
+      this.setEmployeeList(workersResponse.data);
       this.setStations(stationsResponse.data);
     } catch (error) {
       this.setErrorMsg('Error loading data');
@@ -186,10 +186,10 @@ export default class Store {
     }
   }
 
-  async addPerson(candidate) {
+  async addWorker(candidate) {
     try {
-      const responseAddPerson = await UserService.addPerson(candidate);
-      this.setEmployeeList([...this.employeeList, responseAddPerson.data]);
+      const responseAddWorker = await WorkerService.addWorker(candidate);
+      this.setEmployeeList([...this.employeeList, responseAddWorker.data]);
       this.setErrorMsg('');
       this.loadData();
     } catch (error) {
@@ -229,12 +229,12 @@ export default class Store {
     }
   }
 
-  async deletePerson(name) {
+  async deleteWorker(name) {
     try {
-      const responseDeletePerson = await UserService.deletePerson(name);
+      const responseDeleteWorker = await WorkerService.deleteWorker(name);
       this.setEmployeeList(
         this.employeeList.filter(
-          (person) => person.name !== responseDeletePerson.name
+          (person) => person.name !== responseDeleteWorker.name
         )
       );
       this.setErrorMsg('');
@@ -244,25 +244,25 @@ export default class Store {
     }
   }
 
-  async removeStationFromPerson(name, stationToRemove) {
+  async removeStationFromWorker(name, stationToRemove) {
     try {
-      const responseRemStnFromPerson =
-        await UserService.removeStationFromPerson(name, stationToRemove);
+      const responseRemStnFromWorker =
+        await WorkerService.removeStationFromWorker(name, stationToRemove);
       this.loadData();
-      return responseRemStnFromPerson.data;
+      return responseRemStnFromWorker.data;
     } catch (error) {
       console.error('Error removing station:', error.message || error);
     }
   }
 
-  async addStationToPerson(name, stationToAdd) {
+  async addStationToWorker(name, stationToAdd) {
     try {
-      const responseAddStnToPerson = await UserService.addStationToPerson(
+      const responseAddStnToWorker = await WorkerService.addStationToWorker(
         name,
         stationToAdd
       );
       this.loadData();
-      return responseAddStnToPerson.data;
+      return responseAddStnToWorker.data;
     } catch (error) {
       console.error('Error adding station:', error.message || error);
     }
@@ -349,9 +349,9 @@ export default class Store {
     }
   }
 
-  async changeEmployeeStatus(name, newStatus) {
+  async changeWorkerStatus(name, newStatus) {
     try {
-      await UserService.personChangeStatus(name, newStatus);
+      await WorkerService.workerChangeStatus(name, newStatus);
 
       this.setEmployeeList(
         this.employeeList.map((emp) =>
