@@ -283,14 +283,14 @@ export default class Store {
   async confirmRotation(
     specialRotation = null,
     highPriorityRotation,
-    dailyRotations
+    rotation
   ) {
     try {
       if (
         !highPriorityRotation ||
         typeof highPriorityRotation !== 'object' ||
-        !Array.isArray(dailyRotations) ||
-        dailyRotations.length === 0
+        !Array.isArray(rotation) ||
+        rotation.length === 0
       ) {
         throw new Error('Incorrect rotation data');
       }
@@ -298,7 +298,7 @@ export default class Store {
       const responseConfirmRotation = await RotationPlanService.confirmRotation(
         specialRotation,
         highPriorityRotation,
-        dailyRotations
+        rotation
       );
 
       if (responseConfirmRotation?.data) {

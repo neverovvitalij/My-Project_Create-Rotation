@@ -1,17 +1,71 @@
 .App {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #1e1e2d;
+  color: #ffffff;
+  font-family: Arial, sans-ser;
+}
+
+.header {
+  font-size: 28px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  color: #f7e500;
+}
+
+.authContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-width: 500px;
+  height: auto;
+  margin: auto;
+  padding: 20px;
+  background-color: #2b2b3d;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   text-align: center;
 }
 
-h1 {
-  font-size: 90px;
-  margin-top: 20px;
+.authForms {
+  width: 100%;
 }
 
-button {
-  padding: 15px;
-  font-size: 30px;
-  margin: 20px;
+.buttonContainer {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.toggleButton {
+  background-color: #f7e500;
+  color: #2b2b3d;
+  border: none;
   border-radius: 5px;
-  border: 0;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
   cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.toggleButton:active {
+  transform: scale(0.95);
+  background-color: #c5b200;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
