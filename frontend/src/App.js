@@ -9,11 +9,11 @@ import {
 } from 'react-router-dom';
 import { useContext, useEffect, useRef } from 'react';
 import { Context } from './index';
-import MainLayout from './pages/MainLayout';
+import MainLayout from './components/MainLayout';
 import StationsListe from './pages/StationsList';
 import WorkersListe from './pages/WorkersList';
 import RotationPlan from './pages/RotationPlan';
-import PersonAria from './components/PersonAria';
+import UserAria from './components/UserAria';
 import LoginForm from './pages/LoginForm';
 import RegisterForm from './pages/RegisterForm';
 import ReqResPassword from './components/ReqResPassword';
@@ -74,7 +74,7 @@ function App() {
     <BrowserRouter>
       <div className={styles.App}>
         <h1 className={styles.header}>Rotationsplan leicht erstellen!</h1>
-        {store.isAuth && <PersonAria />}
+        {store.isAuth && <UserAria />}
         <Routes>
           <Route
             path="/login"
