@@ -16,8 +16,8 @@ import RotationPlan from './pages/RotationPlan';
 import UserAria from './components/UserAria';
 import LoginForm from './pages/LoginForm';
 import RegisterForm from './pages/RegisterForm';
-import ReqResPassword from './components/ReqResPassword';
-import ResetPassword from './components/ResetPassword';
+import ReqResPassword from './pages/ReqResPassword';
+import ResetPassword from './pages/ResetPassword';
 import styles from './App.module.css';
 
 function AuthGuard({ children }) {

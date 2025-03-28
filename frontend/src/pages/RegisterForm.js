@@ -51,7 +51,10 @@ const RegisterForm = () => {
           >
             Register
           </button>
-          <button className={`${styles.baseButton} ${styles.secondaryButton}`}>
+          <button
+            className={`${styles.baseButton} ${styles.secondaryButton}`}
+            onClick={handleGoToLogin}
+          >
             Go to Login
           </button>
         </div>
