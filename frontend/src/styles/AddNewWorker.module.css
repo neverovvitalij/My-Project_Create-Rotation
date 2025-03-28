@@ -1,0 +1,144 @@
+.container {
+  background-color: #3a3a4f;
+  padding: 25px;
+  border-radius: 12px;
+  max-width: 800px;
+  margin: 20px auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  color: #ffffff;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.inputField {
+  width: 80%;
+  padding: 8px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+}
+
+.inputField:focus {
+  outline: none;
+  border-color: #f7e500;
+  background-color: #ffffff;
+}
+
+.inputRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.stationSelection {
+  margin-bottom: 20px;
+}
+
+.toggleStationsButton {
+  background-color: #f7e500;
+  border: none;
+  padding: 10px 15px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 15px;
+  transition: background-color 0.3s ease;
+}
+
+.toggleStationsButton:hover {
+  background-color: #e0d100;
+}
+
+.stationsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.stationItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #2c2c3c;
+  padding: 10px;
+  border-radius: 8px;
+  width: 160px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.stationItem:hover {
+  background-color: #f7e500;
+}
+
+.stationCheckbox {
+  margin-right: 10px;
+}
+
+.stationLabel {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.selected {
+  background-color: #f7e500;
+  color: black;
+}
+
+.noStations {
+  color: #999;
+  font-size: 14px;
+  font-style: italic;
+}
+
+.submitButton {
+  background-color: #f7e500;
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.submitButton:hover {
+  background-color: #e0d100;
+}
+
+.submitButton:active {
+  transform: scale(0.95);
+}
+
+.errorMsg {
+  color: #ff4444;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .inputRow {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}

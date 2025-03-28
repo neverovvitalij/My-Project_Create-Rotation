@@ -8,17 +8,17 @@ import {
   useLocation,
 } from 'react-router-dom';
 import { useContext, useEffect, useRef } from 'react';
-import styles from './App.module.css';
 import { Context } from './index';
 import MainLayout from './pages/MainLayout';
 import StationsListe from './pages/StationsList';
 import WorkersListe from './pages/WorkersList';
 import RotationPlan from './pages/RotationPlan';
 import PersonAria from './components/PersonAria';
-import LoginForm from './components/LoginForm';
-import RegisterForm from './components/RegisterForm';
+import LoginForm from './pages/LoginForm';
+import RegisterForm from './pages/RegisterForm';
 import ReqResPassword from './components/ReqResPassword';
 import ResetPassword from './components/ResetPassword';
+import styles from './App.module.css';
 
 function AuthGuard({ children }) {
   const { store } = useContext(Context);
