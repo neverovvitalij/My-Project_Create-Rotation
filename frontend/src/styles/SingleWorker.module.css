@@ -1,0 +1,90 @@
+.personCard {
+  position: relative;
+  padding: 5px;
+  margin: 5px;
+  font-size: 1.1em;
+  background-color: #3a3a4f;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  min-height: 40px;
+}
+
+.personCard:hover {
+  background-color: #505068;
+  transform: scale(1.02);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  z-index: 2;
+}
+
+.stationsList {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 3;
+  width: 200px;
+  max-height: 150px;
+  overflow-y: auto;
+  background-color: #2c2c3c;
+  border: 1px solid #505068;
+  border-radius: 8px;
+  padding: 10px;
+  display: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.stationsList.active {
+  display: block;
+}
+
+.stationItem {
+  font-size: 14px;
+  color: #ffffff;
+  padding: 5px;
+  border-bottom: 1px solid #4a4a5d;
+}
+
+.stationItem:last-child {
+  border-bottom: none;
+}
+
+.deleteIcon {
+  font-size: 20px;
+  color: #ff4d4d;
+  transition: color 0.2s ease;
+}
+
+.deleteIcon2 {
+  font-size: 14px;
+  color: #ff4d4d;
+  transition: color 0.2s ease;
+}
+
+.updateIcon {
+  font-size: 20px;
+  color: #f7e500;
+  transition: color 0.2s ease;
+  margin-left: auto;
+}
+
+.updateIcon:hover {
+  color: #d6c400;
+}
+
+.addButton {
+  margin-top: 10px;
+  padding: 5px 10px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.addButton:hover {
+  background-color: #45a049;
+}
