@@ -12,4 +12,4 @@ const ConfirmedRotationSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('ConfirmesRotation', ConfirmedRotationSchema);
+module.exports = mongoose.model('ConfirmedRotation', ConfirmedRotationSchema);

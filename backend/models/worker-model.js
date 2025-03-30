@@ -12,4 +12,4 @@ const WorkerSchema = new Schema({
   status: { type: Boolean, required: true, default: true },
 });
 
-module.exports = model('Worker', WorkerSchema);
+module.exports = model('WorkerModel', WorkerSchema);
