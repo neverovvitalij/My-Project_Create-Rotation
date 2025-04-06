@@ -216,7 +216,7 @@ const RotationPlan = () => {
         </>
       )}
       {/* Daily Rotations */}
-      <section className={styles.rotation}>
+      <section className={styles.dailyRotation}>
         {rotations.rotation?.length > 0 ? (
           rotations.rotation.map((rot, cycleIndex) => (
             <div key={cycleIndex} className={styles.cycle}>

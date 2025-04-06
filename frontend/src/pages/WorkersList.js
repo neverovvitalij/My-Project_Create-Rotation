@@ -25,12 +25,12 @@ const WorkersList = () => {
     }
   };
 
-  const groupedEmploees = store.employeeList.reduce((groups, employee) => {
-    const group = employee.group;
+  const groupedEmploees = store.employeeList.reduce((groups, worker) => {
+    const group = worker.group;
     if (!groups[group]) {
       groups[group] = [];
     }
-    groups[group].push(employee);
+    groups[group].push(worker);
     return groups;
   }, {});
 
@@ -39,16 +39,16 @@ const WorkersList = () => {
       <h2 className={styles.header}>Employee List</h2>
       <div className={styles.workersGrid}>
         {store.employeeList.length > 0 ? (
-          Object.entries(groupedEmploees).map(([group, employees]) => (
+          Object.entries(groupedEmploees).map(([group, workers]) => (
             <div className={styles.groupColumn} key={group}>
               <h3>Group {group}</h3>
-              {employees
+              {workers
                 .slice()
                 .sort((a, b) => a.name.localCompare(b.name))
-                .map((employee) => (
+                .map((worker) => (
                   <SingleWorker
-                    worker={employee}
-                    key={employee._id}
+                    worker={worker}
+                    key={worker._id}
                     activeWorker={activeWorker}
                     setActiveWorker={setActiveWorker}
                   />
@@ -57,7 +57,7 @@ const WorkersList = () => {
           ))
         ) : (
           <p className={styles.noWorkersMessage}>
-            No employees found. Please add new ones.
+            No workers found. Please add new ones.
           </p>
         )}
       </div>

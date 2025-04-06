@@ -3,7 +3,7 @@ import styles from '../styles/MainLayout.module.css';
 
 const MainLayout = () => {
   return (
-    <div className={styles.mainContainer}>
+    <div className={styles.container}>
       <Outlet />
     </div>
   );

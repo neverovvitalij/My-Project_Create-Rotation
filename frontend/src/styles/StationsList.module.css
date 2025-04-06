@@ -44,7 +44,7 @@
   font-weight: bold;
 }
 
-.stationItem {
+/* .stationItem {
   color: #ffffff;
   padding: 12px;
   margin: 5px 0;
@@ -62,7 +62,7 @@
 .stationItem:hover {
   background-color: #3a3a4f;
   transform: scale(1.02);
-}
+} */
 
 .toggleButton {
   margin: 20px auto;
