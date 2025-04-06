@@ -8,8 +8,7 @@ class RotationPlanController {
   constructor() {
     this.getDailyRotation = this.getDailyRotation.bind(this);
     this.confirmRotation = this.confirmRotation.bind(this);
-    this.downloadLatestConfirmedRotation =
-      this.downloadConfirmRotation.bind(this);
+    this.downloadConfirmedRotation = this.downloadConfirmedRotation.bind(this);
   }
 
   // Generate a rotation plan
@@ -35,11 +34,11 @@ class RotationPlanController {
       }
 
       // Validate specialAssignments (if needed)
-      return next(
-        ApiError.BadRequest(
-          'sonderAssignments must be an array of { person, job } objects'
-        )
-      );
+      // return next(
+      //   ApiError.BadRequest(
+      //     'sonderAssignments must be an array of { person, job } objects'
+      //   )
+      // );
 
       // Pass cycles, preassigned, and sonderAssignments
       const result = await rotationService.generateDailyRotation(

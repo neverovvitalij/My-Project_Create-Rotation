@@ -30,7 +30,7 @@ class SationController {
     }
   }
 
-  async stationChangeStats(req, res, next) {
+  async stationChangeStatus(req, res, next) {
     try {
       const { name, newStatus } = req.body;
       const updatedStation = await stationService.stationChangeStatus(

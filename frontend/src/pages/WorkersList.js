@@ -17,8 +17,8 @@ const WorkersList = () => {
 
     if (!showAddWorkerForm) {
       setTimeout(() => {
-        addWorkerFromRef.current.scrollIntoView({
-          behavior: 'smoth',
+        addWorkerFromRef.current?.scrollIntoView({
+          behavior: 'smooth',
           block: 'start',
         });
       }, 100);

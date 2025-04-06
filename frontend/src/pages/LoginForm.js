@@ -12,7 +12,7 @@ const LoginForm = () => {
   const storeRef = useRef(store);
 
   const handleGoToRegister = () => {
-    navigate('/register');
+    navigate('/registration');
   };
 
   useEffect(() => {
@@ -74,6 +74,7 @@ const LoginForm = () => {
           Forgot password?
         </button>
         <button
+          type="button"
           className={`${styles.baseButton} ${styles.secondaryButton}`}
           onClick={handleGoToRegister}
         >

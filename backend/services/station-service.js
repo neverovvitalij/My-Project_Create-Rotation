@@ -32,7 +32,7 @@ class StationService {
           stations: { $elemMatch: { name, isActive: true } },
         }).sort({ name: 1 }); //Sort workers by name
 
-        rotationQueue = new rotationQueue({
+        rotationQueue = new RotationQueueModel({
           station: name,
           queue: workers.map((worker) => worker._id) || [],
         });

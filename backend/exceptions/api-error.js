@@ -2,7 +2,7 @@ module.exports = class ApiError extends Error {
   status;
   errors;
 
-  constructor(status, errors = []) {
+  constructor(status, message, errors = []) {
     super(message);
     this.name = this.constructor.name;
     this.status = status;

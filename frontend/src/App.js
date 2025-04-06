@@ -87,7 +87,7 @@ function App() {
             }
           />
           <Route
-            path="/register"
+            path="/registration"
             element={
               store.isAuth ? (
                 <Navigate to="/dashboard" replace />
@@ -110,7 +110,7 @@ function App() {
           >
             <Route index element={<StationsListe />} />
             <Route path="workersliste" element={<WorkersListe />} />
-            <Route path="rotationpla" element={<RotationPlan />} />
+            <Route path="rotationplan" element={<RotationPlan />} />
           </Route>
 
           <Route

@@ -4,8 +4,15 @@ const ApiError = require('../exceptions/api-error');
 
 class WorkerService {
   async getAllWorkers() {
-    const workers = await WorkerModel.find();
-    return workers;
+    try {
+      const workers = await WorkerModel.find();
+      if (!workers || workers.length === 0) {
+        console.log('Add worker');
+      }
+      return workers;
+    } catch (error) {
+      console.error(error.message);
+    }
   }
 
   async addWorker(name, stations, group, status = true) {

@@ -26,6 +26,7 @@ class WorkerController {
   async deleteWorker(req, res, next) {
     try {
       const { name } = req.body;
+      console.log(name);
       const deletedWorker = await workerService.deleteWorker(name);
       return res.json(deletedWorker);
     } catch (error) {

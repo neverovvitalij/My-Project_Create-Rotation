@@ -79,7 +79,7 @@ const SingleWorker = ({ worker, activeWorker, setActiveWorker }) => {
         }`}
       >
         {worker.stations
-          .splice()
+          .slice()
           .sort((a, b) => a.name.localeCompare(b.name))
           .map((station, index) => (
             <li key={index} className={styles.stationItem}>
@@ -94,7 +94,7 @@ const SingleWorker = ({ worker, activeWorker, setActiveWorker }) => {
           ))}
         <Dropdown
           options={store.stations
-            .splice()
+            .slice()
             .sort((a, b) => a.name.localeCompare(b.name))
             .filter(
               (station) =>

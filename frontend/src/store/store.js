@@ -8,7 +8,6 @@ export default class Store {
   user = {};
   isAuth = false;
   isLoading = false;
-  isInitializing = true;
   errorMsg = '';
   authErrorMsg = '';
   employeeList = [];
@@ -20,6 +19,7 @@ export default class Store {
     rotation: [],
     date: '',
   };
+  isInitializing = true;
 
   constructor() {
     makeAutoObservable(this);
@@ -103,7 +103,7 @@ export default class Store {
     }
   }
 
-  async registartion(email, password) {
+  async registration(email, password) {
     try {
       const responseRegistration = await AuthServise.registration(
         email,
@@ -135,7 +135,7 @@ export default class Store {
     this.setIsLoading(true);
     try {
       const responseCheckAuth = await AuthServise.refresh();
-      localStorage.setItem(responseCheckAuth.data.accessToken);
+      localStorage.setItem('token', responseCheckAuth.data.accessToken);
       this.setAuth(true);
       this.setUser(responseCheckAuth.data.user);
     } catch (error) {

@@ -21,7 +21,7 @@ const RegisterForm = () => {
 
   const handleChangeSubmit = (event) => {
     event.preventDefault();
-    store.registartion(email, password);
+    store.registration(email, password);
     setEmail('');
     setPassword('');
   };
@@ -47,11 +47,12 @@ const RegisterForm = () => {
         <div className={styles.buttonContainer}>
           <button
             type="submit"
-            className={`${styles.baseButton} ${styles.promaryButton}`}
+            className={`${styles.baseButton} ${styles.primaryButton}`}
           >
             Register
           </button>
           <button
+            type="button"
             className={`${styles.baseButton} ${styles.secondaryButton}`}
             onClick={handleGoToLogin}
           >
