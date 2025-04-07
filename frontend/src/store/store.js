@@ -13,10 +13,10 @@ export default class Store {
   employeeList = [];
   stations = [];
   newStation = { name: '', priority: 0 };
-  dailyRotation = {
+  rotation = {
     specialRotation: {},
     highPriorityRotation: {},
-    rotation: [],
+    cycleRotations: [],
     date: '',
   };
   isInitializing = true;
@@ -61,11 +61,16 @@ export default class Store {
     this.newStation = station;
   }
 
-  setDailyRotation({ specialRotation, highPriorityRotation, rotation, date }) {
-    this.dailyRotation = {
+  setDailyRotation({
+    specialRotation,
+    highPriorityRotation,
+    cycleRotations,
+    date,
+  }) {
+    this.rotation = {
       specialRotation: specialRotation || {},
       highPriorityRotation: highPriorityRotation || {},
-      rotation: Array.isArray(rotation) ? rotation : [],
+      cycleRotations: Array.isArray(cycleRotations) ? cycleRotations : [],
       date: date,
     };
   }
@@ -276,29 +281,29 @@ export default class Store {
       );
       this.setDailyRotation(responseDailyRotation.data);
     } catch (error) {
-      this.setErrorMsg('Error creating rotation plan');
+      this.setErrorMsg('Error creating cycleRotations plan');
     }
   }
 
   async confirmRotation(
     specialRotation = null,
     highPriorityRotation,
-    rotation
+    cycleRotations
   ) {
     try {
       if (
         !highPriorityRotation ||
         typeof highPriorityRotation !== 'object' ||
-        !Array.isArray(rotation) ||
-        rotation.length === 0
+        !Array.isArray(cycleRotations) ||
+        cycleRotations.length === 0
       ) {
-        throw new Error('Incorrect rotation data');
+        throw new Error('Incorrect cycleRotations data');
       }
 
       const responseConfirmRotation = await RotationPlanService.confirmRotation(
         specialRotation,
         highPriorityRotation,
-        rotation
+        cycleRotations
       );
 
       if (responseConfirmRotation?.data) {
@@ -308,7 +313,7 @@ export default class Store {
       }
     } catch (error) {
       console.error(error.response?.data?.message || error.message);
-      this.setErrorMsg('Error confirming rotation');
+      this.setErrorMsg('Error confirming cycleRotations');
     }
   }
 

@@ -4,7 +4,7 @@ const RotationQueueSchema = new Schema({
   station: { type: String, unique: true, required: true },
   queue: {
     type: [mongoose.Schema.Types.ObjectId],
-    ref: 'Worker',
+    ref: 'WorkerModel',
     required: true,
   },
   updatedAt: { type: Date, default: Date.now },

@@ -61,13 +61,14 @@ class RotationPlanController {
   async confirmRotation(req, res, next) {
     try {
       const rotationService = new RotationPlanServise();
-      const { specialRotation, highPriorityRotation, dailyRotation } = req.body;
+      const { specialRotation, highPriorityRotation, cycleRotations } =
+        req.body;
 
       if (
         !highPriorityRotation ||
         typeof highPriorityRotation !== 'object' ||
-        !Array.isArray(dailyRotation) ||
-        dailyRotation.length === 0
+        !Array.isArray(cycleRotations) ||
+        cycleRotations.length === 0
       ) {
         return next(
           ApiError.BadRequest('Error confirming plan, invalid input')
@@ -77,7 +78,7 @@ class RotationPlanController {
       const result = await rotationService.confirmRotation(
         specialRotation,
         highPriorityRotation,
-        dailyRotation
+        cycleRotations
       );
       res.json({ result, message: 'Plan has been confirmed and saved.' });
     } catch (error) {
@@ -99,14 +100,14 @@ class RotationPlanController {
           .json({ message: 'No confirmed plan available for download' });
       }
 
-      const { specialRotation, highPriorityRotation, dailyRotation } =
+      const { specialRotation, highPriorityRotation, cycleRotations } =
         confirmedRotation.rotation;
 
       const rotationService = new RotationPlanServise();
       const filePath = await rotationService.saveRotationToExcel(
         specialRotation,
         highPriorityRotation,
-        dailyRotation
+        cycleRotations
       );
 
       if (!filePath) {

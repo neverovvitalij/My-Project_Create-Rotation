@@ -9,27 +9,27 @@ const RotationPlan = () => {
   const { store } = useContext(Context);
 
   const [preassigned, setPreassigned] = useState([]);
-  const [sonderAssignments, setSonderAssignments] = useState([]);
+  const [specialAssignments, setSpecialAssignments] = useState([]);
 
   const [confirmedRotation, setConfirmedRotation] = useState(false);
   const [rotationForDownload, setRotationForDownload] = useState(false);
 
-  const rotations = toJS(store.dailyRotation);
+  const rotations = toJS(store.rotation);
   const stationsList = toJS(store.stations);
 
   // 1) Remove from preassigned if it exists
-  // 2) Remove from sonderAssignments if it exists
-  // 3) If "sonder" is selected, add it to the sonderAssignments array
+  // 2) Remove from specialAssignments if it exists
+  // 3) If "sonder" is selected, add it to the specialAssignments array
   // 4) If another station is selected (not empty), add it to preassigned
   // If newStation === '', that means "remove assignment", add nothing
   const handleStationChange = (workerName, newStation) => {
     setPreassigned((prev) => prev.filter((item) => item.worker !== workerName));
-    setSonderAssignments((prev) =>
+    setSpecialAssignments((prev) =>
       prev.filter((item) => item.worker !== workerName)
     );
 
     if (newStation === 'sonder') {
-      setSonderAssignments((prev) => [
+      setSpecialAssignments((prev) => [
         ...prev,
         { worker: workerName, station: newStation },
       ]);
@@ -38,7 +38,7 @@ const RotationPlan = () => {
 
   // -- Logic for entering "job" for sonder --
   const handleSonderJobChange = (workerName, newJob) => {
-    setSonderAssignments((prev) =>
+    setSpecialAssignments((prev) =>
       prev.map((item) =>
         item.worker === workerName ? { ...item, job: newJob } : item
       )
@@ -47,7 +47,7 @@ const RotationPlan = () => {
 
   // -- Get what has been selected for this employee (station or 'sonder') --
   const getCurrentStationForWorker = (workerName) => {
-    const sonderItem = sonderAssignments.find((s) => s.worker === workerName);
+    const sonderItem = specialAssignments.find((s) => s.worker === workerName);
     if (sonderItem) {
       return 'sonder';
     }
@@ -57,7 +57,7 @@ const RotationPlan = () => {
 
   // -- The current job for this employee, if they are in sonder --
   const getSonderJobForWorker = (workerName) => {
-    const sonderItem = sonderAssignments.find((s) => s.worker === workerName);
+    const sonderItem = specialAssignments.find((s) => s.worker === workerName);
     return sonderItem ? sonderItem.job : '';
   };
 
@@ -66,7 +66,7 @@ const RotationPlan = () => {
     setRotationForDownload(false);
     try {
       setConfirmedRotation(true);
-      await store.getDailyRotation(sonderAssignments, preassigned);
+      await store.getDailyRotation(specialAssignments, preassigned);
     } catch (error) {
       console.error('Failed to load rotation', error.message);
     } finally {
@@ -76,9 +76,9 @@ const RotationPlan = () => {
 
   const confirmRotation = async () => {
     setConfirmedRotation(true);
-    const { specialRotation, highPriorityRotation, rotation } = rotations;
+    const { specialRotation, highPriorityRotation, cycleRotations } = rotations;
 
-    if (!highPriorityRotation || !rotation?.length) {
+    if (!highPriorityRotation || !cycleRotations?.length) {
       store.setErrorMsg('Not enough data to confirm rotation.');
       return;
     }
@@ -87,7 +87,7 @@ const RotationPlan = () => {
       await store.confirmRotation(
         specialRotation,
         highPriorityRotation,
-        rotation
+        cycleRotations
       );
       setRotationForDownload(true);
     } catch (error) {
@@ -117,7 +117,7 @@ const RotationPlan = () => {
         <button className={styles.button} onClick={getRotationDataForDay}>
           Load rotation
         </button>
-        {rotations.rotation?.length ? (
+        {rotations.cycleRotations?.length ? (
           <button
             disabled={confirmedRotation}
             className={styles.button}
@@ -134,7 +134,7 @@ const RotationPlan = () => {
       </div>
       {confirmedRotation && <FaSpinner className={styles.spinner} />}
       <h2>{`Available employees ${store.activeEmployeeCount} | Needed ${store.stationsCount}`}</h2>
-      ;{/* List of employees */}
+      {/* List of employees */}
       <ul className={styles.available}>
         {store.employeeList.map((emp) => {
           const stationValue = getCurrentStationForWorker(emp.name);
@@ -146,6 +146,7 @@ const RotationPlan = () => {
               <input
                 type="checkbox"
                 className={styles.inputCheckbox}
+                checked={emp.status}
                 onChange={() => handleCheck(emp)}
               />
               <select
@@ -167,7 +168,7 @@ const RotationPlan = () => {
                   type="text"
                   className={styles.inputSonder}
                   placeholder="Enter tast"
-                  value={sonderJob}
+                  value={sonderJob ?? ' '}
                   onChange={(e) =>
                     handleSonderJobChange(emp.name, e.target.value)
                   }
@@ -217,8 +218,8 @@ const RotationPlan = () => {
       )}
       {/* Daily Rotations */}
       <section className={styles.dailyRotation}>
-        {rotations.rotation?.length > 0 ? (
-          rotations.rotation.map((rot, cycleIndex) => (
+        {rotations.cycleRotations?.length > 0 ? (
+          rotations.cycleRotations.map((rot, cycleIndex) => (
             <div key={cycleIndex} className={styles.cycle}>
               <h3>Cycle {cycleIndex + 1}</h3>
               <ul>

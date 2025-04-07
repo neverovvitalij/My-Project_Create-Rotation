@@ -5,7 +5,7 @@ const ConfirmedRotationSchema = new mongoose.Schema({
   rotation: {
     specialRotation: { type: Map, of: String, required: false },
     highPriorityRotation: { type: Map, of: String, required: true },
-    dailyRotation: {
+    cycleRotations: {
       type: [{ type: Map, of: String }],
       required: true,
     },

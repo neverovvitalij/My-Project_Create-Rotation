@@ -14,7 +14,7 @@ export default class WorkerService {
   }
 
   static async workerChangeStatus(name, newStatus) {
-    return api.patch('/worker-change-status', { name, newStatus });
+    return api.patch('/change-worker-status', { name, newStatus });
   }
 
   static async removeStationFromWorker(name, stationToRemove) {

@@ -44,7 +44,7 @@ const WorkersList = () => {
               <h3>Group {group}</h3>
               {workers
                 .slice()
-                .sort((a, b) => a.name.localCompare(b.name))
+                .sort((a, b) => a.name.localeCompare(b.name))
                 .map((worker) => (
                   <SingleWorker
                     worker={worker}

@@ -17,7 +17,7 @@ class RotationPlanService {
    * @returns {{
    *   sonderRotation: Object,              // person -> job
    *   highPriorityRotation: Object,        // station -> person
-   *   dailyRotations: Array<Object>,       // [{ station -> person }, ...] for each cycle
+   *   cycleRotations: Array<Object>,       // [{ station -> person }, ...] for each cycle
    *   date: string
    * }}
    */
@@ -32,7 +32,7 @@ class RotationPlanService {
         return {
           specialRotation: {},
           highPriorityRotation: {},
-          dailyRotations: [],
+          cycleRotations: [],
           date: new Date().toISOString().split('T')[0],
         };
       }
@@ -56,7 +56,7 @@ class RotationPlanService {
       }
 
       // 3) Preparation of results
-      const dailyRotations = []; // Array of daily rotations
+      const cycleRotations = []; // Array of daily rotations
       const highPriorityRotation = new Map(); //Map(station -> worker)
       const specialRotation = new Map(); // Object (worker -> job)
       const fixedAssignments = {}; // station -> worker
@@ -204,7 +204,7 @@ class RotationPlanService {
             }
           }
         }
-        dailyRotations.push(dailyRotation);
+        cycleRotations.push(dailyRotation);
       }
 
       // 4) Save updated queues in DB
@@ -222,7 +222,7 @@ class RotationPlanService {
         // Convert Map -> Object
         highPriorityRotation: Object.fromEntries(highPriorityRotation),
         // Array: [ { station1: person1, station2: person2, ... }, ... ]
-        dailyRotations,
+        cycleRotations,
         date: new Date().toISOString().split('T')[0],
       };
     } catch (error) {
@@ -260,7 +260,6 @@ class RotationPlanService {
       const workers = await WorkerModel.find({
         stations: { $elemMatch: { name: stationName, isActive: true } },
       }).sort({ name: 1 }); // Sort workers by name (alphabetically)
-
       // Create a new queue or update existing one
       let rotationQueue = await RotationQueueModel.findOne({
         station: stationName,
@@ -284,9 +283,9 @@ class RotationPlanService {
   async confirmRotation(
     specialRotation = null,
     highPriorityRotation,
-    dailyRotations
+    cycleRotations
   ) {
-    if (!highPriorityRotation || !dailyRotations) {
+    if (!highPriorityRotation || !cycleRotations) {
       throw new Error(
         'Incorrect data: High-priority rotation or daily rotations missing'
       );
@@ -297,7 +296,7 @@ class RotationPlanService {
         rotation: {
           specialRotation: { ...specialRotation },
           highPriorityRotation: { ...highPriorityRotation },
-          dailyRotations: dailyRotations.map((rotation) => ({ ...rotation })),
+          cycleRotations: cycleRotations.map((rotation) => ({ ...rotation })),
         },
       });
 
@@ -305,7 +304,7 @@ class RotationPlanService {
       const filePath = await this.saveRotationToExcel(
         specialRotation,
         highPriorityRotation,
-        dailyRotations
+        cycleRotations
       );
 
       // Queue update
@@ -344,7 +343,7 @@ class RotationPlanService {
         await updateQueue(station, workerName);
       }
 
-      for (const rotation of dailyRotations) {
+      for (const rotation of cycleRotations) {
         for (const [station, workerName] of Object.entries(rotation)) {
           await updateQueue(station, workerName);
         }
@@ -361,7 +360,7 @@ class RotationPlanService {
   async saveRotationToExcel(
     specialRotation,
     highPriorityRotation,
-    dailyRotations
+    cycleRotations
   ) {
     try {
       // == (1) Form the filename ==
@@ -383,7 +382,7 @@ class RotationPlanService {
       };
 
       // == (4) Sheet parameters ==
-      const numCycles = dailyRotations.length;
+      const numCycles = cycleRotations.length;
       const leftNumCycles = Math.min(numCycles, 5);
       const leftBlockColumns = 1 + leftNumCycles;
       const gapColumns = 1;
@@ -572,21 +571,21 @@ class RotationPlanService {
       // Collect people for the Pivot, excluding HP
       const hpWorkersSet = new Set(Object.values(highPriorityRotation || {}));
       const pivotWorkersSet = new Set();
-      dailyRotations.forEach((rotation) => {
+      cycleRotations.forEach((rotation) => {
         Object.values(rotation).forEach((p) => {
           if (p && !hpWorkersSet.has(p)) {
             pivotWorkersSet.add(p);
           }
         });
       });
-      const pivotWorkers = Array.from(pivotPersonsSet).sort();
+      const pivotWorkers = Array.from(pivotWorkersSet).sort();
 
       let pivotRowCount = 0;
       pivotWorkers.forEach((worker) => {
         pivotRowCount++;
         const rowData = [worker];
         for (let i = 0; i < leftNumCycles; i++) {
-          const rotation = dailyRotations[i] || {};
+          const rotation = cycleRotations[i] || {};
           const stations = [];
           for (const [st, assignedWorkers] of Object.entries(rotation)) {
             if (assignedWorkers === worker) {
