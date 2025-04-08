@@ -97,29 +97,24 @@ export default class Store {
 
   async login(email, password) {
     try {
-      const responseLogin = await AuthServise.login(email, password);
-      localStorage.setItem('token', responseLogin.data.accessToken);
+      const response = await AuthServise.login(email, password);
+      localStorage.setItem('token', response.data.accessToken);
       this.setAuth(true);
-      this.setUser(responseLogin.data.user);
+      this.setUser(response.data.user);
     } catch (error) {
-      this.setAuthErrorMsg(
-        error.responseLogin?.data?.message || 'Error logging in'
-      );
+      this.setAuthErrorMsg(error.response?.data?.message || 'Error logging in');
     }
   }
 
   async registration(email, password) {
     try {
-      const responseRegistration = await AuthServise.registration(
-        email,
-        password
-      );
-      localStorage.setItem('token', responseRegistration.data.accessToken);
+      const response = await AuthServise.registration(email, password);
+      localStorage.setItem('token', response.data.accessToken);
       this.setAuth(true);
-      this.setUser(responseRegistration.data.user);
+      this.setUser(response.data.user);
     } catch (error) {
       this.setAuthErrorMsg(
-        error.responseLogin?.data?.message || 'Error registering'
+        error.response?.data?.message || 'Error registering'
       );
     }
   }
@@ -139,10 +134,10 @@ export default class Store {
     this.setIsInitializing(true);
     this.setIsLoading(true);
     try {
-      const responseCheckAuth = await AuthServise.refresh();
-      localStorage.setItem('token', responseCheckAuth.data.accessToken);
+      const response = await AuthServise.refresh();
+      localStorage.setItem('token', response.data.accessToken);
       this.setAuth(true);
-      this.setUser(responseCheckAuth.data.user);
+      this.setUser(response.data.user);
     } catch (error) {
       console.error('Error checking authorization:', error.message || error);
     } finally {
@@ -153,10 +148,8 @@ export default class Store {
 
   async requestResetPassword(email) {
     try {
-      const responseReqResPassword = await AuthServise.requestResetPassword(
-        email
-      );
-      return responseReqResPassword.data;
+      const response = await AuthServise.requestResetPassword(email);
+      return response.data;
     } catch (error) {
       if (error.response) {
         console.error('Error resetting password:', error.response.data);
@@ -173,11 +166,8 @@ export default class Store {
 
   async resetPassword(token, newPassword) {
     try {
-      const responseResPassword = await AuthServise.resetPassword(
-        token,
-        newPassword
-      );
-      return responseResPassword.data;
+      const response = await AuthServise.resetPassword(token, newPassword);
+      return response.data;
     } catch (error) {
       if (error.response) {
         console.error('Error resetting password:', error.response.data);
@@ -193,8 +183,8 @@ export default class Store {
 
   async addWorker(candidate) {
     try {
-      const responseAddWorker = await WorkerService.addWorker(candidate);
-      this.setEmployeeList([...this.employeeList, responseAddWorker.data]);
+      const response = await WorkerService.addWorker(candidate);
+      this.setEmployeeList([...this.employeeList, response.data]);
       this.setErrorMsg('');
       this.loadData();
     } catch (error) {
@@ -206,12 +196,8 @@ export default class Store {
 
   async addNewStation({ name, priority, group }) {
     try {
-      const responseAddNewStation = await StationsService.addStation(
-        name,
-        priority,
-        group
-      );
-      this.setNewStation(responseAddNewStation.data);
+      const response = await StationsService.addStation(name, priority, group);
+      this.setNewStation(response.data);
       this.setErrorMsg('');
       this.loadData();
     } catch (error) {
@@ -221,12 +207,8 @@ export default class Store {
 
   async deleteStation(station) {
     try {
-      const responseDeleteStation = await StationsService.deleteStation(
-        station
-      );
-      this.setStations(
-        this.stations.filter((s) => s.name !== responseDeleteStation.name)
-      );
+      const response = await StationsService.deleteStation(station);
+      this.setStations(this.stations.filter((s) => s.name !== response.name));
       this.setErrorMsg('');
       this.loadData();
     } catch (error) {
@@ -236,11 +218,9 @@ export default class Store {
 
   async deleteWorker(name) {
     try {
-      const responseDeleteWorker = await WorkerService.deleteWorker(name);
+      const response = await WorkerService.deleteWorker(name);
       this.setEmployeeList(
-        this.employeeList.filter(
-          (person) => person.name !== responseDeleteWorker.name
-        )
+        this.employeeList.filter((person) => person.name !== response.name)
       );
       this.setErrorMsg('');
       this.loadData();
@@ -251,10 +231,12 @@ export default class Store {
 
   async removeStationFromWorker(name, stationToRemove) {
     try {
-      const responseRemStnFromWorker =
-        await WorkerService.removeStationFromWorker(name, stationToRemove);
+      const response = await WorkerService.removeStationFromWorker(
+        name,
+        stationToRemove
+      );
       this.loadData();
-      return responseRemStnFromWorker.data;
+      return response.data;
     } catch (error) {
       console.error('Error removing station:', error.message || error);
     }
@@ -262,12 +244,12 @@ export default class Store {
 
   async addStationToWorker(name, stationToAdd) {
     try {
-      const responseAddStnToWorker = await WorkerService.addStationToWorker(
+      const response = await WorkerService.addStationToWorker(
         name,
         stationToAdd
       );
       this.loadData();
-      return responseAddStnToWorker.data;
+      return response.data;
     } catch (error) {
       console.error('Error adding station:', error.message || error);
     }
@@ -275,11 +257,11 @@ export default class Store {
 
   async getDailyRotation(specialAssignments = null, preassigned = null) {
     try {
-      const responseDailyRotation = await RotationPlanService.dailyRotation(
+      const response = await RotationPlanService.dailyRotation(
         specialAssignments,
         preassigned
       );
-      this.setDailyRotation(responseDailyRotation.data);
+      this.setDailyRotation(response.data);
     } catch (error) {
       this.setErrorMsg('Error creating cycleRotations plan');
     }
@@ -300,13 +282,13 @@ export default class Store {
         throw new Error('Incorrect cycleRotations data');
       }
 
-      const responseConfirmRotation = await RotationPlanService.confirmRotation(
+      const response = await RotationPlanService.confirmRotation(
         specialRotation,
         highPriorityRotation,
         cycleRotations
       );
 
-      if (responseConfirmRotation?.data) {
+      if (response?.data) {
         this.setErrorMsg('');
       } else {
         throw new Error('Server response is empty');
@@ -319,21 +301,16 @@ export default class Store {
 
   async downloadLatestConfirmedRotation() {
     try {
-      const responseDwnldLatstConfirmdRotation =
+      const response =
         await RotationPlanService.downloadLatestConfirmedRotation();
 
-      if (
-        responseDwnldLatstConfirmdRotation.status === 200 &&
-        responseDwnldLatstConfirmdRotation.data
-      ) {
-        const blob = new Blob([responseDwnldLatstConfirmdRotation.data], {
+      if (response.status === 200 && response.data) {
+        const blob = new Blob([response.data], {
           type: 'application/pdf',
         });
 
-        let fileName = responseDwnldLatstConfirmdRotation.headers[
-          'content-disposition'
-        ]
-          ? responseDwnldLatstConfirmdRotation.headers['content-disposition']
+        let fileName = response.headers['content-disposition']
+          ? response.headers['content-disposition']
               .split('filename=')[1]
               ?.replace(/"/g, '')
           : `rotation_plan${new Date().toISOString().split('T')[0]}.xlsx`;

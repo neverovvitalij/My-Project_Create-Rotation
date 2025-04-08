@@ -31,6 +31,11 @@ const RotationPlan = () => {
     if (newStation === 'sonder') {
       setSpecialAssignments((prev) => [
         ...prev,
+        { worker: workerName, job: '' },
+      ]);
+    } else if (newStation) {
+      setPreassigned((prev) => [
+        ...prev,
         { worker: workerName, station: newStation },
       ]);
     }
