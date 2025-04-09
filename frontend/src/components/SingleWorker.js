@@ -73,7 +73,7 @@ const SingleWorker = ({ worker, activeWorker, setActiveWorker }) => {
         className={styles.deleteIcon}
         onClick={() => deleteWorker(worker.name)}
       />
-      <ul
+      <ol
         className={`${styles.stationsList} ${
           stationsVisible ? styles.active : ''
         }`}
@@ -99,7 +99,7 @@ const SingleWorker = ({ worker, activeWorker, setActiveWorker }) => {
             .filter(
               (station) =>
                 !worker.stations.map((s) => s.name).includes(station.name)
-            )
+            ) //RAZBERIS S ZIFRAMI S LEWO
             .map((station) => station.name)}
           onSelect={handleAddStation}
           label={'Add station'}
@@ -110,7 +110,7 @@ const SingleWorker = ({ worker, activeWorker, setActiveWorker }) => {
           </button>
         )}
         {complete && `✅ Ok`}
-      </ul>
+      </ol>
     </li>
   );
 };

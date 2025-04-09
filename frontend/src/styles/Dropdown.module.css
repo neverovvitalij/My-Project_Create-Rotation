@@ -1,13 +1,13 @@
 .container {
   position: relative;
-  width: 200px;
+  width: 180px;
   font-family: Arial, sans-serif;
 }
 
 .header {
   background-color: #3a3a4f;
   color: #ffffff;
-  padding: 10px 15px;
+  padding: 5px;
   border-radius: 5px;
   cursor: pointer;
   text-align: center;
