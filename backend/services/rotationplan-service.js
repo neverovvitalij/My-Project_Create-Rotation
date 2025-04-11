@@ -189,17 +189,40 @@ class RotationPlanService {
               const stationInfo = worker.stations.find(
                 (s) => s.name === station.name
               );
-
+              const stationGroup = station.group || null;
+              const workerGroup = worker.group || null;
               if (
                 worker.status &&
                 stationInfo?.isActive &&
-                !assignedWorkers.has(worker.name)
+                !assignedWorkers.has(worker.name) &&
+                workerGroup === stationGroup
               ) {
                 dailyRotation[station.name] = worker.name;
                 assignedWorkers.add(worker.name);
                 queue.push(queue.splice(i, 1)[0]);
                 assigned = true;
                 break;
+              }
+            }
+
+            if (!assigned) {
+              for (let i = 0; i < queue.length; i++) {
+                const worker = queue[i];
+                if (specialWorkers.has(worker.name)) continue;
+                const stationInfo = worker.stations.find(
+                  (s) => s.name === station.name
+                );
+                if (
+                  worker.status &&
+                  stationInfo?.isActive &&
+                  !assignedWorkers.has(worker.name)
+                ) {
+                  dailyRotation[station.name] = worker.name;
+                  assignedWorkers.add(worker.name);
+                  queue.push(queue.splice(i, 1)[0]);
+                  assigned = true;
+                  break;
+                }
               }
             }
           }
