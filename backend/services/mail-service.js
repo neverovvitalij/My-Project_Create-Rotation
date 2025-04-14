@@ -13,7 +13,7 @@ class MailService {
     });
   }
 
-  async sendActivationMail(userEmail, userLink, adminMail, adminLink) {
+  async sendActivationMail(userEmail, userLink, adminEmail, adminLink) {
     //Email to user
     await this.transporter.sendMail({
       from: process.env.SMTP_USER,
@@ -31,7 +31,7 @@ class MailService {
     // Email to administrator
     await this.transporter.sendMail({
       from: process.env.SMTP_USER,
-      to: adminMail,
+      to: adminEmail,
       subject: 'A new user requires approval',
       text: '',
       html: `

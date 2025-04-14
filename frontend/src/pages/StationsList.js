@@ -91,7 +91,11 @@ const StationsList = () => {
           </div>
         ))}
       </div>
-      <button className={styles.toggleButton} onClick={toggleAddStationForm}>
+      <button
+        disabled={!store.user.isActivated}
+        className={styles.toggleButton}
+        onClick={toggleAddStationForm}
+      >
         {showAddStationForm ? 'hide form' : 'Add station'}
       </button>
       {showAddStationForm && (

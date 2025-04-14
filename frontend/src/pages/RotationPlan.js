@@ -119,7 +119,11 @@ const RotationPlan = () => {
     <div className={styles.container}>
       {/* Button panel */}
       <div className={styles.buttonPanel}>
-        <button className={styles.button} onClick={getRotationDataForDay}>
+        <button
+          disabled={!store.user.isActivated}
+          className={styles.button}
+          onClick={getRotationDataForDay}
+        >
           Load rotation
         </button>
         {rotations.cycleRotations?.length ? (

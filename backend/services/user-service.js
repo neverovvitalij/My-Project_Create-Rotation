@@ -88,13 +88,15 @@ class UserService {
 
   async refresh(refreshToken) {
     if (!refreshToken) {
-      throw ApiError.UnouthorizedError();
+      console.error('Refresh token is missing');
+      throw ApiError.UnauthorizedError();
     }
     const userData = tokenService.validateRefreshToken(refreshToken);
     const tokenFromDb = await tokenService.findToken(refreshToken);
 
     if (!userData || !tokenFromDb) {
-      throw ApiError.UnouthorizedError();
+      console.error('Token validation failed');
+      throw ApiError.UnauthorizedError;
     }
     const user = await UserModel.findById(userData.id);
     const userDto = new UserDto(user);

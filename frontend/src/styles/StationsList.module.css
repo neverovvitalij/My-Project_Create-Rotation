@@ -88,6 +88,12 @@
   background-color: #c5b200;
 }
 
+.toggleButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .addNewStationContainer {
   background-color: #2d2d3d;
   padding: 20px;

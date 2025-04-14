@@ -61,7 +61,11 @@ const WorkersList = () => {
           </p>
         )}
       </div>
-      <button className={styles.toggleButton} onClick={toggleAddWorkerFrom}>
+      <button
+        disabled={!store.user.isActivated}
+        className={styles.toggleButton}
+        onClick={toggleAddWorkerFrom}
+      >
         {showAddWorkerForm ? 'Hide form' : 'Add worker'}
       </button>
       {showAddWorkerForm && (
