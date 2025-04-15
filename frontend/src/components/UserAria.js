@@ -31,7 +31,7 @@ const UserAria = () => {
                 title="Please confirm your email!"
                 className={styles.redicon}
               />{' '}
-              authorized (please confirm your email)
+              NOT authorized (please confirm your email)
             </h3>
           )}
           <button

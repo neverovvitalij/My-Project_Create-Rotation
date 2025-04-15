@@ -59,6 +59,8 @@ class UserService {
     // The account is activated only if both have confirmed
     if (user.userActivationStatus && user.adminActivationStatus) {
       user.isActivated = true;
+    } else {
+      user.isActivated = false;
     }
 
     await user.save();
