@@ -1,3 +1,15 @@
-node_modules
+# зависимости
+node_modules/
+
+# секреты
 .env
-server.com
+
+# фронтовая сборка
+frontend/build/
+build/
+
+# твой локальный http‑конфиг (если ты действительно хочешь, чтобы git его не трекал)
+frontend/src/http/index.js
+
+# (обычно не игнорят backend/index.js, но если ты хочешь, чтобы он тоже не перезаписывался)
+backend/index.js
