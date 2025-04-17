@@ -19,9 +19,9 @@ const RegisterForm = () => {
     storeRef.current.setAuthErrorMsg('');
   }, []);
 
-  const handleChangeSubmit = (event) => {
+  const handleChangeSubmit = async (event) => {
     event.preventDefault();
-    store.registration(email, password);
+    await store.registration(email, password);
     setEmail('');
     setPassword('');
   };

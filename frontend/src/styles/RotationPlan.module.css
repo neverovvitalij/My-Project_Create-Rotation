@@ -106,6 +106,16 @@ h2 {
   color: rgba(197, 178, 0, 0.5);
 }
 
+.groupSection {
+  margin-bottom: 30px;
+}
+
+.groupHeader {
+  color: #f7e500;
+  margin-bottom: 10px;
+  font-size: 20px;
+}
+
 .highPriorityStation h3 {
   color: #f7e500;
   font-size: 18px;

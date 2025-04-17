@@ -1,75 +1,84 @@
-const sgMail = require('@sendgrid/mail');
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+// services/mail-service.js
+const Mailjet = require('node-mailjet');
 
 class MailService {
-  async sendActivationMail(userEmail, userLink, adminEmail, adminLink) {
-    // Email to user
-    const msgUser = {
-      to: userEmail,
-      from: process.env.SENDGRID_SENDER,
-      subject: 'Activation link for ' + process.env.API_URL,
-      text: `Please activate your account using the following link: ${userLink}`,
-      html: `
-        <div>
-          <h1>Please activate your account</h1>
-          <a href="${userLink}">${userLink}</a>
-        </div>
-      `,
+  constructor() {
+    this.mailjet = Mailjet.apiConnect(
+      process.env.MAILJET_API_KEY,
+      process.env.MAILJET_API_SECRET
+    );
+    this.from = {
+      Email: process.env.MAILJET_SENDER_EMAIL,
+      Name: process.env.MAILJET_SENDER_NAME || 'Rotation Plan Service',
     };
+  }
 
-    // Email to administrator
-    const msgAdmin = {
-      to: adminEmail,
-      from: process.env.SENDGRID_SENDER,
-      subject: 'A new user requires approval',
-      text: `A new user has registered. Approve the user by clicking the following link: ${adminLink}`,
-      html: `
-        <div>
-          <h1>A new user has registered</h1>
-          <p>Please approve the user by clicking the following link:</p>
-          <a href="${adminLink}">${adminLink}</a>
-        </div>
-      `,
-    };
+  async sendActivationMail(userEmail, userLink, adminEmail, adminLink) {
+    const messages = [
+      {
+        From: this.from,
+        To: [{ Email: userEmail }],
+        Subject: `Activation link for ${process.env.API_URL}`,
+        HTMLPart: `
+          <div>
+            <h1>Please activate your account</h1>
+            <a href="${userLink}">${userLink}</a>
+          </div>
+        `,
+        TextPart: `Please activate your account using the following link: ${userLink}`,
+      },
+      {
+        From: this.from,
+        To: [{ Email: adminEmail }],
+        Subject: 'A new user requires approval',
+        HTMLPart: `
+          <div>
+            <h1>A new user${userEmail} has registered</h1>
+            <p>Please approve the user by clicking the following link:</p>
+            <a href="${adminLink}">${adminLink}</a>
+          </div>
+        `,
+        TextPart: `A new user has registered. Approve the user by clicking: ${adminLink}`,
+      },
+    ];
 
     try {
-      await sgMail.send(msgUser);
-      await sgMail.send(msgAdmin);
-      console.log('Activation emails sent successfully.');
-    } catch (error) {
-      console.error(
-        'Error sending activation email:',
-        error.response ? error.response.body : error
-      );
-      throw error;
+      await this.mailjet
+        .post('send', { version: 'v3.1' })
+        .request({ Messages: messages });
+      console.log('Activation emails sent via Mailjet');
+    } catch (e) {
+      console.error('Mailjet activation email error:', e?.response?.data || e);
+      throw e;
     }
   }
 
-  async sendPasswordResetMail(to, link) {
-    const msg = {
-      to,
-      from: process.env.SENDGRID_SENDER,
-      subject: 'Reset password',
-      text: `Reset your password by clicking the following link: ${link}`,
-      html: `
+  async sendPasswordResetMail(toEmail, resetLink) {
+    const message = {
+      From: this.from,
+      To: [{ Email: toEmail }],
+      Subject: 'Reset password',
+      HTMLPart: `
         <div>
           <h1>Reset password</h1>
-          <p>Click the following link to reset your password:</p>
-          <a href="${link}">${link}</a>
-          <p>This link is valid for 1 hour.</p>
+          <p>Click the following link to reset your password (valid for 1 hour):</p>
+          <a href="${resetLink}">${resetLink}</a>
         </div>
       `,
+      TextPart: `Reset your password using the link (valid 1 hour): ${resetLink}`,
     };
 
     try {
-      await sgMail.send(msg);
-      console.log('Password reset email sent successfully.');
-    } catch (error) {
+      await this.mailjet
+        .post('send', { version: 'v3.1' })
+        .request({ Messages: [message] });
+      console.log('Password‑reset email sent via Mailjet');
+    } catch (e) {
       console.error(
-        'Error sending password reset email:',
-        error.response ? error.response.body : error
+        'Mailjet password‑reset email error:',
+        e?.response?.data || e
       );
-      throw error;
+      throw e;
     }
   }
 }

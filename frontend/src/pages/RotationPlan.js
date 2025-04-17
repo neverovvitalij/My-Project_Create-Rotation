@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import { FaSpinner } from 'react-icons/fa';
-import { useContext, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { toJS } from 'mobx';
 import styles from '../styles/RotationPlan.module.css';
 import { Context } from '../index';
@@ -16,6 +16,7 @@ const RotationPlan = () => {
 
   const rotations = toJS(store.rotation);
   const stationsList = toJS(store.stations);
+  const employees = toJS(store.employeeList);
 
   // 1) Remove from preassigned if it exists
   // 2) Remove from specialAssignments if it exists
@@ -115,6 +116,15 @@ const RotationPlan = () => {
     await store.changeWorkerStatus(worker.name, newStatus);
   };
 
+  const groupedEmployees = useMemo(() => {
+    return employees.reduce((acc, emp) => {
+      const grp = emp.group;
+      if (!acc[grp]) acc[grp] = [];
+      acc[grp].push(emp);
+      return acc;
+    }, {});
+  }, [employees]);
+
   return (
     <div className={styles.container}>
       {/* Button panel */}
@@ -144,49 +154,56 @@ const RotationPlan = () => {
       {confirmedRotation && <FaSpinner className={styles.spinner} />}
       <h2>{`Available employees ${store.activeEmployeeCount} | Needed ${store.stationsCount}`}</h2>
       {/* List of employees */}
-      <ul className={styles.available}>
-        {store.employeeList.map((emp) => {
-          const stationValue = getCurrentStationForWorker(emp.name);
-          const sonderJob = getSonderJobForWorker(emp.name);
+      {Object.entries(groupedEmployees).map(([groupName, groupEmps]) => (
+        <section key={groupName} className={styles.groupSection}>
+          <h3 className={styles.groupHeader}>Group{groupName}</h3>
+          <ul className={styles.available}>
+            {groupEmps.map((emp) => {
+              const stationValue = getCurrentStationForWorker(emp.name);
+              const sonderJob = getSonderJobForWorker(emp.name);
 
-          return (
-            <li key={emp._id} className={styles.empItem}>
-              <span>{emp.name}</span>
-              <input
-                type="checkbox"
-                className={styles.inputCheckbox}
-                checked={emp.status}
-                onChange={() => handleCheck(emp)}
-              />
-              <select
-                className={styles.stationDropdown}
-                onChange={(e) => handleStationChange(emp.name, e.target.value)}
-                value={stationValue}
-              >
-                <option value="">Assign</option>
-                <option value="sonder">Special</option>
-                {stationsList.map((station) => (
-                  <option key={station._id} value={station.name}>
-                    {station.name}
-                  </option>
-                ))}
-              </select>
+              return (
+                <li key={emp._id} className={styles.empItem}>
+                  <span>{emp.name}</span>
+                  <input
+                    type="checkbox"
+                    className={styles.inputCheckbox}
+                    checked={emp.status}
+                    onChange={() => handleCheck(emp)}
+                  />
+                  <select
+                    className={styles.stationDropdown}
+                    value={stationValue}
+                    onChange={(e) =>
+                      handleStationChange(emp.name, e.target.value)
+                    }
+                  >
+                    <option value="">Assign</option>
+                    <option value="sonder">Special</option>
+                    {stationsList.map((station) => (
+                      <option key={station._id} value={station.name}>
+                        {station.name}
+                      </option>
+                    ))}
+                  </select>
 
-              {stationValue === 'sonder' && (
-                <input
-                  type="text"
-                  className={styles.inputSonder}
-                  placeholder="Enter tast"
-                  value={sonderJob ?? ' '}
-                  onChange={(e) =>
-                    handleSonderJobChange(emp.name, e.target.value)
-                  }
-                />
-              )}
-            </li>
-          );
-        })}
-      </ul>
+                  {stationValue === 'sonder' && (
+                    <input
+                      type="text"
+                      className={styles.inputSonder}
+                      placeholder="Enter task"
+                      value={sonderJob}
+                      onChange={(e) =>
+                        handleSonderJobChange(emp.name, e.target.value)
+                      }
+                    />
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))}
       <h2>{`Rotations plan ${rotations.date}`}</h2>
       {/* High Priority Rotations */}
       <section className={styles.highPriority}>
