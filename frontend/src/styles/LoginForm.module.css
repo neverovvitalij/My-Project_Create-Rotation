@@ -1,4 +1,4 @@
-.authForm {
+.container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -34,7 +34,7 @@
 }
 
 .buttonContainer {
-  width: 100%;
+  width: 95%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -90,4 +90,15 @@
   color: #ff5555;
   font-size: 14px;
   margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    max-width: 95%;
+    padding: 5px;
+  }
+
+  .input {
+    padding: 5px;
+  }
 }

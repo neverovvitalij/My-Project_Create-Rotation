@@ -1,4 +1,4 @@
-.authForm {
+.container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -92,8 +92,13 @@
   margin-top: 10px;
 }
 
-.success {
-  color: #31a34f;
-  font-size: 14px;
-  margin-top: 10px;
+@media (max-width: 768px) {
+  .container {
+    max-width: 95%;
+    padding: 5px;
+  }
+
+  .input {
+    padding: 5px;
+  }
 }

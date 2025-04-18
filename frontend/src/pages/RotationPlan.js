@@ -127,6 +127,7 @@ const RotationPlan = () => {
 
   return (
     <div className={styles.container}>
+      <h2>{`Available employees ${store.activeEmployeeCount} | Needed ${store.stationsCount}`}</h2>
       {/* Button panel */}
       <div className={styles.buttonPanel}>
         <button
@@ -152,7 +153,6 @@ const RotationPlan = () => {
         )}
       </div>
       {confirmedRotation && <FaSpinner className={styles.spinner} />}
-      <h2>{`Available employees ${store.activeEmployeeCount} | Needed ${store.stationsCount}`}</h2>
       {/* List of employees */}
       {Object.entries(groupedEmployees).map(([groupName, groupEmps]) => (
         <section key={groupName} className={styles.groupSection}>

@@ -22,9 +22,20 @@
   transform: scale(1.05);
 }
 
-.active {
+.navLink:active,
+.navLink:focus,
+.navLink.active {
   background-color: #f7e500;
   color: #2b2b3d;
   transform: scale(1.1);
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+  outline: none;
+}
+
+@media (max-width: 768px) {
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 }

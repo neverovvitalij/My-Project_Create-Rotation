@@ -39,41 +39,36 @@ const ReqResPassword = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <form
-        className={styles.passwordChangeForm}
-        onSubmit={handleSubmitReqChangePass}
-      >
-        <h2 className={styles.title}>Change Password</h2>
-        <input
-          value={email}
-          type="email"
-          onChange={(e) => setEmail(e.target.value)}
-          className={styles.input}
-        />
-        <div className={styles.buttonContainer}>
-          <button
-            type="submit"
-            disabled={serverResponse}
-            className={`${styles.baseButton} ${styles.primaryButton}`}
-          >
-            Send Email
-          </button>
-        </div>
+    <form className={styles.container} onSubmit={handleSubmitReqChangePass}>
+      <h2 className={styles.title}>Change Password</h2>
+      <input
+        value={email}
+        type="email"
+        onChange={(e) => setEmail(e.target.value)}
+        className={styles.input}
+      />
+      <div className={styles.buttonContainer}>
         <button
-          type="button"
-          onClick={handleGoToDashboard}
-          className={`${styles.baseButton} ${styles.secondaryButton}`}
+          type="submit"
+          disabled={serverResponse}
+          className={`${styles.baseButton} ${styles.primaryButton}`}
         >
-          Home
+          Send Email
         </button>
-        {serverResponse && <FaSpinner className={styles.spinner} />}
-        {store.authErrorMsg && (
-          <p className={styles.error}>{store.authErrorMsg}</p>
-        )}
-        {successMsg && <p className={styles.success}>{successMsg}</p>}
-      </form>
-    </div>
+      </div>
+      <button
+        type="button"
+        onClick={handleGoToDashboard}
+        className={`${styles.baseButton} ${styles.secondaryButton}`}
+      >
+        Home
+      </button>
+      {serverResponse && <FaSpinner className={styles.spinner} />}
+      {store.authErrorMsg && (
+        <p className={styles.error}>{store.authErrorMsg}</p>
+      )}
+      {successMsg && <p className={styles.success}>{successMsg}</p>}
+    </form>
   );
 };
 

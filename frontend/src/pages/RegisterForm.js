@@ -28,7 +28,7 @@ const RegisterForm = () => {
 
   return (
     <>
-      <form className={styles.authForm} onSubmit={handleChangeSubmit}>
+      <form className={styles.container} onSubmit={handleChangeSubmit}>
         <h2 className={styles.title}>Register</h2>
         <input
           placeholder="Email"

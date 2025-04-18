@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: 20px;
   align-items: center;
-  max-width: 1200px;
+  max-width: 95%;
   margin: 0 auto;
   padding: 20px;
   background-color: #1f1f2d;
@@ -129,7 +129,7 @@ h2 {
 
 .dailyRotation {
   display: flex;
-  box-shadow: 0 0 6px rgba(197, 178, 0, 0.5); /* мягкое свечение */
+  box-shadow: 0 0 6px rgba(197, 178, 0, 0.5);
   border-radius: 8px;
   padding: 10px;
   flex-wrap: wrap;
@@ -205,9 +205,22 @@ h2 {
   opacity: 0.6;
 }
 
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 @media (max-width: 768px) {
   .container {
-    padding: 10px;
+    padding: 5px;
   }
 
   .empItem,
@@ -220,17 +233,8 @@ h2 {
     max-height: 60vh;
     gap: 10px;
   }
-}
 
-.spinner {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
+  .buttonPanel {
+    padding: 10px;
   }
 }

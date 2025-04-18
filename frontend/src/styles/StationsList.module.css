@@ -1,5 +1,5 @@
 .container {
-  width: 90%;
+  width: 95%;
   max-width: 1200px;
   margin: 20px auto;
   padding: 30px 20px;
@@ -43,26 +43,6 @@
   font-size: 20px;
   font-weight: bold;
 }
-
-/* .stationItem {
-  color: #ffffff;
-  padding: 12px;
-  margin: 5px 0;
-  border-bottom: 1px solid #444;
-  font-size: 16px;
-  border-radius: 6px;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-  cursor: pointer;
-}
-
-.stationItem:last-child {
-  border-bottom: none;
-}
-
-.stationItem:hover {
-  background-color: #3a3a4f;
-  transform: scale(1.02);
-} */
 
 .toggleButton {
   margin: 20px auto;
@@ -147,6 +127,16 @@
 }
 
 @media (max-width: 768px) {
+  .container {
+    max-width: 768px;
+    padding: 5px;
+    margin: 0px;
+  }
+
+  .header {
+    font-size: 22px;
+  }
+
   .groupColumn {
     max-width: 100%;
   }

@@ -41,39 +41,30 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className={styles.container}>
-      {store.authErrorMsg ? (
+    <form className={styles.container} onSubmit={handleSubmitResetPassword}>
+      <h2 className={styles.title}>Enter new password</h2>
+      <input
+        type="password"
+        placeholder="New password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className={styles.input}
+      />
+      <input
+        type="password"
+        placeholder="Confirm password"
+        value={newPassword}
+        onChange={(e) => setNewPassword(e.target.value)}
+        className={styles.input}
+      />
+      {store.authErrorMsg && (
         <p className={styles.error}>{store.authErrorMsg}</p>
-      ) : (
-        <form
-          className={styles.passwordChangeForm}
-          onSubmit={handleSubmitResetPassword}
-        >
-          <h2 className={styles.title}>Enter new password</h2>
-          <input
-            type="password"
-            placeholder="New password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className={styles.input}
-          />
-          <input
-            type="password"
-            placeholder="Confirm password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className={styles.input}
-          />
-          {store.authErrorMsg && (
-            <p className={styles.error}>{store.authErrorMsg}</p>
-          )}
-          {successMsg && <p className={styles.success}>{successMsg}</p>}
-          <button type="submit" className={styles.button}>
-            Change password
-          </button>
-        </form>
       )}
-    </div>
+      {successMsg && <p className={styles.success}>{successMsg}</p>}
+      <button type="submit" className={styles.button}>
+        Change password
+      </button>
+    </form>
   );
 };
 
