@@ -148,26 +148,23 @@ class RotationPlanService {
       }
 
       // ----------------------------------------------------------------
-      //   (C) Regular (daily) rotation
+      //   (C) Regular (daily) rotation + duplicate resolution
       // ----------------------------------------------------------------
       for (let cycle = 0; cycle < cycles; cycle++) {
         const dailyRotation = {};
-        // Who is already "busy": HighPriority + Special
+        // who is already busy: HighPriority + Special
         const assignedWorkers = new Set([
           ...Object.values(fixedAssignments),
           ...specialWorkers,
         ]);
 
         for (const station of activeStations) {
-          if (station.priority >= 2) {
-            // already distributed as highPriority
-            continue;
-          }
+          if (station.priority >= 2) continue;
           const queue = this.rotationQueues.get(station.name) || [];
           if (queue.length === 0) continue;
 
           let assigned = false;
-          // If there is a fixed worker, we take them
+          // 1) fixed assignments
           if (fixedAssignments[station.name]) {
             const workerName = fixedAssignments[station.name];
             const idx = queue.findIndex((p) => p.name === workerName);
@@ -175,13 +172,12 @@ class RotationPlanService {
               const worker = queue[idx];
               dailyRotation[station.name] = worker.name;
               assignedWorkers.add(worker.name);
-              // move them to the end
               queue.push(queue.splice(idx, 1)[0]);
               assigned = true;
             }
           }
 
-          // Otherwise look for an available worker
+          // 2) assignment by group
           if (!assigned) {
             for (let i = 0; i < queue.length; i++) {
               const worker = queue[i];
@@ -189,13 +185,11 @@ class RotationPlanService {
               const stationInfo = worker.stations.find(
                 (s) => s.name === station.name
               );
-              const stationGroup = station.group || null;
-              const workerGroup = worker.group || null;
               if (
                 worker.status &&
                 stationInfo?.isActive &&
                 !assignedWorkers.has(worker.name) &&
-                workerGroup === stationGroup
+                worker.group === station.group
               ) {
                 dailyRotation[station.name] = worker.name;
                 assignedWorkers.add(worker.name);
@@ -204,29 +198,60 @@ class RotationPlanService {
                 break;
               }
             }
+          }
 
-            if (!assigned) {
-              for (let i = 0; i < queue.length; i++) {
-                const worker = queue[i];
-                if (specialWorkers.has(worker.name)) continue;
-                const stationInfo = worker.stations.find(
-                  (s) => s.name === station.name
-                );
-                if (
-                  worker.status &&
-                  stationInfo?.isActive &&
-                  !assignedWorkers.has(worker.name)
-                ) {
-                  dailyRotation[station.name] = worker.name;
-                  assignedWorkers.add(worker.name);
-                  queue.push(queue.splice(i, 1)[0]);
-                  assigned = true;
-                  break;
-                }
+          // 3) fallback search considering previous round
+          if (!assigned) {
+            const prevRotation = cycle > 0 ? cycleRotations[cycle - 1] : {};
+            for (let i = 0; i < queue.length; i++) {
+              const worker = queue[i];
+              if (specialWorkers.has(worker.name)) continue;
+              const stationInfo = worker.stations.find(
+                (s) => s.name === station.name
+              );
+              if (
+                worker.status &&
+                stationInfo?.isActive &&
+                !assignedWorkers.has(worker.name) &&
+                prevRotation[station.name] !== worker.name
+              ) {
+                dailyRotation[station.name] = worker.name;
+                assignedWorkers.add(worker.name);
+                queue.push(queue.splice(i, 1)[0]);
+                assigned = true;
+                break;
               }
             }
           }
         }
+
+        // 4) Check within the same day for duplicates—and if found, swap them
+        const counts = {};
+        for (const w of Object.values(dailyRotation)) {
+          counts[w] = (counts[w] || 0) + 1;
+        }
+        for (const [worker, cnt] of Object.entries(counts)) {
+          if (cnt > 1) {
+            const stations = Object.entries(dailyRotation)
+              .filter(([st, w]) => w === worker)
+              .map(([st]) => st);
+            for (let i = 1; i < stations.length; i++) {
+              const dupStation = stations[i];
+              const otherEntry = Object.entries(dailyRotation).find(
+                ([st, w]) => counts[w] === 1 && st !== dupStation
+              );
+              if (!otherEntry) break;
+              const [otherStation, otherWorker] = otherEntry;
+              // swap assignments
+              dailyRotation[dupStation] = otherWorker;
+              dailyRotation[otherStation] = worker;
+              counts[worker]--;
+              counts[otherWorker]++;
+              break;
+            }
+          }
+        }
+
         cycleRotations.push(dailyRotation);
       }
 
@@ -386,17 +411,17 @@ class RotationPlanService {
     cycleRotations
   ) {
     try {
-      // == (1) Form the filename ==
+      // == (1) Build the filename ==
       const currentDate = new Date().toISOString().split('T')[0];
       const fileName = `rotationsplan_${currentDate}_${Date.now()}.xlsx`;
       const fileNameParts = fileName.split('_');
       const dateFromFile = fileNameParts[1];
 
-      // == (2) Create workbook and sheet ==
+      // == (2) Create the workbook and worksheet ==
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Rotationplan');
 
-      // == (3) Thin border style ==
+      // == (3) Define thin border style ==
       const borderStyle = {
         top: { style: 'thin' },
         left: { style: 'thin' },
@@ -404,32 +429,32 @@ class RotationPlanService {
         right: { style: 'thin' },
       };
 
-      // == (4) Sheet parameters ==
+      // == (4) Sheet layout parameters ==
       const numCycles = cycleRotations.length;
       const leftNumCycles = Math.min(numCycles, 5);
-      const leftBlockColumns = 1 + leftNumCycles;
-      const gapColumns = 1;
-      const rightBlockColumns = 2;
-      const totalColumns = leftBlockColumns + gapColumns + rightBlockColumns;
-      const rightBlockStart = leftBlockColumns + gapColumns + 1;
+      const leftCols = 1 + leftNumCycles;
+      const gapCols = 1;
+      const rightCols = 2;
+      const totalCols = leftCols + gapCols + rightCols;
+      const rightStart = leftCols + gapCols + 1;
 
-      // == (5) First row (overall header) ==
-      worksheet.mergeCells(1, 1, 1, totalColumns - 1);
-      const headerCellTitle = worksheet.getCell(1, 1);
-      headerCellTitle.value = 'Rotationsplan 395.5 A-Schicht Halle 4.0';
-      headerCellTitle.font = { bold: true, size: 16 };
-      headerCellTitle.alignment = { horizontal: 'left', vertical: 'middle' };
-      headerCellTitle.fill = {
+      // == (5) Main header row ==
+      worksheet.mergeCells(1, 1, 1, totalCols - 1);
+      const titleCell = worksheet.getCell(1, 1);
+      titleCell.value = 'Rotationsplan 395.5 A‑Schicht Halle 4.0';
+      titleCell.font = { bold: true, size: 16 };
+      titleCell.alignment = { horizontal: 'left', vertical: 'middle' };
+      titleCell.fill = {
         type: 'pattern',
         pattern: 'solid',
         fgColor: { argb: 'FFEFEFEF' },
       };
 
-      const headerCellDate = worksheet.getCell(1, totalColumns);
-      headerCellDate.value = dateFromFile;
-      headerCellDate.font = { bold: true, size: 14 };
-      headerCellDate.alignment = { horizontal: 'right', vertical: 'middle' };
-      headerCellDate.fill = {
+      const dateCell = worksheet.getCell(1, totalCols);
+      dateCell.value = dateFromFile;
+      dateCell.font = { bold: true, size: 14 };
+      dateCell.alignment = { horizontal: 'right', vertical: 'middle' };
+      dateCell.fill = {
         type: 'pattern',
         pattern: 'solid',
         fgColor: { argb: 'FFEFEFEF' },
@@ -438,270 +463,265 @@ class RotationPlanService {
       worksheet.getRow(1).height = 30;
       worksheet.getRow(1).eachCell((cell) => {
         cell.border = {
-          ...cell.border,
+          ...borderStyle,
           bottom: { style: 'thick', color: { argb: 'FF000000' } },
         };
       });
 
-      // ===============================
-      //     UPPER BLOCK: HP + Special
-      // ===============================
-      let rowIndex = 2; // start from 2nd row
-
-      // -- (A) Header (rowIndex)
-      const topBlockHeaderRow = worksheet.getRow(rowIndex);
-      topBlockHeaderRow.getCell(1).value = 'Mitarbeiter';
-      topBlockHeaderRow.getCell(2).value = 'Station';
-      topBlockHeaderRow.getCell(1).font = { bold: true };
-      topBlockHeaderRow.getCell(2).font = { bold: true };
-
-      topBlockHeaderRow.getCell(1).fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFADD8E6' },
-      };
-      topBlockHeaderRow.getCell(2).fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFADD8E6' },
-      };
-      topBlockHeaderRow.getCell(1).border = borderStyle;
-      topBlockHeaderRow.getCell(2).border = borderStyle;
-
-      // other columns = borders
-      for (let col = 3; col < totalColumns; col++) {
-        topBlockHeaderRow.getCell(col).border = borderStyle;
-      }
-
-      // Header "Sondertätigkeiten" (right block, merge cells)
-      worksheet.mergeCells(rowIndex, rightBlockStart, rowIndex, totalColumns);
-      const rightHeaderCell = worksheet.getCell(rowIndex, rightBlockStart);
-      rightHeaderCell.value = 'Sondertätigkeiten';
-      rightHeaderCell.font = { bold: true, size: 14 };
-      rightHeaderCell.alignment = {
+      // == (6) Top block: High‑Priority + Sonder ==
+      let rowIdx = 2;
+      const hdr = worksheet.getRow(rowIdx);
+      hdr.getCell(1).value = 'Mitarbeiter';
+      hdr.getCell(2).value = 'Station';
+      [1, 2].forEach((c) => {
+        const cell = hdr.getCell(c);
+        cell.font = { bold: true };
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFADD8E6' },
+        };
+        cell.border = borderStyle;
+      });
+      for (let c = 3; c <= totalCols; c++) hdr.getCell(c).border = borderStyle;
+      worksheet.mergeCells(rowIdx, rightStart, rowIdx, totalCols);
+      const sHdr = worksheet.getCell(rowIdx, rightStart);
+      sHdr.value = 'Sondertätigkeiten';
+      sHdr.font = { bold: true, size: 14 };
+      sHdr.alignment = {
         horizontal: 'center',
         vertical: 'middle',
         wrapText: true,
       };
-      rightHeaderCell.fill = {
+      sHdr.fill = {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: 'FF99CCFF' },
+        fgColor: { argb: 'FFADD8E6' },
       };
-      rightHeaderCell.border = borderStyle;
-      topBlockHeaderRow.commit();
+      sHdr.border = borderStyle;
+      hdr.commit();
 
-      rowIndex++; // move to the next row for data
-
-      // -- (B) Data
-      // Convert our objects into arrays of pairs to render a "zebra"
+      // Populate HP + Special rows
+      rowIdx++;
       const hpEntries = Object.entries(highPriorityRotation || {});
       const srEntries = Object.entries(specialRotation || {});
-
-      // Determine max rows
-      const maxLen = Math.max(hpEntries.length, srEntries.length);
-
-      for (let i = 0; i < maxLen; i++) {
-        const row = worksheet.getRow(rowIndex);
-
-        // 1) High Priority (left part, columns 1 and 2)
+      const topLen = Math.max(hpEntries.length, srEntries.length);
+      for (let i = 0; i < topLen; i++) {
+        const row = worksheet.getRow(rowIdx);
         if (i < hpEntries.length) {
           const [station, worker] = hpEntries[i];
           row.getCell(1).value = worker;
           row.getCell(2).value = station;
-
-          // "zebra":
           row.getCell(1).fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'FF4D4D' },
+            fgColor: { argb: 'FFADD8E6' },
           };
-          if (i % 2 === 1) {
+          if (i % 2) {
             row.getCell(2).fill = {
               type: 'pattern',
               pattern: 'solid',
               fgColor: { argb: 'FFD3D3D3' },
             };
           }
-        } else {
-          row.getCell(1).value = '';
-          row.getCell(2).value = '';
         }
-
-        // 2) Sonder (right part, columns rightBlockStart, rightBlockStart+1)
         if (i < srEntries.length) {
           const [workerName, job] = srEntries[i];
-          row.getCell(rightBlockStart).value = workerName;
-          row.getCell(rightBlockStart + 1).value = job;
-
-          // "zebra" for the right block (similar approach with i % 2)
-          row.getCell(rightBlockStart).fill = {
+          row.getCell(rightStart).value = workerName;
+          row.getCell(rightStart + 1).value = job;
+          row.getCell(rightStart).fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'FF4D4D' },
+            fgColor: { argb: 'FFADD8E6' },
           };
-          if (i % 2 === 1) {
-            row.getCell(rightBlockStart + 1).fill = {
+          if (i % 2) {
+            row.getCell(rightStart + 1).fill = {
               type: 'pattern',
               pattern: 'solid',
               fgColor: { argb: 'FFD3D3D3' },
             };
           }
-        } else {
-          row.getCell(rightBlockStart).value = '';
-          row.getCell(rightBlockStart + 1).value = '';
         }
-
-        // Borders for the entire row
-        for (let col = 1; col <= totalColumns; col++) {
-          row.getCell(col).border = borderStyle;
+        for (let c = 1; c <= totalCols; c++) {
+          row.getCell(c).border = borderStyle;
         }
         row.commit();
-        rowIndex++;
+        rowIdx++;
       }
 
-      // Empty separator row
+      // spacer
       worksheet.addRow([]);
-      rowIndex++;
+      rowIdx++;
 
-      // ===============================
-      //     LOWER BLOCK: PIVOT
-      // ===============================
-      const pivotHeaderLeft = ['Mitarbeiter'];
-      for (let i = 1; i <= leftNumCycles; i++) {
-        pivotHeaderLeft.push(`Runde ${i}`);
-      }
-      const pivotHeader = pivotHeaderLeft.concat(['', '', '']);
-      const pivotHeaderRow = worksheet.addRow(pivotHeader);
-
-      for (let col = 1; col <= leftBlockColumns; col++) {
-        const cell = pivotHeaderRow.getCell(col);
-        cell.font = { bold: true };
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'FF90EE90' },
-        };
-        cell.border = borderStyle;
-      }
-      pivotHeaderRow.getCell(leftBlockColumns + 1).border = borderStyle;
-      for (let col = leftBlockColumns + 2; col <= totalColumns; col++) {
-        pivotHeaderRow.getCell(col).border = borderStyle;
-      }
-      pivotHeaderRow.commit();
-      rowIndex = worksheet.lastRow.number + 1;
-
-      // Collect people for the Pivot, excluding HP
-      const hpWorkersSet = new Set(Object.values(highPriorityRotation || {}));
-      const pivotWorkersSet = new Set();
-      cycleRotations.forEach((rotation) => {
-        Object.values(rotation).forEach((p) => {
-          if (p && !hpWorkersSet.has(p)) {
-            pivotWorkersSet.add(p);
-          }
-        });
+      // == (7) Pivot by group, with sub‑headers ==
+      const hpSet = new Set(Object.values(highPriorityRotation || {}));
+      const pivotSet = new Set();
+      cycleRotations.forEach((rot) =>
+        Object.values(rot).forEach((n) => {
+          if (n && !hpSet.has(n)) pivotSet.add(n);
+        })
+      );
+      const infos = await WorkerModel.find(
+        { name: { $in: Array.from(pivotSet) } },
+        'name group'
+      ).lean();
+      const byGroup = {};
+      infos.forEach(({ name, group }) => {
+        byGroup[group] = byGroup[group] || [];
+        byGroup[group].push(name.trim());
       });
-      const pivotWorkers = Array.from(pivotWorkersSet).sort();
 
-      let pivotRowCount = 0;
-      pivotWorkers.forEach((worker) => {
-        pivotRowCount++;
-        const rowData = [worker];
-        for (let i = 0; i < leftNumCycles; i++) {
-          const rotation = cycleRotations[i] || {};
-          const stations = [];
-          for (const [st, assignedWorkers] of Object.entries(rotation)) {
-            if (assignedWorkers === worker) {
-              stations.push(st);
-            }
-          }
-          rowData.push(stations.join(', '));
-        }
-        rowData.push('', '');
-        worksheet.addRow(rowData);
+      Object.entries(byGroup)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .forEach(([grp, names]) => {
+          // group header
+          const grRow = worksheet.addRow([`Gruppe ${grp}`]);
+          grRow.font = { bold: true };
+          grRow.alignment = { horizontal: 'left' };
+          worksheet.mergeCells(
+            grRow.number,
+            1,
+            grRow.number,
+            leftNumCycles + 1
+          );
+          grRow.eachCell((c) => (c.border = borderStyle));
+          grRow.commit();
 
-        const dataRow = worksheet.getRow(worksheet.lastRow.number);
-        // pivot zebra
-        dataRow.getCell(1).fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'FF4D4D' },
-        };
-        if (pivotRowCount % 2 === 1) {
-          for (let col = 2; col <= leftBlockColumns; col++) {
-            dataRow.getCell(col).fill = {
+          // sub‑header
+          const subTitles = [
+            'Mitarbeiter',
+            ...Array.from(
+              { length: leftNumCycles },
+              (_, i) => `Runde ${i + 1}`
+            ),
+          ];
+          const subRow = worksheet.addRow(subTitles);
+          subRow.eachCell((c) => {
+            c.font = { bold: true };
+            c.fill = {
               type: 'pattern',
               pattern: 'solid',
-              fgColor: { argb: 'FFD3D3D3' },
+              fgColor: { argb: 'FFCCFFCC' },
             };
+            c.border = borderStyle;
+          });
+          subRow.commit();
+
+          // worker rows
+          names.forEach((w, i) => {
+            const data = [w];
+            for (let c = 0; c < leftNumCycles; c++) {
+              const rot = cycleRotations[c] || {};
+              const sts = Object.entries(rot)
+                .filter(([, x]) => x === w)
+                .map(([s]) => s)
+                .join(', ');
+              data.push(sts);
+            }
+            const r = worksheet.addRow(data);
+            r.getCell(1).fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFCCFFCC' },
+            };
+            if (i % 2) {
+              r.eachCell((c, col) => {
+                if (col > 1) {
+                  c.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFD3D3D3' },
+                  };
+                }
+              });
+            }
+            r.eachCell((c) => (c.border = borderStyle));
+            r.commit();
+          });
+
+          // spacer
+          worksheet.addRow([]);
+        });
+
+      // == (8) Abwesend block ==
+      const absentList = await WorkerModel.find(
+        { status: false },
+        'name'
+      ).lean();
+      if (absentList.length) {
+        // header
+        const hdrRow = worksheet.getRow(rowIdx);
+        worksheet.mergeCells(rowIdx, rightStart, rowIdx, totalCols);
+        const aHdr = hdrRow.getCell(rightStart);
+        aHdr.value = 'Abwesend';
+        aHdr.font = { bold: true, size: 14 };
+        aHdr.alignment = { horizontal: 'center' };
+        aHdr.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFADD8E6' },
+        };
+        aHdr.border = borderStyle;
+        hdrRow.commit();
+        rowIdx++;
+
+        // two‑column layout, trim & reset font
+        const names = absentList.map((o) => o.name.trim());
+        for (let i = 0; i < names.length; i += 2) {
+          const row = worksheet.getRow(rowIdx);
+          // left cell
+          const leftCell = row.getCell(rightStart);
+          leftCell.value = names[i];
+          leftCell.font = { bold: false };
+          leftCell.border = borderStyle;
+          // right cell if exists
+          if (names[i + 1]) {
+            const rightCell = row.getCell(rightStart + 1);
+            rightCell.value = names[i + 1];
+            rightCell.font = { bold: false };
+            rightCell.border = borderStyle;
           }
+          row.commit();
+          rowIdx++;
         }
-
-        //borders
-        for (let col = 1; col <= totalColumns; col++) {
-          dataRow.getCell(col).border = borderStyle;
-        }
-        dataRow.commit();
-      });
-
-      // == (6) Column widths ==
-      worksheet.getColumn(1).width = 16;
-      worksheet.getColumn(2).width = 8;
-      worksheet.getColumn(leftBlockColumns + 1).width = 3;
-      for (let i = rightBlockStart; i <= totalColumns; i++) {
-        worksheet.getColumn(i).width = 20;
       }
+
+      // == (9) Draw thick outline & set widths ==
+      const last = worksheet.lastRow.number;
+      for (let r = 1; r <= last; r++) {
+        for (let c = 1; c <= totalCols; c++) {
+          const cell = worksheet.getCell(r, c);
+          const b = { ...borderStyle };
+          if (r === 1) b.top = { style: 'thick', color: { argb: 'FF000000' } };
+          if (r === last)
+            b.bottom = { style: 'thick', color: { argb: 'FF000000' } };
+          if (c === 1) b.left = { style: 'thick', color: { argb: 'FF000000' } };
+          if (c === totalCols)
+            b.right = { style: 'thick', color: { argb: 'FF000000' } };
+          cell.border = b;
+        }
+      }
+
       worksheet.getColumn(1).width = 22;
-      for (let i = 2; i <= leftBlockColumns; i++) {
-        worksheet.getColumn(i).width = 8;
+      for (let c = 2; c <= leftCols; c++) {
+        worksheet.getColumn(c).width = 8;
+      }
+      worksheet.getColumn(leftCols + 1).width = 3;
+      for (let c = rightStart; c <= totalCols; c++) {
+        worksheet.getColumn(c).width = 20;
       }
 
-      // == (7) Thick border around everything
-      const finalLastRowForBorder = worksheet.lastRow.number;
-      for (let r = 1; r <= finalLastRowForBorder; r++) {
-        const row = worksheet.getRow(r);
-        for (let c = 1; c <= totalColumns; c++) {
-          const cell = row.getCell(c);
-          if (r === 1) {
-            cell.border = {
-              ...cell.border,
-              top: { style: 'thick', color: { argb: 'FF000000' } },
-            };
-          }
-          if (r === finalLastRowForBorder) {
-            cell.border = {
-              ...cell.border,
-              bottom: { style: 'thick', color: { argb: 'FF000000' } },
-            };
-          }
-          if (c === 1) {
-            cell.border = {
-              ...cell.border,
-              left: { style: 'thick', color: { argb: 'FF000000' } },
-            };
-          }
-          if (c === totalColumns) {
-            cell.border = {
-              ...cell.border,
-              right: { style: 'thick', color: { argb: 'FF000000' } },
-            };
-          }
-        }
-      }
-
-      // == (8) Save file ==
-      const finalFilePath = path.join(
+      // == (10) Save ==
+      const outPath = path.join(
         process.env.FILE_STORAGE_PATH || '/tmp',
         fileName
       );
-      await workbook.xlsx.writeFile(finalFilePath);
-
-      return finalFilePath;
-    } catch (error) {
-      console.error('Error creating Excel file:', error);
+      await workbook.xlsx.writeFile(outPath);
+      return outPath;
+    } catch (err) {
+      console.error('Error creating Excel file:', err);
       throw new Error('Error creating Excel file');
     }
   }
 }
-
 module.exports = RotationPlanService;
