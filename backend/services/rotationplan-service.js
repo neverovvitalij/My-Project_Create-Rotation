@@ -712,12 +712,10 @@ class RotationPlanService {
       }
 
       // == (10) Save ==
-      const outPath = path.join(
-        process.env.FILE_STORAGE_PATH || '/tmp',
-        fileName
-      );
-      await workbook.xlsx.writeFile(outPath);
-      return outPath;
+
+      const buffer = await workbook.xlsx.writeBuffer();
+
+      return { buffer, fileName };
     } catch (err) {
       console.error('Error creating Excel file:', err);
       throw new Error('Error creating Excel file');

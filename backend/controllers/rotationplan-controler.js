@@ -104,29 +104,22 @@ class RotationPlanController {
         confirmedRotation.rotation;
 
       const rotationService = new RotationPlanServise();
-      const filePath = await rotationService.saveRotationToExcel(
+      const { buffer, fileName } = await rotationService.saveRotationToExcel(
         specialRotation,
         highPriorityRotation,
         cycleRotations
       );
-
-      if (!filePath) {
-        console.error('Error: File was not created.');
-        return res.status(500).send('Error creating Excel file');
-      }
-
-      const fileName = path.basename(filePath);
-      res.download(filePath, fileName, async (err) => {
-        if (err) {
-          console.error('Error sending file:', err);
-          return res.status(500).send('Error transferring file.');
-        }
-        try {
-          await fs.unlink(filePath); // Remove the file after successful send
-        } catch (unlinkErr) {
-          console.error('Error deleting file:', unlinkErr);
-        }
-      });
+      res
+        .status(200)
+        .set({
+          'Content-Type':
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'Content-Disposition': `attachment; filename="${fileName}"`,
+          'Content-Transfer-Encoding': 'binary',
+          'Cache-Control': 'no-cache',
+          'Content-Length': buffer.length,
+        })
+        .send(buffer);
     } catch (error) {
       console.error('Error downloading confirmed rotation:', error.message);
       next(ApiError.BadRequest('Error downloading rotation'));

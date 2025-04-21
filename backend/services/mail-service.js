@@ -33,7 +33,7 @@ class MailService {
         Subject: 'A new user requires approval',
         HTMLPart: `
           <div>
-            <h1>A new user${userEmail} has registered</h1>
+            <h1>A new user ${userEmail} has registered</h1>
             <p>Please approve the user by clicking the following link:</p>
             <a href="${adminLink}">${adminLink}</a>
           </div>
