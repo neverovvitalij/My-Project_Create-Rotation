@@ -2,6 +2,12 @@ const { Schema, model } = require('mongoose');
 
 const WorkerSchema = new Schema({
   name: { type: String, unique: true, required: true },
+  role: {
+    type: String,
+    enum: ['WORKER', 'UNT', 'GV'],
+    required: true,
+  },
+  costCenter: { type: String, required: true },
   stations: [
     {
       name: { type: String, required: true },

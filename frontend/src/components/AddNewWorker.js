@@ -6,6 +6,8 @@ import styles from '../styles/AddNewWorker.module.css';
 const AddNewWorker = () => {
   const [candidateName, setCandidateName] = useState('');
   const [group, setGroup] = useState('');
+  const [role, setRole] = useState('');
+  const [costCenter, setCostCenter] = useState('');
   const [selectedStations, setSelectedStations] = useState([]);
   const { store } = useContext(Context);
 
@@ -30,6 +32,8 @@ const AddNewWorker = () => {
       name: candidateName,
       stations,
       group: parseInt(group, 10),
+      role,
+      costCenter,
     };
     await store.addWorker(candidate);
 
@@ -72,6 +76,14 @@ const AddNewWorker = () => {
               className={styles.inputField}
               placeholder="Enter worker name"
             />
+            <label className={styles.label}>Role:</label>
+            <input
+              value={role}
+              type="text"
+              onChange={(e) => setRole(e.target.value)}
+              className={styles.inputField}
+              placeholder="Enter worker role"
+            />
           </div>
           <div className={styles.inputGroup}>
             <label className={styles.label}>Group:</label>
@@ -82,6 +94,14 @@ const AddNewWorker = () => {
               type="number"
               min="1"
               onChange={(e) => setGroup(e.target.value)}
+            />
+            <label className={styles.label}>CostCenter:</label>
+            <input
+              className={styles.inputField}
+              placeholder="Enter worker CostCenter"
+              value={costCenter}
+              type="text"
+              onChange={(e) => setCostCenter(e.target.value)}
             />
           </div>
         </div>

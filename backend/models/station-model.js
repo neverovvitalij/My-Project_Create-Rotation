@@ -5,6 +5,7 @@ const StationSchema = new mongoose.Schema({
   priority: { type: Number, required: true },
   group: { type: Number },
   status: { type: Boolean, required: true, default: true },
+  costCenter: { type: String, required: true },
 });
 
 module.exports = mongoose.model('StationModel', StationSchema);

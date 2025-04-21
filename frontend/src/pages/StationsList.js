@@ -8,6 +8,7 @@ const StationsList = () => {
   const [stationName, setStationName] = useState('');
   const [stationPriority, setStationPriority] = useState('');
   const [stationGroup, setStationGroup] = useState('');
+  const [stationCostCenter, setStationCostCenter] = useState('');
   const { store } = useContext(Context);
   const [showAddStationForm, setShowAddStationForm] = useState(false);
   const addStationFormRef = useRef(null);
@@ -48,6 +49,7 @@ const StationsList = () => {
         name: stationName,
         priority: parseInt(stationPriority, 10),
         group: parseInt(stationGroup, 10),
+        costCenter: stationCostCenter,
       };
       await store.addNewStation(newStation);
     } catch (error) {
@@ -126,6 +128,13 @@ const StationsList = () => {
                 type="number"
                 min="1"
                 onChange={(e) => setStationGroup(e.target.value)}
+              />
+              <input
+                className={styles.addStationInput}
+                placeholder="CostCenter"
+                value={stationCostCenter}
+                type="text"
+                onChange={(e) => setStationCostCenter(e.target.value)}
               />
               <button className={styles.addStationButton} type="submit">
                 Add Station

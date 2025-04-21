@@ -15,7 +15,7 @@ class WorkerService {
     }
   }
 
-  async addWorker(name, stations, group, status = true) {
+  async addWorker(name, role, costCenter, stations, group, status = true) {
     try {
       const existingWorker = await WorkerModel.findOne({ name });
       if (existingWorker) {
@@ -24,6 +24,8 @@ class WorkerService {
 
       const worker = await WorkerModel.create({
         name,
+        role,
+        costCenter,
         stations,
         group,
         status,

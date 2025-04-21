@@ -1,4 +1,3 @@
-const path = require('path');
 const ExcelJS = require('exceljs');
 const WorkerModel = require('../models/worker-model');
 const RotationQueueModel = require('../models/rotationqueue-model');
@@ -10,18 +9,11 @@ class RotationPlanService {
     this.stations = [];
   }
 
-  /**
-   * @param {number} cycles                 - How many rotation "cycles"
-   * @param {Array}  preassigned            - Preassigned assignments, [{ station, person }, ...]
-   * @param {Array}  sonderAssignments      - Sonder array, [{ person, job }, ...]
-   * @returns {{
-   *   sonderRotation: Object,              // person -> job
-   *   highPriorityRotation: Object,        // station -> person
-   *   cycleRotations: Array<Object>,       // [{ station -> person }, ...] for each cycle
-   *   date: string
-   * }}
-   */
-  async generateDailyRotation(specialAssignments = [], preassigned, cycles) {
+  async generateDailyRotation(
+    specialAssignments = [],
+    preassigned = [],
+    cycles
+  ) {
     try {
       // 1) Initialization of stations
       if (!this.stations || this.stations.length === 0) {
@@ -65,7 +57,7 @@ class RotationPlanService {
       // ----------------------------------------------------------------
       //   (A) Sonder
       // ----------------------------------------------------------------
-      // For example, in `sonderAssignments = [{ person: "Vasya", job: "Special task" }, ...]`
+      // For example, in sonderAssignments = [{ person: "Vasya", job: "Special task" }, ...]
       for (const { worker, job } of specialAssignments) {
         // We form an object (person -> job)
         specialRotation.set(worker, job);
@@ -262,7 +254,6 @@ class RotationPlanService {
           { queue: queue.map((p) => p._id) }
         );
       }
-
       // 5) Return the result
       return {
         // Object: { "Ivanov": "Special task", ... }
@@ -349,11 +340,6 @@ class RotationPlanService {
       });
 
       await confirmedRotation.save();
-      const filePath = await this.saveRotationToExcel(
-        specialRotation,
-        highPriorityRotation,
-        cycleRotations
-      );
 
       // Queue update
       const updateQueue = async (station, workerName) => {
@@ -398,7 +384,7 @@ class RotationPlanService {
       }
 
       this.rotationQueues = null; // Reset local queue
-      return { confirmedRotation, filePath };
+      return { confirmedRotation };
     } catch (error) {
       console.error('Error confirming rotation:', error);
       throw new Error('Error confirming rotation');

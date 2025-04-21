@@ -12,8 +12,13 @@ class SationController {
 
   async addStation(req, res, next) {
     try {
-      const { name, priority, group } = req.body;
-      const response = await stationService.addStation(name, priority, group);
+      const { name, priority, group, costCenter } = req.body;
+      const response = await stationService.addStation(
+        name,
+        priority,
+        group,
+        costCenter
+      );
       return res.json(response);
     } catch (error) {
       next(error);

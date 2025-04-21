@@ -12,8 +12,14 @@ class WorkerController {
 
   async addWorker(req, res, next) {
     try {
-      const { name, stations, group } = req.body;
-      const personData = await workerService.addWorker(name, stations, group);
+      const { name, role, costCenter, stations, group } = req.body;
+      const personData = await workerService.addWorker(
+        name,
+        role,
+        costCenter,
+        stations,
+        group
+      );
       return res.json(personData);
     } catch (error) {
       if (error.message.includes('is already registered')) {

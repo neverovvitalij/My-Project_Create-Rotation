@@ -13,16 +13,16 @@ class StationService {
     }
   }
 
-  async addStation(name, priority, group) {
+  async addStation(name, priority, group, costCenter) {
     try {
       // Check if a station with this name already exists
-      const existingStation = await StationModel.findOne({ name });
+      const existingStation = await StationModel.exists({ name });
       if (existingStation) {
         throw ApiError.BadRequest('Station already exists');
       }
 
       // Create a new station
-      const station = new StationModel({ name, priority, group });
+      const station = new StationModel({ name, priority, group, costCenter });
       await station.save();
 
       // Initialize queue for the new station

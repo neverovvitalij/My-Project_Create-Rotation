@@ -106,9 +106,14 @@ export default class Store {
     }
   }
 
-  async registration(email, password) {
+  async registration(email, password, role, costCenter) {
     try {
-      const response = await AuthServise.registration(email, password);
+      const response = await AuthServise.registration(
+        email,
+        password,
+        role,
+        costCenter
+      );
       localStorage.setItem('token', response.data.accessToken);
       this.setAuth(true);
       this.setUser(response.data.user);
@@ -181,9 +186,13 @@ export default class Store {
     }
   }
 
-  async addWorker(candidate) {
+  async addWorker(candidate, role, costCenter) {
     try {
-      const response = await WorkerService.addWorker(candidate);
+      const response = await WorkerService.addWorker(
+        candidate,
+        role,
+        costCenter
+      );
       this.setEmployeeList([...this.employeeList, response.data]);
       this.setErrorMsg('');
       this.loadData();
@@ -194,9 +203,14 @@ export default class Store {
     }
   }
 
-  async addNewStation({ name, priority, group }) {
+  async addNewStation({ name, priority, group, costCenter }) {
     try {
-      const response = await StationsService.addStation(name, priority, group);
+      const response = await StationsService.addStation(
+        name,
+        priority,
+        group,
+        costCenter
+      );
       this.setNewStation(response.data);
       this.setErrorMsg('');
       this.loadData();
@@ -302,27 +316,33 @@ export default class Store {
   async downloadLatestConfirmedRotation() {
     try {
       const response =
-        await RotationPlanService.downloadLatestConfirmedRotation();
+        await RotationPlanService.downloadLatestConfirmedRotation({
+          responseType: 'blob',
+        });
 
       if (response.status === 200 && response.data) {
         const blob = new Blob([response.data], {
-          type: 'application/pdf',
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         });
 
-        let fileName = response.headers['content-disposition']
-          ? response.headers['content-disposition']
-              .split('filename=')[1]
-              ?.replace(/"/g, '')
-          : `rotation_plan${new Date().toISOString().split('T')[0]}.xlsx`;
+        let fileName =
+          'rotation_plan' + new Date().toISOString().split('T')[0] + '.xlsx';
+        const cd = response.headers['content-disposition'];
+        if (cd) {
+          const match =
+            cd.match(/filename\*?=['"]?UTF-8''(.+?)['"]?$/i) ||
+            cd.match(/filename=['"]?(.+?)['"]?$/i);
+          if (match) fileName = decodeURIComponent(match[1]);
+        }
 
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', fileName);
-
+        link.download = fileName;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
       } else {
         throw new Error('File not received.');
       }

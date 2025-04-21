@@ -8,6 +8,8 @@ const RegisterForm = () => {
   const { store } = useContext(Context);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('');
+  const [costCenter, setCostCenter] = useState('');
   const navigate = useNavigate();
   const storeRef = useRef(store);
 
@@ -21,7 +23,7 @@ const RegisterForm = () => {
 
   const handleChangeSubmit = async (event) => {
     event.preventDefault();
-    await store.registration(email, password);
+    await store.registration(email, password, role, costCenter);
     setEmail('');
     setPassword('');
   };
@@ -43,6 +45,20 @@ const RegisterForm = () => {
           value={password}
           type="password"
           onChange={(e) => setPassword(e.target.value)}
+        />
+        <input
+          placeholder="Role"
+          className={styles.input}
+          value={role}
+          type="text"
+          onChange={(e) => setRole(e.target.value)}
+        />
+        <input
+          placeholder="CostCenter"
+          className={styles.input}
+          value={costCenter}
+          type="text"
+          onChange={(e) => setCostCenter(e.target.value)}
         />
         <div className={styles.buttonContainer}>
           <button

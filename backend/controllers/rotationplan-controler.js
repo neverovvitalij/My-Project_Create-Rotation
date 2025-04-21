@@ -33,13 +33,6 @@ class RotationPlanController {
         );
       }
 
-      // Validate specialAssignments (if needed)
-      // return next(
-      //   ApiError.BadRequest(
-      //     'sonderAssignments must be an array of { person, job } objects'
-      //   )
-      // );
-
       // Pass cycles, preassigned, and sonderAssignments
       const result = await rotationService.generateDailyRotation(
         specialAssignments || [],
@@ -50,7 +43,7 @@ class RotationPlanController {
       if (!result || typeof result !== 'object') {
         return next(ApiError.BadRequest('Invalid rotation data format.'));
       }
-      res.json(result);
+      return res.json(result);
     } catch (error) {
       console.error('Error generating daily rotation:', error.message),
         next(ApiError.BadRequest('Error creating plan', error.message));
@@ -80,7 +73,10 @@ class RotationPlanController {
         highPriorityRotation,
         cycleRotations
       );
-      res.json({ result, message: 'Plan has been confirmed and saved.' });
+      return res.json({
+        result,
+        message: 'Plan has been confirmed and saved.',
+      });
     } catch (error) {
       console.error('Error confirming rotation:', error.message);
       next(ApiError.BadRequest('Error confirming plan', error.message));
