@@ -40,11 +40,24 @@ class RotationPlanService {
       for (const station of activeStations) {
         const rotationQueue = await RotationQueueModel.findOne({
           station: station.name,
-        }).populate('queue');
-        this.rotationQueues.set(
-          station.name,
-          rotationQueue?.queue.slice() || []
+        }).populate(
+          'queue.workerId',
+          '_id name role costCenter group status stations'
         );
+
+        const queue = (rotationQueue?.queue || []).map((item) => {
+          const w = item.workerId;
+          return {
+            _id: w._id,
+            name: w.name,
+            group: w.group,
+            role: w.role,
+            costCenter: w.costCenter,
+            status: w.status,
+            stations: w.stations,
+          };
+        });
+        this.rotationQueues.set(station.name, queue);
       }
 
       // 3) Preparation of results
@@ -251,10 +264,19 @@ class RotationPlanService {
       for (const [stationName, queue] of this.rotationQueues.entries()) {
         await RotationQueueModel.findOneAndUpdate(
           { station: stationName },
-          { queue: queue.map((p) => p._id) }
+          {
+            queue: queue.map((p) => ({
+              workerId: p._id,
+              name: p.name,
+              group: p.group,
+              role: p.role,
+              costCenter: p.costCenter,
+            })),
+          }
         );
       }
       // 5) Return the result
+      console.log(highPriorityRotation, specialRotation);
       return {
         // Object: { "Ivanov": "Special task", ... }
         specialRotation: Object.fromEntries(specialRotation),
@@ -312,7 +334,13 @@ class RotationPlanService {
       }
 
       // Form a queue of workers based on their IDs
-      rotationQueue.queue = workers.map((worker) => worker._id);
+      rotationQueue.queue = workers.map((worker) => ({
+        workerId: worker._id,
+        name: worker.name,
+        group: worker.group,
+        role: worker.role,
+        costCenter: worker.costCenter,
+      }));
 
       // Save the queue in the database
       await rotationQueue.save();
@@ -353,7 +381,7 @@ class RotationPlanService {
         }
 
         const index = rotationQueue.queue.findIndex(
-          (id) => id.toString() === worker._id.toString()
+          (item) => item.workerId.toString() === worker._id.toString()
         );
 
         if (index !== -1) {
