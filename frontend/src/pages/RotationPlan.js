@@ -82,7 +82,7 @@ const RotationPlan = () => {
 
   const confirmRotation = async () => {
     setConfirmedRotation(true);
-    const { specialRotation, highPriorityRotation, cycleRotations } = rotations;
+    const { highPriorityRotation, cycleRotations } = rotations;
 
     if (!highPriorityRotation || !cycleRotations?.length) {
       store.setErrorMsg('Not enough data to confirm rotation.');
@@ -90,11 +90,7 @@ const RotationPlan = () => {
     }
 
     try {
-      await store.confirmRotation(
-        specialRotation,
-        highPriorityRotation,
-        cycleRotations
-      );
+      await store.confirmRotation();
       setRotationForDownload(true);
     } catch (error) {
       console.error('Error confirming rotation:', error.message || error);
@@ -127,7 +123,6 @@ const RotationPlan = () => {
 
   return (
     <div className={styles.container}>
-      <h2>{`Available employees ${store.activeEmployeeCount} | Needed ${store.stationsCount}`}</h2>
       {/* Button panel */}
       <div className={styles.buttonPanel}>
         <button
@@ -156,12 +151,14 @@ const RotationPlan = () => {
       {/* List of employees */}
       {Object.entries(groupedEmployees).map(([groupName, groupEmps]) => (
         <section key={groupName} className={styles.groupSection}>
-          <h3 className={styles.groupHeader}>Group{groupName}</h3>
+          <h3 className={styles.groupHeader}>Group {groupName}</h3>
+          <h3
+            className={styles.groupHeader}
+          >{`Available employees ${store.activeEmployeeByGroup[groupName]} | Needed ${store.stationsByGroup[groupName]}`}</h3>
           <ul className={styles.available}>
             {groupEmps.map((emp) => {
               const stationValue = getCurrentStationForWorker(emp.name);
               const sonderJob = getSonderJobForWorker(emp.name);
-
               return (
                 <li key={emp._id} className={styles.empItem}>
                   <span>{emp.name}</span>
@@ -215,7 +212,7 @@ const RotationPlan = () => {
               ([station, worker]) => (
                 <div key={station} className={styles.highPriorityStation}>
                   <h3>{station}</h3>
-                  <p>{worker}</p>
+                  <p>{worker.name}</p>
                 </div>
               )
             )}
@@ -231,9 +228,9 @@ const RotationPlan = () => {
             <p className={styles.groupTitle}>Special task</p>
             <div className={styles.highPriorityList}>
               {Object.entries(rotations.specialRotation).map(
-                ([workerName, job]) => (
+                ([workerName, { worker, job }]) => (
                   <div key={workerName} className={styles.highPriorityStation}>
-                    <h3>{workerName}</h3>
+                    <h3>{worker.name}</h3>
                     <p>{job}</p>
                   </div>
                 )
@@ -251,7 +248,7 @@ const RotationPlan = () => {
               <ul>
                 {Object.entries(rot).map(([station, worker], indx) => (
                   <li key={station}>
-                    <strong>{`${indx + 1}. ${station}`}:</strong> {worker}
+                    <strong>{`${indx + 1}. ${station}`}:</strong> {worker.name}
                   </li>
                 ))}
               </ul>

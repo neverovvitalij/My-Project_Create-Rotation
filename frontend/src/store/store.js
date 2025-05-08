@@ -18,6 +18,7 @@ export default class Store {
     highPriorityRotation: {},
     cycleRotations: [],
     date: '',
+    allWorkers: [],
   };
   isInitializing = true;
 
@@ -66,21 +67,33 @@ export default class Store {
     highPriorityRotation,
     cycleRotations,
     date,
+    allWorkers,
   }) {
     this.rotation = {
       specialRotation: specialRotation || {},
       highPriorityRotation: highPriorityRotation || {},
       cycleRotations: Array.isArray(cycleRotations) ? cycleRotations : [],
       date: date,
+      allWorkers: allWorkers || [],
     };
   }
 
-  get activeEmployeeCount() {
-    return this.employeeList.filter((emp) => emp.status).length;
+  get activeEmployeeByGroup() {
+    return this.employeeList.reduce((acc, emp) => {
+      const grp = emp.group;
+      if (!acc[grp]) acc[grp] = 0;
+      if (emp.status) acc[grp]++;
+      return acc;
+    }, {});
   }
 
-  get stationsCount() {
-    return this.stations.filter((stn) => stn.status).length;
+  get stationsByGroup() {
+    return this.stations.reduce((acc, stn) => {
+      const grp = stn.group;
+      if (!acc[grp]) acc[grp] = 0;
+      if (stn.status) acc[grp]++;
+      return acc;
+    }, {});
   }
 
   async loadData() {
@@ -281,27 +294,44 @@ export default class Store {
     }
   }
 
-  async confirmRotation(
-    specialRotation = null,
-    highPriorityRotation,
-    cycleRotations
-  ) {
+  async confirmRotation() {
     try {
+      const allWorkers = this.rotation.allWorkers;
+      const special = Object.fromEntries(
+        Object.entries(this.rotation.specialRotation).map(
+          ([workerName, { job }]) => [workerName.trim(), job]
+        )
+      );
+
+      const highPr = Object.fromEntries(
+        Object.entries(this.rotation.highPriorityRotation).map(
+          ([station, workerObj]) => [station, workerObj.name.trim()]
+        )
+      );
+
+      const cycles = this.rotation.cycleRotations.map((rot) =>
+        Object.fromEntries(
+          Object.entries(rot).map(([station, workerObj]) => [
+            station,
+            workerObj.name.trim(),
+          ])
+        )
+      );
+
       if (
-        !highPriorityRotation ||
-        typeof highPriorityRotation !== 'object' ||
-        !Array.isArray(cycleRotations) ||
-        cycleRotations.length === 0
+        Object.keys(highPr).length === 0 ||
+        !Array.isArray(cycles) ||
+        cycles.length === 0
       ) {
         throw new Error('Incorrect cycleRotations data');
       }
 
       const response = await RotationPlanService.confirmRotation(
-        specialRotation,
-        highPriorityRotation,
-        cycleRotations
+        special,
+        highPr,
+        cycles,
+        allWorkers
       );
-
       if (response?.data) {
         this.setErrorMsg('');
       } else {

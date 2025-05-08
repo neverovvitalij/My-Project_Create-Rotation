@@ -39,7 +39,6 @@ class RotationPlanController {
         preassigned || [],
         cycles
       );
-
       if (!result || typeof result !== 'object') {
         return next(ApiError.BadRequest('Invalid rotation data format.'));
       }
@@ -54,8 +53,12 @@ class RotationPlanController {
   async confirmRotation(req, res, next) {
     try {
       const rotationService = new RotationPlanServise();
-      const { specialRotation, highPriorityRotation, cycleRotations } =
-        req.body;
+      const {
+        specialRotation,
+        highPriorityRotation,
+        cycleRotations,
+        allWorkers,
+      } = req.body;
 
       if (
         !highPriorityRotation ||
@@ -71,7 +74,8 @@ class RotationPlanController {
       const result = await rotationService.confirmRotation(
         specialRotation,
         highPriorityRotation,
-        cycleRotations
+        cycleRotations,
+        allWorkers
       );
       return res.json({
         result,
@@ -87,7 +91,7 @@ class RotationPlanController {
   async downloadConfirmedRotation(req, res, next) {
     try {
       const confirmedRotation = await ConfirmedRotation.findOne()
-        .sort({ date: -1 })
+        .sort({ createdAt: -1 })
         .lean();
 
       if (!confirmedRotation) {
@@ -96,14 +100,18 @@ class RotationPlanController {
           .json({ message: 'No confirmed plan available for download' });
       }
 
-      const { specialRotation, highPriorityRotation, cycleRotations } =
-        confirmedRotation.rotation;
-
+      const {
+        specialRotation,
+        highPriorityRotation,
+        cycleRotations,
+        allWorkers,
+      } = confirmedRotation.rotation;
       const rotationService = new RotationPlanServise();
       const { buffer, fileName } = await rotationService.saveRotationToExcel(
         specialRotation,
         highPriorityRotation,
-        cycleRotations
+        cycleRotations,
+        allWorkers
       );
       res
         .status(200)

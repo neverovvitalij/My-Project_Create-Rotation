@@ -67,7 +67,7 @@ const StationsList = () => {
 
   // Dynamic group display
   const groupedStations = store.stations.reduce((groups, station) => {
-    const group = station.group || 'Day';
+    const group = station.group || 'Suporters';
     if (!groups[group]) {
       groups[group] = [];
     }

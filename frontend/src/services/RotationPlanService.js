@@ -8,12 +8,14 @@ export default class RotationPlanService {
   static async confirmRotation(
     specialRotation,
     highPriorityRotation,
-    cycleRotations
+    cycleRotations,
+    allWorkers
   ) {
     return api.post('/confirm-rotation', {
       specialRotation,
       highPriorityRotation,
       cycleRotations,
+      allWorkers,
     });
   }
 

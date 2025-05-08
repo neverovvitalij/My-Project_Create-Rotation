@@ -23,7 +23,7 @@ class WorkerService {
       }
 
       const worker = await WorkerModel.create({
-        name,
+        name: name.trim(),
         role,
         costCenter,
         stations,

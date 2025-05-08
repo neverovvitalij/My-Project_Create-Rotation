@@ -22,7 +22,12 @@ class StationService {
       }
 
       // Create a new station
-      const station = new StationModel({ name, priority, group, costCenter });
+      const station = new StationModel({
+        name: name.trim(),
+        priority,
+        group,
+        costCenter,
+      });
       await station.save();
 
       // Initialize queue for the new station

@@ -61,21 +61,26 @@ class RotationPlanService {
       }
 
       // 3) Preparation of results
-      const cycleRotations = []; // Array of daily rotations
-      const highPriorityRotation = new Map(); //Map(station -> worker)
-      const specialRotation = new Map(); // Object (worker -> job)
-      const fixedAssignments = {}; // station -> worker
-      const specialWorkers = new Set(); // Set of people assigned to Special
+      const cycleRotations = [];
+      const highPriorityRotation = new Map();
+      const specialRotation = new Map();
+      const fixedAssignments = {};
+      const specialWorkers = new Set();
 
       // ----------------------------------------------------------------
       //   (A) Sonder
       // ----------------------------------------------------------------
       // For example, in sonderAssignments = [{ person: "Vasya", job: "Special task" }, ...]
-      for (const { worker, job } of specialAssignments) {
-        // We form an object (person -> job)
-        specialRotation.set(worker, job);
-        // Add to the set to exclude this person from HighPriority and Daily
-        specialWorkers.add(worker);
+      for (const { worker: workerName, job } of specialAssignments) {
+        const workerObj = Array.from(this.rotationQueues.values())
+          .flat()
+          .find((w) => w.name === workerName);
+        if (!workerObj) continue;
+        specialRotation.set(workerObj.name, {
+          worker: workerObj,
+          job,
+        });
+        specialWorkers.add(workerObj.name);
       }
 
       // ----------------------------------------------------------------
@@ -96,7 +101,7 @@ class RotationPlanService {
           }
         }
         if (found) {
-          highPriorityRotation.set(stationName, found.name);
+          highPriorityRotation.set(stationName, found);
           fixedAssignments[stationName] = found.name;
         }
       }
@@ -125,7 +130,7 @@ class RotationPlanService {
             !Object.values(fixedAssignments).includes(worker.name) &&
             stationGroup === workerGroup
           ) {
-            highPriorityRotation.set(station.name, worker.name);
+            highPriorityRotation.set(station.name, worker);
             fixedAssignments[station.name] = worker.name;
             assigned = true;
             break;
@@ -144,7 +149,7 @@ class RotationPlanService {
               stationInfo?.isActive &&
               !Object.values(fixedAssignments).includes(worker.name)
             ) {
-              highPriorityRotation.set(station.name, worker.name);
+              highPriorityRotation.set(station.name, worker);
               fixedAssignments[station.name] = worker.name;
               break;
             }
@@ -175,7 +180,7 @@ class RotationPlanService {
             const idx = queue.findIndex((p) => p.name === workerName);
             if (idx !== -1) {
               const worker = queue[idx];
-              dailyRotation[station.name] = worker.name;
+              dailyRotation[station.name] = worker;
               assignedWorkers.add(worker.name);
               queue.push(queue.splice(idx, 1)[0]);
               assigned = true;
@@ -196,7 +201,7 @@ class RotationPlanService {
                 !assignedWorkers.has(worker.name) &&
                 worker.group === station.group
               ) {
-                dailyRotation[station.name] = worker.name;
+                dailyRotation[station.name] = worker;
                 assignedWorkers.add(worker.name);
                 queue.push(queue.splice(i, 1)[0]);
                 assigned = true;
@@ -220,7 +225,7 @@ class RotationPlanService {
                 !assignedWorkers.has(worker.name) &&
                 prevRotation[station.name] !== worker.name
               ) {
-                dailyRotation[station.name] = worker.name;
+                dailyRotation[station.name] = worker;
                 assignedWorkers.add(worker.name);
                 queue.push(queue.splice(i, 1)[0]);
                 assigned = true;
@@ -276,14 +281,33 @@ class RotationPlanService {
         );
       }
       // 5) Return the result
-      console.log(highPriorityRotation, specialRotation);
+      // 1) Собираем «сырые» данные из всех очередей
+      const allWorkersRaw = Array.from(this.rotationQueues.values())
+        .flat()
+        .map((w) => ({
+          id: w._id.toString(), // для уникализации
+          name: w.name,
+          group: w.group,
+          status: w.status,
+          costCenter: w.costCenter,
+          role: w.role,
+        }));
+
+      // 2) Убираем дубликаты по id
+      const workersMap = new Map();
+      for (const w of allWorkersRaw) {
+        if (!workersMap.has(w.id)) {
+          workersMap.set(w.id, w);
+        }
+      }
+
+      // 3) Финальный массив уникальных сотрудников
+      const allWorkers = Array.from(workersMap.values());
       return {
-        // Object: { "Ivanov": "Special task", ... }
         specialRotation: Object.fromEntries(specialRotation),
-        // Convert Map -> Object
         highPriorityRotation: Object.fromEntries(highPriorityRotation),
-        // Array: [ { station1: person1, station2: person2, ... }, ... ]
         cycleRotations,
+        allWorkers,
         date: new Date().toISOString().split('T')[0],
       };
     } catch (error) {
@@ -336,7 +360,7 @@ class RotationPlanService {
       // Form a queue of workers based on their IDs
       rotationQueue.queue = workers.map((worker) => ({
         workerId: worker._id,
-        name: worker.name,
+        name: worker.name.trim(),
         group: worker.group,
         role: worker.role,
         costCenter: worker.costCenter,
@@ -350,7 +374,8 @@ class RotationPlanService {
   async confirmRotation(
     specialRotation = null,
     highPriorityRotation,
-    cycleRotations
+    cycleRotations,
+    allWorkers
   ) {
     if (!highPriorityRotation || !cycleRotations) {
       throw new Error(
@@ -364,6 +389,7 @@ class RotationPlanService {
           specialRotation: { ...specialRotation },
           highPriorityRotation: { ...highPriorityRotation },
           cycleRotations: cycleRotations.map((rotation) => ({ ...rotation })),
+          allWorkers,
         },
       });
 
@@ -422,8 +448,10 @@ class RotationPlanService {
   async saveRotationToExcel(
     specialRotation,
     highPriorityRotation,
-    cycleRotations
+    cycleRotations,
+    allWorkers
   ) {
+    console.log(cycleRotations);
     try {
       // == (1) Build the filename ==
       const currentDate = new Date().toISOString().split('T')[0];
@@ -572,17 +600,15 @@ class RotationPlanService {
       const pivotSet = new Set();
       cycleRotations.forEach((rot) =>
         Object.values(rot).forEach((n) => {
-          if (n && !hpSet.has(n)) pivotSet.add(n);
+          if (n && !hpSet.has(n)) pivotSet.add(n.trim());
         })
       );
-      const infos = await WorkerModel.find(
-        { name: { $in: Array.from(pivotSet) } },
-        'name group'
-      ).lean();
       const byGroup = {};
-      infos.forEach(({ name, group }) => {
-        byGroup[group] = byGroup[group] || [];
-        byGroup[group].push(name.trim());
+      allWorkers.forEach(({ name, group, status }) => {
+        if (pivotSet.has(name) && status) {
+          byGroup[group] = byGroup[group] || [];
+          byGroup[group].push(name.trim());
+        }
       });
 
       Object.entries(byGroup)
@@ -658,10 +684,9 @@ class RotationPlanService {
         });
 
       // == (8) Abwesend block ==
-      const absentList = await WorkerModel.find(
-        { status: false },
-        'name'
-      ).lean();
+      const absentList = allWorkers
+        .filter((w) => !w.status)
+        .map((w) => w.name.trim());
       if (absentList.length) {
         // header
         const hdrRow = worksheet.getRow(rowIdx);
@@ -680,7 +705,7 @@ class RotationPlanService {
         rowIdx++;
 
         // two‑column layout, trim & reset font
-        const names = absentList.map((o) => o.name.trim());
+        const names = absentList.map((o) => o.trim());
         for (let i = 0; i < names.length; i += 2) {
           const row = worksheet.getRow(rowIdx);
           // left cell
