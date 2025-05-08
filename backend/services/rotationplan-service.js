@@ -285,7 +285,7 @@ class RotationPlanService {
       const allWorkersRaw = Array.from(this.rotationQueues.values())
         .flat()
         .map((w) => ({
-          id: w._id.toString(), // для уникализации
+          id: w._id.toString(),
           name: w.name,
           group: w.group,
           status: w.status,
@@ -451,7 +451,6 @@ class RotationPlanService {
     cycleRotations,
     allWorkers
   ) {
-    console.log(cycleRotations);
     try {
       // == (1) Build the filename ==
       const currentDate = new Date().toISOString().split('T')[0];

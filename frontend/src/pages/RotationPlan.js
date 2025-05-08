@@ -174,6 +174,7 @@ const RotationPlan = () => {
                     onChange={(e) =>
                       handleStationChange(emp.name, e.target.value)
                     }
+                    disabled={!emp.status}
                   >
                     <option value="">Assign</option>
                     <option value="sonder">Special</option>
@@ -193,6 +194,7 @@ const RotationPlan = () => {
                       onChange={(e) =>
                         handleSonderJobChange(emp.name, e.target.value)
                       }
+                      disabled={!emp.status}
                     />
                   )}
                 </li>
