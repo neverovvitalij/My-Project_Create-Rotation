@@ -3,7 +3,8 @@ const stationService = require('../services/station-service');
 class SationController {
   async getStations(req, res, next) {
     try {
-      const stations = await stationService.getStations();
+      const cc = req.user.costCenter;
+      const stations = await stationService.getStations({ costCenter: cc });
       res.json(stations);
     } catch (error) {
       next(error);
@@ -12,7 +13,8 @@ class SationController {
 
   async addStation(req, res, next) {
     try {
-      const { name, priority, group, costCenter } = req.body;
+      const costCenter = req.user.costCenter;
+      const { name, priority, group } = req.body;
       const response = await stationService.addStation(
         name,
         priority,

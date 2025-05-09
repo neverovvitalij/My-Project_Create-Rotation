@@ -1,5 +1,3 @@
-const path = require('path');
-const fs = require('fs').promises;
 const ApiError = require('../exceptions/api-error');
 const ConfirmedRotation = require('../models/confirmedrotation-model');
 const RotationPlanServise = require('../services/rotationplan-service');
@@ -13,6 +11,7 @@ class RotationPlanController {
 
   // Generate a rotation plan
   async getDailyRotation(req, res, next) {
+    const costCenter = req.user.costCenter;
     try {
       const rotationService = new RotationPlanServise();
       const cycles = parseInt(req.query.cycles, 10) || 5;
@@ -37,7 +36,8 @@ class RotationPlanController {
       const result = await rotationService.generateDailyRotation(
         specialAssignments || [],
         preassigned || [],
-        cycles
+        cycles,
+        costCenter
       );
       if (!result || typeof result !== 'object') {
         return next(ApiError.BadRequest('Invalid rotation data format.'));
@@ -51,6 +51,8 @@ class RotationPlanController {
 
   // Confirm the rotation plan
   async confirmRotation(req, res, next) {
+    const costCenter = req.user.costCenter;
+
     try {
       const rotationService = new RotationPlanServise();
       const {
@@ -75,7 +77,8 @@ class RotationPlanController {
         specialRotation,
         highPriorityRotation,
         cycleRotations,
-        allWorkers
+        allWorkers,
+        costCenter
       );
       return res.json({
         result,
@@ -89,8 +92,10 @@ class RotationPlanController {
 
   // Download the latest confirmed plan
   async downloadConfirmedRotation(req, res, next) {
+    const costCenter = req.user.costCenter;
+
     try {
-      const confirmedRotation = await ConfirmedRotation.findOne()
+      const confirmedRotation = await ConfirmedRotation.findOne({ costCenter })
         .sort({ createdAt: -1 })
         .lean();
 

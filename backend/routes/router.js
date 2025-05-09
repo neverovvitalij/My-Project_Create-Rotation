@@ -24,7 +24,7 @@ router.post('/reset-password', usersController.resetPassword);
 //Services
 router.get('/activate/:type/:link', usersController.activate);
 router.get('/workers', authMiddleware, workersController.getWorkers);
-router.post('/add-worker', workersController.addWorker);
+router.post('/add-worker', authMiddleware, workersController.addWorker);
 router.patch('/change-worker-status', workersController.workerChangeStatus);
 router.patch('/change-station-status', stationsController.stationChangeStatus);
 router.patch(
@@ -36,14 +36,23 @@ router.patch(
   workersController.addStationToWorker
 );
 router.delete('/delete-worker', workersController.deleteWorker);
-router.post('/daily-rotation', rotationplanController.getDailyRotation);
-router.post('/confirm-rotation', rotationplanController.confirmRotation);
+router.post(
+  '/daily-rotation',
+  authMiddleware,
+  rotationplanController.getDailyRotation
+);
+router.post(
+  '/confirm-rotation',
+  authMiddleware,
+  rotationplanController.confirmRotation
+);
 router.get(
   '/download-latest-confirmed-rotation',
+  authMiddleware,
   rotationplanController.downloadConfirmedRotation
 );
-router.get('/stations', stationsController.getStations);
-router.post('/new-station', stationsController.addStation);
+router.get('/stations', authMiddleware, stationsController.getStations);
+router.post('/new-station', authMiddleware, stationsController.addStation);
 router.delete('/delete-station', stationsController.deleteStation);
 
 module.exports = router;

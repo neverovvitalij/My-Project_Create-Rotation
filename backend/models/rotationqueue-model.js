@@ -3,6 +3,7 @@ const { Schema, model, default: mongoose } = require('mongoose');
 const RotationQueueSchema = new Schema(
   {
     station: { type: String, unique: true, required: true },
+    costCenter: { type: String, required: true },
     queue: [
       {
         workerId: {

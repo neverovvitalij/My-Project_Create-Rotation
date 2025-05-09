@@ -3,7 +3,8 @@ const workerService = require('../services/worker-service');
 class WorkerController {
   async getWorkers(req, res, next) {
     try {
-      const workers = await workerService.getAllWorkers();
+      const cc = req.user.costCenter;
+      const workers = await workerService.getAllWorkers({ costCenter: cc });
       res.json(workers);
     } catch (error) {
       next(error);
@@ -12,7 +13,8 @@ class WorkerController {
 
   async addWorker(req, res, next) {
     try {
-      const { name, role, costCenter, stations, group } = req.body;
+      const costCenter = req.user.costCenter;
+      const { name, role, stations, group } = req.body;
       const personData = await workerService.addWorker(
         name,
         role,

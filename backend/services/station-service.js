@@ -4,9 +4,9 @@ const WorkerModel = require('../models/worker-model');
 const ApiError = require('../exceptions/api-error');
 
 class StationService {
-  async getStations() {
+  async getStations(costCenter) {
     try {
-      const stations = await StationModel.find();
+      const stations = await StationModel.find(costCenter).lean();
       return stations;
     } catch (error) {
       throw ApiError.BadRequest('Error fetching stations', error.message);
@@ -40,6 +40,7 @@ class StationService {
         rotationQueue = new RotationQueueModel({
           station: name,
           queue: workers.map((worker) => worker._id) || [],
+          costCenter,
         });
         await rotationQueue.save();
         console.log(

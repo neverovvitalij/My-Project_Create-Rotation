@@ -29,6 +29,7 @@ const WorkerInfoSchema = new mongoose.Schema(
 const ConfirmedRotationSchema = new mongoose.Schema(
   {
     date: { type: Date, default: Date.now, unique: true },
+    costCenter: { type: String, required: true },
     rotation: {
       specialRotation: { type: Map, of: String, required: false },
       highPriorityRotation: { type: Map, of: String, required: true },

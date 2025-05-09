@@ -3,11 +3,11 @@ const RotationQueueModel = require('../models/rotationqueue-model');
 const ApiError = require('../exceptions/api-error');
 
 class WorkerService {
-  async getAllWorkers() {
+  async getAllWorkers(costCenter) {
     try {
-      const workers = await WorkerModel.find();
+      const workers = await WorkerModel.find(costCenter).lean();
       if (!workers || workers.length === 0) {
-        console.log('Add worker');
+        console.log('Add worker to the dataBase');
       }
       return workers;
     } catch (error) {
