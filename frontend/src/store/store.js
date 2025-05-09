@@ -78,6 +78,14 @@ export default class Store {
     };
   }
 
+  get activeEmployee() {
+    return this.employeeList.filter((emp) => emp.status).length;
+  }
+
+  get activeStations() {
+    return this.stations.filter((stn) => stn.status).length;
+  }
+
   get activeEmployeeByGroup() {
     return this.employeeList.reduce((acc, emp) => {
       const grp = emp.group;

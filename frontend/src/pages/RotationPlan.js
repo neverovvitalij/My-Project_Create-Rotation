@@ -149,6 +149,9 @@ const RotationPlan = () => {
       </div>
       {confirmedRotation && <FaSpinner className={styles.spinner} />}
       {/* List of employees */}
+      <h3
+        className={styles.groupHeader}
+      >{`Available employees ${store.activeEmployee} | Needed ${store.activeStations}`}</h3>
       {Object.entries(groupedEmployees).map(([groupName, groupEmps]) => (
         <section key={groupName} className={styles.groupSection}>
           <h3 className={styles.groupHeader}>Group {groupName}</h3>
