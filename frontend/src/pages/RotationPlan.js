@@ -1,28 +1,43 @@
 import { observer } from 'mobx-react-lite';
 import { FaSpinner } from 'react-icons/fa';
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useMemo, useState, useRef } from 'react';
 import { toJS } from 'mobx';
+import ExcelPreview from '../components/ExcelPreview';
 import styles from '../styles/RotationPlan.module.css';
 import { Context } from '../index';
 
 const RotationPlan = () => {
   const { store } = useContext(Context);
+  const previewRef = useRef(null);
 
   const [preassigned, setPreassigned] = useState([]);
   const [specialAssignments, setSpecialAssignments] = useState([]);
 
   const [confirmedRotation, setConfirmedRotation] = useState(false);
   const [rotationForDownload, setRotationForDownload] = useState(false);
+  const [loader, setLoader] = useState(false);
+  const [msg, setMsg] = useState('');
 
   const rotations = toJS(store.rotation);
   const stationsList = toJS(store.stations);
   const employees = toJS(store.employeeList);
 
-  // 1) Remove from preassigned if it exists
-  // 2) Remove from specialAssignments if it exists
-  // 3) If "sonder" is selected, add it to the specialAssignments array
-  // 4) If another station is selected (not empty), add it to preassigned
-  // If newStation === '', that means "remove assignment", add nothing
+  const onClickPreview = async () => {
+    setLoader(true);
+    try {
+      setMsg('');
+      setRotationForDownload(false);
+      setConfirmedRotation(false);
+      await store.getDailyRotation(specialAssignments, preassigned);
+      await previewRef.current.loadPreview();
+      setConfirmedRotation(true);
+    } catch (error) {
+      console.error('Failed to load rotation', error.message);
+    } finally {
+      setLoader(false);
+    }
+  };
+
   const handleStationChange = (workerName, newStation) => {
     setPreassigned((prev) => prev.filter((item) => item.worker !== workerName));
     setSpecialAssignments((prev) =>
@@ -67,20 +82,8 @@ const RotationPlan = () => {
     return sonderItem ? sonderItem.job : '';
   };
 
-  // -- Plan-related methods --
-  const getRotationDataForDay = async () => {
-    setRotationForDownload(false);
-    try {
-      setConfirmedRotation(true);
-      await store.getDailyRotation(specialAssignments, preassigned);
-    } catch (error) {
-      console.error('Failed to load rotation', error.message);
-    } finally {
-      setConfirmedRotation(false);
-    }
-  };
-
   const confirmRotation = async () => {
+    setLoader(true);
     setConfirmedRotation(true);
     const { highPriorityRotation, cycleRotations } = rotations;
 
@@ -90,12 +93,13 @@ const RotationPlan = () => {
     }
 
     try {
-      await store.confirmRotation();
+      const response = await store.confirmRotation();
+      setMsg(response.message);
       setRotationForDownload(true);
     } catch (error) {
       console.error('Error confirming rotation:', error.message || error);
     } finally {
-      setConfirmedRotation(false);
+      setLoader(false);
     }
   };
 
@@ -126,15 +130,15 @@ const RotationPlan = () => {
       {/* Button panel */}
       <div className={styles.buttonPanel}>
         <button
-          disabled={!store.user.isActivated}
+          disabled={!store.user.isActivated || loader}
           className={styles.button}
-          onClick={getRotationDataForDay}
+          onClick={onClickPreview}
         >
           Load rotation
         </button>
-        {rotations.cycleRotations?.length ? (
+        {confirmedRotation ? (
           <button
-            disabled={confirmedRotation}
+            disabled={rotationForDownload || loader}
             className={styles.button}
             onClick={confirmRotation}
           >
@@ -147,7 +151,9 @@ const RotationPlan = () => {
           </button>
         )}
       </div>
-      {confirmedRotation && <FaSpinner className={styles.spinner} />}
+      {loader && <FaSpinner className={styles.spinner} />}
+      {msg && <p className={styles.success}>{msg}</p>}
+
       {/* List of employees */}
       <h3
         className={styles.groupHeader}
@@ -207,62 +213,11 @@ const RotationPlan = () => {
         </section>
       ))}
       <h2>{`Rotations plan ${rotations.date}`}</h2>
-      {/* High Priority Rotations */}
-      <section className={styles.highPriority}>
-        <p className={styles.gruppeTitle}>Entire day</p>
-        {rotations.highPriorityRotation &&
-        Object.keys(rotations.highPriorityRotation).length > 0 ? (
-          <div className={styles.highPriorityList}>
-            {Object.entries(rotations.highPriorityRotation).map(
-              ([station, worker]) => (
-                <div key={station} className={styles.highPriorityStation}>
-                  <h3>{station}</h3>
-                  <p>{worker.name}</p>
-                </div>
-              )
-            )}
-          </div>
-        ) : (
-          <p>Loading high priority rotation data...</p>
-        )}
-      </section>
-      {/* Special tasks (Sonder Rotations) */}
-      {Object.keys(rotations.specialRotation).length > 0 && (
-        <>
-          <section className={styles.highPriority}>
-            <p className={styles.groupTitle}>Special task</p>
-            <div className={styles.highPriorityList}>
-              {Object.entries(rotations.specialRotation).map(
-                ([workerName, { worker, job }]) => (
-                  <div key={workerName} className={styles.highPriorityStation}>
-                    <h3>{worker.name}</h3>
-                    <p>{job}</p>
-                  </div>
-                )
-              )}
-            </div>
-          </section>
-        </>
-      )}
-      {/* Daily Rotations */}
-      <section className={styles.dailyRotation}>
-        {rotations.cycleRotations?.length > 0 ? (
-          rotations.cycleRotations.map((rot, cycleIndex) => (
-            <div key={cycleIndex} className={styles.cycle}>
-              <h3>Cycle {cycleIndex + 1}</h3>
-              <ul>
-                {Object.entries(rot).map(([station, worker], indx) => (
-                  <li key={station}>
-                    <strong>{`${indx + 1}. ${station}`}:</strong> {worker.name}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))
-        ) : (
-          <p>Loading daily rotation data...</p>
-        )}
-      </section>
+      <ExcelPreview
+        ref={previewRef}
+        preassigned={toJS(preassigned)}
+        specialAssignments={toJS(specialAssignments)}
+      />
     </div>
   );
 };

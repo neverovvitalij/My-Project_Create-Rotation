@@ -1,8 +1,21 @@
 import api from '../http/index';
 
 export default class RotationPlanService {
-  static async dailyRotation(specialAssignments, preassigned) {
-    return api.post('/daily-rotation', { specialAssignments, preassigned });
+  static async previewExcel(
+    specialRotation,
+    highPriorityRotation,
+    cycleRotations,
+    allWorkers
+  ) {
+    return api.post(
+      '/rotation-preview-excel',
+      { specialRotation, highPriorityRotation, cycleRotations, allWorkers },
+      { responseType: 'blob' }
+    );
+  }
+
+  static async rotationData(specialAssignments, preassigned) {
+    return api.post('/rotation-data', { specialAssignments, preassigned });
   }
 
   static async confirmRotation(

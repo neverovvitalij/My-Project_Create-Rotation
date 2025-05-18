@@ -9,7 +9,7 @@ class RotationPlanService {
     this.stations = [];
   }
 
-  async generateDailyRotation(
+  async generateRotationData(
     specialAssignments = [],
     preassigned = [],
     cycles,
@@ -456,7 +456,7 @@ class RotationPlanService {
     }
   }
 
-  async saveRotationToExcel(
+  async buildExcelBuffer(
     specialRotation,
     highPriorityRotation,
     cycleRotations,
@@ -555,11 +555,23 @@ class RotationPlanService {
 
       // Populate HP + Special rows
       rowIdx++;
-      const hpEntries = Object.entries(highPriorityRotation || {});
-      const srEntries = Object.entries(specialRotation || {});
+      const hpEntries = Object.entries(highPriorityRotation || {}).map(
+        ([station, w]) => [station, typeof w === 'object' ? w.name : w]
+      );
+
+      // entries вида [имя_сотрудника, его_работа]
+      const srEntries = Object.entries(specialRotation || {}).map(
+        ([workerName, spec]) => [
+          workerName,
+          // если spec — объект с полем job, то job, иначе — сам spec
+          typeof spec === 'object' && spec.job != null ? spec.job : spec,
+        ]
+      );
+
       const topLen = Math.max(hpEntries.length, srEntries.length);
       for (let i = 0; i < topLen; i++) {
         const row = worksheet.getRow(rowIdx);
+
         if (i < hpEntries.length) {
           const [station, worker] = hpEntries[i];
           row.getCell(1).value = worker;
@@ -605,29 +617,35 @@ class RotationPlanService {
       worksheet.addRow([]);
       rowIdx++;
 
-      // == (7) Pivot by group, with sub‑headers ==
-      const hpSet = new Set(Object.values(highPriorityRotation || {}));
+      // == (7) Pivot by group, with sub-headers ==
+      const hpNames = new Set(
+        Object.values(highPriorityRotation || {}).map((w) =>
+          typeof w === 'object' ? w.name : w
+        )
+      );
       const pivotSet = new Set();
       cycleRotations.forEach((rot) =>
-        Object.values(rot).forEach((n) => {
-          if (n && !hpSet.has(n)) pivotSet.add(n.trim());
+        Object.values(rot).forEach((worker) => {
+          const name =
+            worker && typeof worker === 'object' ? worker.name : worker;
+          if (name && !hpNames.has(name)) pivotSet.add(name.trim());
         })
       );
       const byGroup = {};
       allWorkers.forEach(({ name, group, status }) => {
-        if (pivotSet.has(name) && status) {
+        if (pivotSet.has(name.trim()) && status) {
           byGroup[group] = byGroup[group] || [];
           byGroup[group].push(name.trim());
         }
       });
 
+      // == (7.c) Worker rows with zebra striping ==
       Object.entries(byGroup)
         .sort(([a], [b]) => a.localeCompare(b))
         .forEach(([grp, names]) => {
-          // group header
+          // Group header
           const grRow = worksheet.addRow([`Gruppe ${grp}`]);
           grRow.font = { bold: true };
-          grRow.alignment = { horizontal: 'left' };
           worksheet.mergeCells(
             grRow.number,
             1,
@@ -637,7 +655,7 @@ class RotationPlanService {
           grRow.eachCell((c) => (c.border = borderStyle));
           grRow.commit();
 
-          // sub‑header
+          // Sub-header with round numbers
           const subTitles = [
             'Mitarbeiter',
             ...Array.from(
@@ -646,47 +664,52 @@ class RotationPlanService {
             ),
           ];
           const subRow = worksheet.addRow(subTitles);
-          subRow.eachCell((c) => {
-            c.font = { bold: true };
-            c.fill = {
+          subRow.eachCell((cell) => {
+            cell.font = { bold: true };
+            cell.fill = {
               type: 'pattern',
               pattern: 'solid',
               fgColor: { argb: 'FFCCFFCC' },
             };
-            c.border = borderStyle;
+            cell.border = borderStyle;
           });
           subRow.commit();
 
-          // worker rows
-          names.forEach((w, i) => {
-            const data = [w];
+          // Actual worker rows
+          names.forEach((workerName, idx) => {
+            const data = [workerName];
             for (let c = 0; c < leftNumCycles; c++) {
               const rot = cycleRotations[c] || {};
               const sts = Object.entries(rot)
-                .filter(([, x]) => x === w)
-                .map(([s]) => s)
+                .filter(([, worker]) => {
+                  const nm =
+                    worker && typeof worker === 'object' ? worker.name : worker;
+                  return nm === workerName;
+                })
+                .map(([station]) => station)
                 .join(', ');
               data.push(sts);
             }
-            const r = worksheet.addRow(data);
-            r.getCell(1).fill = {
-              type: 'pattern',
-              pattern: 'solid',
-              fgColor: { argb: 'FFCCFFCC' },
-            };
-            if (i % 2) {
-              r.eachCell((c, col) => {
-                if (col > 1) {
-                  c.fill = {
-                    type: 'pattern',
-                    pattern: 'solid',
-                    fgColor: { argb: 'FFD3D3D3' },
-                  };
-                }
-              });
-            }
-            r.eachCell((c) => (c.border = borderStyle));
-            r.commit();
+            const row = worksheet.addRow(data);
+            row.eachCell((cell, colNumber) => {
+              cell.border = borderStyle;
+              if (colNumber === 1) {
+                // first column always light-green
+                cell.fill = {
+                  type: 'pattern',
+                  pattern: 'solid',
+                  fgColor: { argb: 'FFCCFFCC' },
+                };
+              } else if (idx % 2 === 1) {
+                // zebra: odd rows dark-grey
+                cell.fill = {
+                  type: 'pattern',
+                  pattern: 'solid',
+                  fgColor: { argb: 'FFD3D3D3' },
+                };
+              }
+            });
+            row.commit();
           });
 
           // spacer
@@ -760,10 +783,23 @@ class RotationPlanService {
         worksheet.getColumn(c).width = 20;
       }
 
+      // == (9.1) Auto-fit columns to their content ==
+      worksheet.columns.forEach((column) => {
+        let maxLength = 0;
+        column.eachCell({ includeEmpty: false }, (cell) => {
+          if (cell.row <= 2) return; // skip title and sub-header rows
+          const text = cell.value == null ? '' : cell.value.toString();
+          maxLength = Math.max(maxLength, text.length);
+        });
+
+        const cappedLength = Math.max(10, Math.min(maxLength, 20));
+
+        column.width = cappedLength + 2;
+      });
+
       // == (10) Save ==
 
       const buffer = await workbook.xlsx.writeBuffer();
-
       return { buffer, fileName };
     } catch (err) {
       console.error('Error creating Excel file:', err);

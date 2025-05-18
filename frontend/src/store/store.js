@@ -292,7 +292,7 @@ export default class Store {
 
   async getDailyRotation(specialAssignments = null, preassigned = null) {
     try {
-      const response = await RotationPlanService.dailyRotation(
+      const response = await RotationPlanService.rotationData(
         specialAssignments,
         preassigned
       );
@@ -305,19 +305,19 @@ export default class Store {
   async confirmRotation() {
     try {
       const allWorkers = this.rotation.allWorkers;
-      const special = Object.fromEntries(
+      const specialRotation = Object.fromEntries(
         Object.entries(this.rotation.specialRotation).map(
           ([workerName, { job }]) => [workerName.trim(), job]
         )
       );
 
-      const highPr = Object.fromEntries(
+      const highPriorityRotation = Object.fromEntries(
         Object.entries(this.rotation.highPriorityRotation).map(
           ([station, workerObj]) => [station, workerObj.name.trim()]
         )
       );
 
-      const cycles = this.rotation.cycleRotations.map((rot) =>
+      const cycleRotations = this.rotation.cycleRotations.map((rot) =>
         Object.fromEntries(
           Object.entries(rot).map(([station, workerObj]) => [
             station,
@@ -327,17 +327,17 @@ export default class Store {
       );
 
       if (
-        Object.keys(highPr).length === 0 ||
-        !Array.isArray(cycles) ||
-        cycles.length === 0
+        Object.keys(highPriorityRotation).length === 0 ||
+        !Array.isArray(cycleRotations) ||
+        cycleRotations.length === 0
       ) {
         throw new Error('Incorrect cycleRotations data');
       }
 
       const response = await RotationPlanService.confirmRotation(
-        special,
-        highPr,
-        cycles,
+        specialRotation,
+        highPriorityRotation,
+        cycleRotations,
         allWorkers
       );
       if (response?.data) {
@@ -345,6 +345,7 @@ export default class Store {
       } else {
         throw new Error('Server response is empty');
       }
+      return response.data;
     } catch (error) {
       console.error(error.response?.data?.message || error.message);
       this.setErrorMsg('Error confirming cycleRotations');

@@ -1,51 +1,61 @@
 const ApiError = require('../exceptions/api-error');
 const ConfirmedRotation = require('../models/confirmedrotation-model');
-const RotationPlanServise = require('../services/rotationplan-service');
+const RotationPlanService = require('../services/rotationplan-service');
 
 class RotationPlanController {
   constructor() {
-    this.getDailyRotation = this.getDailyRotation.bind(this);
+    this.getRotationData = this.getRotationData.bind(this);
+    this.previewExcel = this.previewExcel.bind(this);
     this.confirmRotation = this.confirmRotation.bind(this);
     this.downloadConfirmedRotation = this.downloadConfirmedRotation.bind(this);
   }
 
-  // Generate a rotation plan
-  async getDailyRotation(req, res, next) {
-    const costCenter = req.user.costCenter;
+  async getRotationData(req, res, next) {
     try {
-      const rotationService = new RotationPlanServise();
+      const { specialAssignments = [], preassigned = [] } = req.body;
       const cycles = parseInt(req.query.cycles, 10) || 5;
+      const costCenter = req.user.costCenter;
 
-      // Destructure both preassigned and sonderAssignments here
-      const { specialAssignments, preassigned } = req.body;
-
-      if (isNaN(cycles) || cycles <= 0) {
-        return next(ApiError.BadRequest('Invalid cycles parameter.'));
-      }
-
-      // Validate preassigned
-      if (preassigned && !Array.isArray(preassigned)) {
-        return next(
-          ApiError.BadRequest(
-            'Preassigned must be an array of { station, person } objects'
-          )
-        );
-      }
-
-      // Pass cycles, preassigned, and sonderAssignments
-      const result = await rotationService.generateDailyRotation(
-        specialAssignments || [],
-        preassigned || [],
+      const service = new RotationPlanService();
+      const data = await service.generateRotationData(
+        specialAssignments,
+        preassigned,
         cycles,
         costCenter
       );
-      if (!result || typeof result !== 'object') {
-        return next(ApiError.BadRequest('Invalid rotation data format.'));
-      }
-      return res.json(result);
+      return res.json(data);
     } catch (error) {
-      console.error('Error generating daily rotation:', error.message),
-        next(ApiError.BadRequest('Error creating plan', error.message));
+      next(ApiError.BadRequest('Error creating rotation JSON', error.message));
+    }
+  }
+
+  async previewExcel(req, res, next) {
+    try {
+      const {
+        specialRotation,
+        highPriorityRotation,
+        cycleRotations,
+        allWorkers,
+      } = req.body;
+
+      const service = new RotationPlanService();
+      const { buffer, fileName } = await service.buildExcelBuffer(
+        specialRotation,
+        highPriorityRotation,
+        cycleRotations,
+        allWorkers
+      );
+      return res
+        .status(200)
+        .set({
+          'Content-Type':
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'Content-Disposition': `attachment; filename="${fileName}"`,
+        })
+        .send(buffer);
+    } catch (err) {
+      console.error('Error generating daily rotation:', err);
+      next(ApiError.BadRequest('Error creating plan', err.message));
     }
   }
 
@@ -54,7 +64,7 @@ class RotationPlanController {
     const costCenter = req.user.costCenter;
 
     try {
-      const rotationService = new RotationPlanServise();
+      const rotationService = new RotationPlanService();
       const {
         specialRotation,
         highPriorityRotation,
@@ -111,8 +121,8 @@ class RotationPlanController {
         cycleRotations,
         allWorkers,
       } = confirmedRotation.rotation;
-      const rotationService = new RotationPlanServise();
-      const { buffer, fileName } = await rotationService.saveRotationToExcel(
+      const rotationService = new RotationPlanService();
+      const { buffer, fileName } = await rotationService.buildExcelBuffer(
         specialRotation,
         highPriorityRotation,
         cycleRotations,

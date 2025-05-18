@@ -9,3 +9,55 @@ body {
   color: white;
   background-color: #1e1e2d;
 }
+
+/*globsl styles for Excel-preview */
+#preview-table {
+  border-collapse: separate !important;
+  border-spacing: 0 8px !important;
+  width: max-content;
+  font-size: 0.9rem;
+}
+
+#preview-table th,
+#preview-table td {
+  padding: 6px 12px;
+  border: 1px solid #444;
+  background: rgba(255, 255, 255, 0.05);
+  color: #eee;
+}
+
+#preview-table tr:first-child td,
+#preview-table thead th {
+  background: #4b5d7f !important;
+  color: #fff !important;
+  font-weight: bold;
+}
+
+#preview-table tbody tr:nth-child(odd) td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+#preview-table tbody tr:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+#preview-table tbody tr td[colspan] {
+  border: none !important;
+  background: transparent;
+  height: 12px;
+}
+
+@media (max-width: 768px) {
+  #preview-table {
+    width: 100% !important;
+    font-size: 0.8rem !important;
+    table-layout: auto !important;
+    display: block;
+    overflow-x: auto;
+  }
+
+  #preview-table th,
+  #preview-table td {
+    padding: 4px 6px !important;
+  }
+}

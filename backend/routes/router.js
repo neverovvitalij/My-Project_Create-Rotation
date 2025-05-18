@@ -37,10 +37,16 @@ router.patch(
 );
 router.delete('/delete-worker', workersController.deleteWorker);
 router.post(
-  '/daily-rotation',
+  '/rotation-preview-excel',
   authMiddleware,
-  rotationplanController.getDailyRotation
+  rotationplanController.previewExcel
 );
+router.post(
+  '/rotation-data',
+  authMiddleware,
+  rotationplanController.getRotationData
+);
+
 router.post(
   '/confirm-rotation',
   authMiddleware,

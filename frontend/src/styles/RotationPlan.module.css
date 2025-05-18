@@ -209,6 +209,18 @@ h2 {
   animation: spin 1s linear infinite;
 }
 
+.error {
+  color: #ff5555;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.success {
+  color: #4caf50;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
