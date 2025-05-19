@@ -31,9 +31,34 @@ class RotationPlanService {
       }
 
       // 2) Initialization of queues
-      const existingQueues = await RotationQueueModel.find({ costCenter });
-      if (!existingQueues || existingQueues.length === 0) {
-        await this.initializeQueue(costCenter);
+      // const existingQueues = await RotationQueueModel.find({ costCenter });
+      // if (!existingQueues || existingQueues.length === 0) {
+      //   await this.initializeQueue(costCenter);
+      // }
+      // 2) Make sure a RotationQueue exists for every active station:
+      for (const station of activeStations) {
+        let rq = await RotationQueueModel.findOne({
+          station: station.name,
+          costCenter,
+        });
+        if (!rq) {
+          // если очереди ещё нет — создаём её
+          const workers = await WorkerModel.find({
+            stations: { $elemMatch: { name: station.name, isActive: true } },
+          }).sort({ name: 1 });
+          rq = new RotationQueueModel({
+            station: station.name,
+            queue: workers.map((w) => ({
+              workerId: w._id,
+              name: w.name.trim(),
+              group: w.group,
+              role: w.role,
+              costCenter: w.costCenter,
+            })),
+            costCenter,
+          });
+          await rq.save();
+        }
       }
 
       // We load the queues

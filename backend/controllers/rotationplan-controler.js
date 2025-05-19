@@ -61,9 +61,8 @@ class RotationPlanController {
 
   // Confirm the rotation plan
   async confirmRotation(req, res, next) {
-    const costCenter = req.user.costCenter;
-
     try {
+      const costCenter = req.user.costCenter;
       const rotationService = new RotationPlanService();
       const {
         specialRotation,

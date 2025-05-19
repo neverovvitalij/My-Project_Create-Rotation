@@ -31,16 +31,27 @@ class StationService {
       await station.save();
 
       // Initialize queue for the new station
-      let rotationQueue = await RotationQueueModel.findOne({ station: name });
+      let rotationQueue = await RotationQueueModel.findOne({
+        station: name,
+        costCenter,
+      });
       if (!rotationQueue) {
         const workers = await WorkerModel.find({
           stations: { $elemMatch: { name, isActive: true } },
         }).sort({ name: 1 }); //Sort workers by name
 
+        const queueItems = workers.map((w) => ({
+          workerId: w._id,
+          name: w.name,
+          group: w.group,
+          role: w.role,
+          costCenter: w.costCenter,
+        }));
+
         rotationQueue = new RotationQueueModel({
           station: name,
-          queue: workers.map((worker) => worker._id) || [],
           costCenter,
+          queue: queueItems,
         });
         await rotationQueue.save();
         console.log(
