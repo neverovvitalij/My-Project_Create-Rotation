@@ -72,18 +72,23 @@ class RotationPlanService {
           '_id name role costCenter group status stations'
         );
 
-        const queue = (rotationQueue?.queue || []).map((item) => {
-          const w = item.workerId;
-          return {
-            _id: w._id,
-            name: w.name,
-            group: w.group,
-            role: w.role,
-            costCenter: w.costCenter,
-            status: w.status,
-            stations: w.stations,
-          };
-        });
+        const rawQueue = rotationQueue?.queue || [];
+        const queue = rawQueue
+          // сначала убираем те, у которых нет workerId
+          .filter((item) => item.workerId)
+          // потом безопасно маппим
+          .map((item) => {
+            const w = item.workerId;
+            return {
+              _id: w._id,
+              name: w.name,
+              group: w.group,
+              role: w.role,
+              costCenter: w.costCenter,
+              status: w.status,
+              stations: w.stations,
+            };
+          });
         this.rotationQueues.set(station.name, queue);
       }
 
