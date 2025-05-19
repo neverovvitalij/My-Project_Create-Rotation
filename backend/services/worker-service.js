@@ -17,9 +17,12 @@ class WorkerService {
 
   async addWorker(name, role, costCenter, stations, group, status = true) {
     try {
-      const existingWorker = await WorkerModel.findOne({ name });
-      if (existingWorker) {
-        throw new Error(`Worker ${name} is already registered`);
+      const exists = await WorkerModel.exists({
+        name: name.trim(),
+        costCenter,
+      });
+      if (exists) {
+        throw ApiError.BadRequest(`Worker "${name.trim()}" already exists`);
       }
 
       const worker = await WorkerModel.create({

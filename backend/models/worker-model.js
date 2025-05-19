@@ -1,10 +1,10 @@
 const { Schema, model } = require('mongoose');
 
 const WorkerSchema = new Schema({
-  name: { type: String, unique: true, required: true },
+  name: { type: String, required: true },
   role: {
     type: String,
-    enum: ['WORKER', 'UNT', 'GV', 'B&B'],
+    enum: ['WORKER', 'GV'],
     required: true,
   },
   costCenter: { type: String, required: true },
@@ -17,5 +17,7 @@ const WorkerSchema = new Schema({
   group: { type: Number, required: true },
   status: { type: Boolean, required: true, default: true },
 });
+
+WorkerSchema.index({ name: 1, costCenter: 1 }, { unique: true });
 
 module.exports = model('WorkerModel', WorkerSchema);
