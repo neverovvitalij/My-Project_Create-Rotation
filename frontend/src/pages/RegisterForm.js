@@ -10,6 +10,7 @@ const RegisterForm = () => {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('');
   const [costCenter, setCostCenter] = useState('');
+  const [msgType, setMsgType] = useState('');
   const navigate = useNavigate();
   const storeRef = useRef(store);
 
@@ -18,12 +19,19 @@ const RegisterForm = () => {
   };
 
   useEffect(() => {
-    storeRef.current.setAuthErrorMsg('');
+    storeRef.current.setAuthMsg('');
   }, []);
 
   const handleChangeSubmit = async (event) => {
     event.preventDefault();
-    await store.registration(email, password, role, costCenter);
+    try {
+      await store.registration(email, password, role, costCenter);
+      setMsgType('success');
+      store.setAuthMsg('Please check your spam folder.');
+    } catch (error) {
+      setMsgType('error');
+      console.error(error.message);
+    }
     setEmail('');
     setPassword('');
   };
@@ -90,8 +98,10 @@ const RegisterForm = () => {
             Go to Login
           </button>
         </div>
-        {store.authErrorMsg && (
-          <p className={styles.error}>{store.authErrorMsg}</p>
+        {store.authMsg && (
+          <p className={`${msgType ? styles.success : styles.error}`}>
+            {store.authMsg}
+          </p>
         )}
       </form>
     </>

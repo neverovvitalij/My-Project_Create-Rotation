@@ -9,7 +9,7 @@ export default class Store {
   isAuth = false;
   isLoading = false;
   errorMsg = '';
-  authErrorMsg = '';
+  authMsg = '';
   employeeList = [];
   stations = [];
   newStation = { name: '', priority: 0 };
@@ -46,8 +46,8 @@ export default class Store {
     this.errorMsg = msg;
   }
 
-  setAuthErrorMsg(msg) {
-    this.authErrorMsg = msg;
+  setAuthMsg(msg) {
+    this.authMsg = msg;
   }
 
   setEmployeeList(data) {
@@ -123,7 +123,7 @@ export default class Store {
       this.setAuth(true);
       this.setUser(response.data.user);
     } catch (error) {
-      this.setAuthErrorMsg(error.response?.data?.message || 'Error logging in');
+      this.setAuthMsg(error.response?.data?.message || 'Error logging in');
     }
   }
 
@@ -135,13 +135,15 @@ export default class Store {
         role,
         costCenter
       );
-      localStorage.setItem('token', response.data.accessToken);
-      this.setAuth(true);
-      this.setUser(response.data.user);
+      if (response) {
+        setTimeout(() => {
+          localStorage.setItem('token', response.data.accessToken);
+          this.setAuth(true);
+          this.setUser(response.data.user);
+        }, 10000);
+      }
     } catch (error) {
-      this.setAuthErrorMsg(
-        error.response?.data?.message || 'Error registering'
-      );
+      this.setAuthMsg(error.response?.data?.message || 'Error registering');
     }
   }
 

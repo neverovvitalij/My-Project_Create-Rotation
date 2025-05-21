@@ -16,17 +16,17 @@ const ResetPassword = () => {
 
   useEffect(() => {
     if (!token) {
-      storeRef.current.setAuthErrorMsg('Invalid or missing token.');
+      storeRef.current.setAuthMsg('Invalid or missing token.');
     }
   }, [token]);
 
   const handleSubmitResetPassword = async (event) => {
     event.preventDefault();
-    store.setAuthErrorMsg('');
+    store.setAuthMsg('');
     setSuccessMsg('');
 
     if (password !== newPassword) {
-      store.setAuthErrorMsg('Passwords do not match.');
+      store.setAuthMsg('Passwords do not match.');
       return;
     }
 
@@ -36,7 +36,7 @@ const ResetPassword = () => {
       setSuccessMsg('Your password has been changed successfully!');
       setTimeout(() => navigate('/'), 3000);
     } else {
-      store.setAuthErrorMsg(response.message || 'Error changing password.');
+      store.setAuthMsg(response.message || 'Error changing password.');
     }
   };
 
@@ -57,9 +57,7 @@ const ResetPassword = () => {
         onChange={(e) => setNewPassword(e.target.value)}
         className={styles.input}
       />
-      {store.authErrorMsg && (
-        <p className={styles.error}>{store.authErrorMsg}</p>
-      )}
+      {store.authMsg && <p className={styles.error}>{store.authMsg}</p>}
       {successMsg && <p className={styles.success}>{successMsg}</p>}
       <button type="submit" className={styles.button}>
         Change password

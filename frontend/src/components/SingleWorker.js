@@ -99,7 +99,7 @@ const SingleWorker = ({ worker, activeWorker, setActiveWorker }) => {
             .filter(
               (station) =>
                 !worker.stations.map((s) => s.name).includes(station.name)
-            ) //RAZBERIS S ZIFRAMI S LEWO
+            )
             .map((station) => station.name)}
           onSelect={handleAddStation}
           label={'Add station'}

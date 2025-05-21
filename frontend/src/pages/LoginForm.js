@@ -16,7 +16,7 @@ const LoginForm = () => {
   };
 
   useEffect(() => {
-    storeRef.current.setAuthErrorMsg('');
+    storeRef.current.setAuthMsg('');
   }, []);
 
   const handleChangeSubmit = async (event) => {
@@ -25,7 +25,7 @@ const LoginForm = () => {
     try {
       await store.login(email, password);
     } catch (error) {
-      store.setAuthErrorMsg('Incorrect data');
+      store.setAuthMsg('Incorrect data');
       console.error('Login failed:', error);
     } finally {
       setEmail('');
@@ -63,9 +63,7 @@ const LoginForm = () => {
             Login
           </button>
         </div>
-        {store.authErrorMsg && (
-          <p className={styles.error}>{store.authErrorMsg}</p>
-        )}
+        {store.authMsg && <p className={styles.error}>{store.authMsg}</p>}
         <button
           type="button"
           className={`${styles.baseButton} ${styles.secondaryButton}`}

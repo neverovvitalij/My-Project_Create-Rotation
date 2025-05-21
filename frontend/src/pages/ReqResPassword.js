@@ -14,13 +14,13 @@ const ReqResPassword = () => {
   const storeRef = useRef(store);
 
   useEffect(() => {
-    storeRef.current.setAuthErrorMsg('');
+    storeRef.current.setAuthMsg('');
   }, []);
 
   const handleSubmitReqChangePass = async (event) => {
     event.preventDefault();
     setSuccessMsg('');
-    store.setAuthErrorMsg('');
+    store.setAuthMsg('');
     setServerResponse(true);
 
     const response = await store.requestResetPassword(email);
@@ -29,7 +29,7 @@ const ReqResPassword = () => {
       setEmail('');
       setSuccessMsg('An email has been sent. Please check your mailbox.');
     } else {
-      store.setAuthErrorMsg(response.message || 'Unknown error');
+      store.setAuthMsg(response.message || 'Unknown error');
     }
     setServerResponse(false);
   };
@@ -64,9 +64,7 @@ const ReqResPassword = () => {
         Home
       </button>
       {serverResponse && <FaSpinner className={styles.spinner} />}
-      {store.authErrorMsg && (
-        <p className={styles.error}>{store.authErrorMsg}</p>
-      )}
+      {store.authMsg && <p className={styles.error}>{store.authMsg}</p>}
       {successMsg && <p className={styles.success}>{successMsg}</p>}
     </form>
   );
