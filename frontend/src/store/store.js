@@ -326,25 +326,16 @@ export default class Store {
         )
       );
 
-      if (
-        Object.keys(highPriorityRotation).length === 0 ||
-        !Array.isArray(cycleRotations) ||
-        cycleRotations.length === 0
-      ) {
-        throw new Error('Incorrect cycleRotations data');
-      }
-
       const response = await RotationPlanService.confirmRotation(
         specialRotation,
         highPriorityRotation,
         cycleRotations,
         allWorkers
       );
-      if (response?.data) {
-        this.setErrorMsg('');
-      } else {
+      if (!response.data) {
         throw new Error('Server response is empty');
       }
+      this.setErrorMsg('');
       return response.data;
     } catch (error) {
       console.error(error.response?.data?.message || error.message);

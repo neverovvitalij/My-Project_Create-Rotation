@@ -6,22 +6,35 @@ const StationModel = require('../models/station-model');
 
 class RotationPlanService {
   constructor() {
+    // Cached list of station definitions
     this.stations = [];
   }
 
+  /**
+   * Generates rotation data for preview or JSON response.
+   * @param {Array<{worker: string, job: string}>} specialAssignments
+   * @param {Array<{station: string, worker: string}>} preassigned
+   * @param {number} cycles                number of rotation cycles
+   * @param {string} costCenter            cost center identifier
+   * @returns {Promise<Object>}            rotation data structure
+   */
   async generateRotationData(
     specialAssignments = [],
     preassigned = [],
     cycles,
     costCenter
   ) {
+    // (1) Load station definitions if not already loaded
+    let activeStations;
     try {
-      // 1) Initialization of stations
       if (!this.stations || this.stations.length === 0) {
         await this.initialize(costCenter);
       }
-      const activeStations = this.stations.filter((s) => s.status === true);
-      if (activeStations.length === 0) {
+      // Keep only active stations
+      activeStations = this.stations.filter((s) => s.status === true);
+
+      // If no stations are active, return empty result
+      if (!activeStations.length) {
         return {
           specialRotation: {},
           highPriorityRotation: {},
@@ -29,108 +42,46 @@ class RotationPlanService {
           date: new Date().toISOString().split('T')[0],
         };
       }
+    } catch (error) {
+      console.error('Error loading stations:', error);
+      throw new Error('Station initialization failed');
+    }
 
-      // 2) Initialization of queues
-      // const existingQueues = await RotationQueueModel.find({ costCenter });
-      // if (!existingQueues || existingQueues.length === 0) {
-      //   await this.initializeQueue(costCenter);
-      // }
-      // 2) Make sure a RotationQueue exists for every active station:
-      for (const station of activeStations) {
-        let rq = await RotationQueueModel.findOne({
-          station: station.name,
-          costCenter,
-        });
-        if (!rq) {
-          // если очереди ещё нет — создаём её
-          const workers = await WorkerModel.find({
-            stations: { $elemMatch: { name: station.name, isActive: true } },
-          }).sort({ name: 1 });
-          rq = new RotationQueueModel({
-            station: station.name,
-            queue: workers.map((w) => ({
-              workerId: w._id,
-              name: w.name.trim(),
-              group: w.group,
-              role: w.role,
-              costCenter: w.costCenter,
-            })),
-            costCenter,
-          });
-          await rq.save();
-        }
-      }
-
-      // We load the queues
-      this.rotationQueues = new Map();
-      for (const station of activeStations) {
-        const rotationQueue = await RotationQueueModel.findOne({
-          station: station.name,
-          costCenter,
-        }).populate(
-          'queue.workerId',
-          '_id name role costCenter group status stations'
-        );
-
-        const rawQueue = rotationQueue?.queue || [];
-        const queue = rawQueue
-          // сначала убираем те, у которых нет workerId
-          .filter((item) => item.workerId)
-          // потом безопасно маппим
-          .map((item) => {
-            const w = item.workerId;
-            return {
-              _id: w._id,
-              name: w.name,
-              group: w.group,
-              role: w.role,
-              costCenter: w.costCenter,
-              status: w.status,
-              stations: w.stations,
-            };
-          });
-        this.rotationQueues.set(station.name, queue);
-      }
-
-      // 3) Preparation of results
-      const cycleRotations = [];
-      const highPriorityRotation = new Map();
+    // (2) load queues
+    try {
+      await this.loadRotationQueues(activeStations, costCenter);
+    } catch (err) {
+      console.error('Error initializing/loading rotation queues:', err);
+      throw new Error('Failed to initialize rotation queues');
+    }
+    try {
+      // Initialize result containers
       const specialRotation = new Map();
+      const highPriorityRotation = new Map();
+      const cycleRotations = [];
       const fixedAssignments = {};
       const specialWorkers = new Set();
 
-      // ----------------------------------------------------------------
-      //   (A) Sonder
-      // ----------------------------------------------------------------
-      // For example, in sonderAssignments = [{ person: "Vasya", job: "Special task" }, ...]
+      // (A) Process special assignments ("Sonder")
       for (const { worker: workerName, job } of specialAssignments) {
         const workerObj = Array.from(this.rotationQueues.values())
           .flat()
           .find((w) => w.name === workerName);
         if (!workerObj) continue;
-        specialRotation.set(workerObj.name, {
-          worker: workerObj,
-          job,
-        });
+        specialRotation.set(workerObj.name, { worker: workerObj, job });
         specialWorkers.add(workerObj.name);
       }
 
-      // ----------------------------------------------------------------
-      //   (B) High Priority (priority >= 2)
-      // ----------------------------------------------------------------
-      // 1. preassigned (excluding "special", since we already handled it)
-      for (const assignment of preassigned) {
-        const { station: stationName, worker: workerName } = assignment;
+      // (B) High-priority assignments (stations priority >= 2)
+      // 1) Pre-assigned overrides
+      for (const { station: stationName, worker: workerName } of preassigned) {
         const station = activeStations.find((s) => s.name === stationName);
         if (!station) continue;
-
         const queue = this.rotationQueues.get(station.name) || [];
         let found = queue.find((p) => p.name === workerName);
         if (!found) {
           found = await WorkerModel.findOne({ name: workerName });
-          if (found) {
-            queue.push(found);
-          }
+          if (found) queue.push(found);
         }
         if (found) {
           highPriorityRotation.set(stationName, found);
@@ -138,29 +89,22 @@ class RotationPlanService {
         }
       }
 
-      // 2. Assign all stations with priority >= 2
+      // 2) Fill remaining high-priority stations by matching group or any available
       for (const station of activeStations.filter((s) => s.priority >= 2)) {
         if (fixedAssignments[station.name]) continue;
-
-        const queue = this.rotationQueues.get(station.name);
-        if (!queue || queue.length === 0) continue;
-
+        const queue = this.rotationQueues.get(station.name) || [];
         let assigned = false;
-        // a) try by group
+        // Try matching by worker.group === station.group
         for (const worker of queue) {
           if (specialWorkers.has(worker.name)) continue;
-
           const stationInfo = worker.stations.find(
             (s) => s.name === station.name
           );
-          const stationGroup = station.group || null;
-          const workerGroup = worker.group || null;
-
           if (
             worker.status &&
             stationInfo?.isActive &&
             !Object.values(fixedAssignments).includes(worker.name) &&
-            stationGroup === workerGroup
+            worker.group === station.group
           ) {
             highPriorityRotation.set(station.name, worker);
             fixedAssignments[station.name] = worker.name;
@@ -168,19 +112,14 @@ class RotationPlanService {
             break;
           }
         }
-
-        // b) if not found by group, assign any available worker
+        // Fallback: assign first available
         if (!assigned) {
           for (const worker of queue) {
             if (specialWorkers.has(worker.name)) continue;
             const stationInfo = worker.stations.find(
               (s) => s.name === station.name
             );
-            if (
-              worker.status &&
-              stationInfo?.isActive &&
-              !Object.values(fixedAssignments).includes(worker.name)
-            ) {
+            if (worker.status && stationInfo?.isActive) {
               highPriorityRotation.set(station.name, worker);
               fixedAssignments[station.name] = worker.name;
               break;
@@ -189,12 +128,10 @@ class RotationPlanService {
         }
       }
 
-      // ----------------------------------------------------------------
-      //   (C) Regular (daily) rotation + duplicate resolution
-      // ----------------------------------------------------------------
+      // (C) Generate daily cycles for regular rotation
       for (let cycle = 0; cycle < cycles; cycle++) {
         const dailyRotation = {};
-        // who is already busy: HighPriority + Special
+        // Keep track of already assigned names to avoid duplicates
         const assignedWorkers = new Set([
           ...Object.values(fixedAssignments),
           ...specialWorkers,
@@ -206,20 +143,19 @@ class RotationPlanService {
           if (queue.length === 0) continue;
 
           let assigned = false;
-          // 1) fixed assignments
+          // 1) Use fixed assignment if present
           if (fixedAssignments[station.name]) {
-            const workerName = fixedAssignments[station.name];
-            const idx = queue.findIndex((p) => p.name === workerName);
+            const name = fixedAssignments[station.name];
+            const idx = queue.findIndex((p) => p.name === name);
             if (idx !== -1) {
-              const worker = queue[idx];
-              dailyRotation[station.name] = worker;
-              assignedWorkers.add(worker.name);
+              dailyRotation[station.name] = queue[idx];
+              assignedWorkers.add(name);
+              // rotate queue entry to the back
               queue.push(queue.splice(idx, 1)[0]);
               assigned = true;
             }
           }
-
-          // 2) assignment by group
+          // 2) Try by group
           if (!assigned) {
             for (let i = 0; i < queue.length; i++) {
               const worker = queue[i];
@@ -241,10 +177,9 @@ class RotationPlanService {
               }
             }
           }
-
-          // 3) fallback search considering previous round
+          // 3) Fallback: avoid repeating from previous cycle if possible
           if (!assigned) {
-            const prevRotation = cycle > 0 ? cycleRotations[cycle - 1] : {};
+            const prev = cycle > 0 ? cycleRotations[cycle - 1] : {};
             for (let i = 0; i < queue.length; i++) {
               const worker = queue[i];
               if (specialWorkers.has(worker.name)) continue;
@@ -255,7 +190,7 @@ class RotationPlanService {
                 worker.status &&
                 stationInfo?.isActive &&
                 !assignedWorkers.has(worker.name) &&
-                prevRotation[station.name] !== worker.name
+                prev[station.name]?.name !== worker.name
               ) {
                 dailyRotation[station.name] = worker;
                 assignedWorkers.add(worker.name);
@@ -266,39 +201,38 @@ class RotationPlanService {
             }
           }
         }
-
-        // 4) Check within the same day for duplicates—and if found, swap them
+        // Resolve any duplicates within the same day by swapping
         const counts = {};
-        for (const w of Object.values(dailyRotation)) {
-          counts[w] = (counts[w] || 0) + 1;
-        }
-        for (const [worker, cnt] of Object.entries(counts)) {
+        Object.values(dailyRotation).forEach(
+          (w) => (counts[w.name] = (counts[w.name] || 0) + 1)
+        );
+        for (const [workerName, cnt] of Object.entries(counts)) {
           if (cnt > 1) {
+            // find stations with duplicate
             const stations = Object.entries(dailyRotation)
-              .filter(([st, w]) => w === worker)
+              .filter(([_, w]) => w.name === workerName)
               .map(([st]) => st);
+            // swap second occurrence with a unique one
             for (let i = 1; i < stations.length; i++) {
-              const dupStation = stations[i];
-              const otherEntry = Object.entries(dailyRotation).find(
-                ([st, w]) => counts[w] === 1 && st !== dupStation
+              const dupSt = stations[i];
+              const other = Object.entries(dailyRotation).find(
+                ([st, w]) => counts[w.name] === 1 && st !== dupSt
               );
-              if (!otherEntry) break;
-              const [otherStation, otherWorker] = otherEntry;
-              // swap assignments
-              dailyRotation[dupStation] = otherWorker;
-              dailyRotation[otherStation] = worker;
-              counts[worker]--;
-              counts[otherWorker]++;
+              if (!other) break;
+              const [otherSt, otherW] = other;
+              dailyRotation[dupSt] = otherW;
+              dailyRotation[otherSt] = this.rotationQueues
+                .get(otherSt)
+                .find((p) => p.name === workerName);
               break;
             }
           }
         }
-
         cycleRotations.push(dailyRotation);
       }
 
-      // 4) Save updated queues in DB
-      for (const [stationName, queue] of this.rotationQueues.entries()) {
+      // (4) Persist updated queue order back to DB
+      for (const [stationName, queue] of this.rotationQueues) {
         await RotationQueueModel.findOneAndUpdate(
           { station: stationName, costCenter },
           {
@@ -312,29 +246,18 @@ class RotationPlanService {
           }
         );
       }
-      // 5) Return the result
-      // 1) Собираем «сырые» данные из всех очередей
-      const allWorkersRaw = Array.from(this.rotationQueues.values())
-        .flat()
-        .map((w) => ({
-          id: w._id.toString(),
-          name: w.name,
-          group: w.group,
-          status: w.status,
-          costCenter: w.costCenter,
-          role: w.role,
-        }));
 
-      // 2) Убираем дубликаты по id
-      const workersMap = new Map();
+      // (5) Assemble final array of all workers for response
+      const allWorkersRaw = Array.from(this.rotationQueues.values()).flat();
+      const uniqueMap = new Map();
       for (const w of allWorkersRaw) {
-        if (!workersMap.has(w.id)) {
-          workersMap.set(w.id, w);
+        if (!uniqueMap.has(w._id.toString())) {
+          uniqueMap.set(w._id.toString(), w);
         }
       }
+      const allWorkers = Array.from(uniqueMap.values());
 
-      // 3) Финальный массив уникальных сотрудников
-      const allWorkers = Array.from(workersMap.values());
+      // Return full rotation data
       return {
         specialRotation: Object.fromEntries(specialRotation),
         highPriorityRotation: Object.fromEntries(highPriorityRotation),
@@ -343,25 +266,83 @@ class RotationPlanService {
         date: new Date().toISOString().split('T')[0],
       };
     } catch (error) {
-      console.error('Error creating rotation plan:', error);
-      throw new Error('Error creating rotation plan');
+      console.error('Error generating rotation data:', error);
+      throw new Error('Error generating rotation data');
     }
   }
 
+  async loadRotationQueues(activeStations, costCenter) {
+    //  Ensure each active station has a rotation queue document
+    for (const station of activeStations) {
+      let rq = await RotationQueueModel.findOne({
+        station: station.name,
+        costCenter,
+      });
+      if (!rq) {
+        // Build queue of eligible workers for this station
+        const workers = await WorkerModel.find({
+          stations: { $elemMatch: { name: station.name, isActive: true } },
+        }).sort({ name: 1 });
+
+        // Create new RotationQueue document
+        rq = new RotationQueueModel({
+          station: station.name,
+          queue: workers.map((w) => ({
+            workerId: w._id,
+            name: w.name.trim(),
+            group: w.group,
+            role: w.role,
+            costCenter: w.costCenter,
+          })),
+          costCenter,
+        });
+        await rq.save();
+      }
+    }
+
+    // Load and normalize each queue into memory
+    this.rotationQueues = new Map();
+    for (const station of activeStations) {
+      const rotationQueue = await RotationQueueModel.findOne({
+        station: station.name,
+        costCenter,
+      }).populate(
+        'queue.workerId',
+        '_id name role costCenter group status stations'
+      );
+
+      const queue = (rotationQueue?.queue || [])
+        .filter((item) => item.workerId) // drop entries missing workerId
+        .map((item) => {
+          // map to worker objects
+          const w = item.workerId;
+          return {
+            _id: w._id,
+            name: w.name,
+            group: w.group,
+            role: w.role,
+            costCenter: w.costCenter,
+            status: w.status,
+            stations: w.stations,
+          };
+        });
+      this.rotationQueues.set(station.name, queue);
+    }
+  }
+
+  /**
+   * Loads station definitions from database.
+   */
   async initialize(costCenter) {
     const stations = await StationModel.find({ costCenter }).sort({
       priority: -1,
     });
-    if (!stations || stations.length === 0) {
-      throw new Error(
-        'Stations list is empty. Please initialize stations first.'
-      );
-    }
-    this.stations = stations.map((station) => ({
-      name: station.name,
-      priority: station.priority,
-      group: station.group || null,
-      status: station.status,
+    if (!stations.length) throw new Error('No stations found for costCenter');
+    this.stations = stations.map((s) => ({
+      name: s.name,
+      priority: s.priority,
+      group: s.group,
+      status: s.status,
     }));
   }
 

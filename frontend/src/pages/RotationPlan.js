@@ -94,7 +94,7 @@ const RotationPlan = () => {
 
     try {
       const response = await store.confirmRotation();
-      setMsg(response.message);
+      setMsg(response?.message);
       setRotationForDownload(true);
     } catch (error) {
       console.error('Error confirming rotation:', error.message || error);
