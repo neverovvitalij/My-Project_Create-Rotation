@@ -46,20 +46,35 @@ const RegisterForm = () => {
           type="password"
           onChange={(e) => setPassword(e.target.value)}
         />
-        <input
+        <select
           placeholder="Role"
           className={styles.input}
           value={role}
-          type="text"
           onChange={(e) => setRole(e.target.value)}
-        />
-        <input
+          required
+        >
+          <option value="" disabled>
+            Select role
+          </option>
+          <option value="GV">GV</option>
+          <option value="MEISTER">Meister</option>
+          <option></option>
+        </select>
+        <select
           placeholder="CostCenter"
           className={styles.input}
           value={costCenter}
-          type="text"
           onChange={(e) => setCostCenter(e.target.value)}
-        />
+          required
+        >
+          <option value="" disabled>
+            Select CostCenter
+          </option>
+          <option value="395.5">395.5</option>
+          <option value="385.5">385.5</option>
+          <option value="311.5">311.5</option>
+        </select>
+
         <div className={styles.buttonContainer}>
           <button
             type="submit"
