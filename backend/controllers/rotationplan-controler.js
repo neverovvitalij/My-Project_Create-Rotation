@@ -12,8 +12,7 @@ class RotationPlanController {
 
   async getRotationData(req, res, next) {
     try {
-      const { specialAssignments = [], preassigned = [] } = req.body;
-      const cycles = parseInt(req.query.cycles, 10) || 5;
+      const { specialAssignments = [], preassigned = [], cycles } = req.body;
       const costCenter = req.user.costCenter;
 
       const service = new RotationPlanService();

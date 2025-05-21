@@ -60,6 +60,18 @@ h2 {
   width: 40%;
 }
 
+.cyclesDropdown {
+  background-color: #383850;
+  color: #ffffff;
+  border: 1px solid #f7e500;
+  border-radius: 5px;
+  padding: 5px 5px 5px 0px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 20%;
+}
+
 .stationDropdown:hover,
 .stationDropdown:focus {
   background-color: #4a4a6a;

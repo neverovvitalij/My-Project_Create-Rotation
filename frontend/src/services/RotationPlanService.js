@@ -14,8 +14,12 @@ export default class RotationPlanService {
     );
   }
 
-  static async rotationData(specialAssignments, preassigned) {
-    return api.post('/rotation-data', { specialAssignments, preassigned });
+  static async rotationData(specialAssignments, preassigned, cycles) {
+    return api.post('/rotation-data', {
+      specialAssignments,
+      preassigned,
+      cycles,
+    });
   }
 
   static async confirmRotation(

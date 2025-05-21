@@ -292,11 +292,16 @@ export default class Store {
     }
   }
 
-  async getDailyRotation(specialAssignments = null, preassigned = null) {
+  async getDailyRotation(
+    specialAssignments = null,
+    preassigned = null,
+    cycles
+  ) {
     try {
       const response = await RotationPlanService.rotationData(
         specialAssignments,
-        preassigned
+        preassigned,
+        cycles
       );
       this.setDailyRotation(response.data);
     } catch (error) {

@@ -12,6 +12,7 @@ const RotationPlan = () => {
 
   const [preassigned, setPreassigned] = useState([]);
   const [specialAssignments, setSpecialAssignments] = useState([]);
+  const [cycles, setCycles] = useState('');
 
   const [confirmedRotation, setConfirmedRotation] = useState(false);
   const [rotationForDownload, setRotationForDownload] = useState(false);
@@ -28,7 +29,7 @@ const RotationPlan = () => {
       setMsg('');
       setRotationForDownload(false);
       setConfirmedRotation(false);
-      await store.getDailyRotation(specialAssignments, preassigned);
+      await store.getDailyRotation(specialAssignments, preassigned, cycles);
       await previewRef.current.loadPreview();
       setConfirmedRotation(true);
     } catch (error) {
@@ -136,6 +137,19 @@ const RotationPlan = () => {
         >
           Load rotation
         </button>
+        <select
+          placeholder="Cycles"
+          className={styles.cyclesDropdown}
+          value={cycles}
+          onChange={(e) => setCycles(e.target.value)}
+          required
+        >
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
         {confirmedRotation ? (
           <button
             disabled={rotationForDownload || loader}
