@@ -127,8 +127,7 @@ const RotationPlan = () => {
   }, [employees]);
 
   const isFullyAssigned =
-    store.activeEmployee !==
-    store.activeStations + preassigned.length + specialAssignments.length;
+    store.activeEmployee !== store.activeStations + specialAssignments.length;
 
   return (
     <div className={styles.container}>
