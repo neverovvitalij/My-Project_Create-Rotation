@@ -126,17 +126,22 @@ const RotationPlan = () => {
     }, {});
   }, [employees]);
 
+  const isFullyAssigned =
+    store.activeEmployee !==
+    store.activeStations + preassigned.length + specialAssignments.length;
+
   return (
     <div className={styles.container}>
       {/* Button panel */}
       <div className={styles.buttonPanel}>
         <button
-          disabled={!store.user.isActivated || loader}
+          disabled={!store.user.isActivated || loader || isFullyAssigned}
           className={styles.button}
           onClick={onClickPreview}
         >
           Load rotation
         </button>
+
         <select
           placeholder="Cycles"
           className={styles.cyclesDropdown}
@@ -167,7 +172,11 @@ const RotationPlan = () => {
       </div>
       {loader && <FaSpinner className={styles.spinner} />}
       {msg && <p className={styles.success}>{msg}</p>}
-
+      {isFullyAssigned && (
+        <p className={styles.error}>
+          Bitte prüfen Sie die Anzahl der Mitarbeiter und Stationen.
+        </p>
+      )}
       <h2>{`Rotations plan ${rotations.date}`}</h2>
       <ExcelPreview
         ref={previewRef}
