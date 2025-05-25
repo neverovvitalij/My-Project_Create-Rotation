@@ -12,7 +12,7 @@ const RotationPlan = () => {
 
   const [preassigned, setPreassigned] = useState([]);
   const [specialAssignments, setSpecialAssignments] = useState([]);
-  const [cycles, setCycles] = useState('');
+  const [cycles, setCycles] = useState('5');
 
   const [confirmedRotation, setConfirmedRotation] = useState(false);
   const [rotationForDownload, setRotationForDownload] = useState(false);
@@ -144,11 +144,11 @@ const RotationPlan = () => {
           onChange={(e) => setCycles(e.target.value)}
           required
         >
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
           <option value="5">5</option>
+          <option value="4">4</option>
+          <option value="3">3</option>
+          <option value="2">2</option>
+          <option value="1">1</option>
         </select>
         {confirmedRotation ? (
           <button
@@ -168,6 +168,12 @@ const RotationPlan = () => {
       {loader && <FaSpinner className={styles.spinner} />}
       {msg && <p className={styles.success}>{msg}</p>}
 
+      <h2>{`Rotations plan ${rotations.date}`}</h2>
+      <ExcelPreview
+        ref={previewRef}
+        preassigned={toJS(preassigned)}
+        specialAssignments={toJS(specialAssignments)}
+      />
       {/* List of employees */}
       <h3
         className={styles.groupHeader}
@@ -226,12 +232,6 @@ const RotationPlan = () => {
           </ul>
         </section>
       ))}
-      <h2>{`Rotations plan ${rotations.date}`}</h2>
-      <ExcelPreview
-        ref={previewRef}
-        preassigned={toJS(preassigned)}
-        specialAssignments={toJS(specialAssignments)}
-      />
     </div>
   );
 };
