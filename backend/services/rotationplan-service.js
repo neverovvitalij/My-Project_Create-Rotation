@@ -17,6 +17,7 @@ class RotationPlanService {
    * @param {number} cycles                number of rotation cycles
    * @param {string} costCenter            cost center identifier
    * @param {string} shift                 shift identifier
+   * @param {string} plant                 plant identifier
    * @returns {Promise<Object>}            rotation data structure
    */
   async generateRotationData(
@@ -24,13 +25,14 @@ class RotationPlanService {
     preassigned = [],
     cycles,
     costCenter,
-    shift
+    shift,
+    plant
   ) {
     // (1) Load station definitions if not already loaded
     let activeStations;
     try {
       if (!this.stations || this.stations.length === 0) {
-        await this.initialize(costCenter, shift);
+        await this.initialize(costCenter, shift, plant);
       }
       // Keep only active stations
       activeStations = this.stations.filter((s) => s.status === true);
@@ -51,7 +53,7 @@ class RotationPlanService {
 
     // (2) load queues
     try {
-      await this.loadRotationQueues(activeStations, costCenter, shift);
+      await this.loadRotationQueues(activeStations, costCenter, shift, plant);
     } catch (err) {
       console.error('Error initializing/loading rotation queues:', err);
       throw new Error('Failed to initialize rotation queues');
@@ -236,7 +238,7 @@ class RotationPlanService {
       // (4) Persist updated queue order back to DB
       for (const [stationName, queue] of this.rotationQueues) {
         await RotationQueueModel.findOneAndUpdate(
-          { station: stationName, costCenter, shift },
+          { station: stationName, costCenter, shift, plant },
           {
             queue: queue.map((p) => ({
               workerId: p._id,
@@ -245,6 +247,7 @@ class RotationPlanService {
               role: p.role,
               costCenter: p.costCenter,
               shift: p.shift,
+              plant: p.plant,
             })),
           }
         );

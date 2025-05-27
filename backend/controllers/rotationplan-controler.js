@@ -15,6 +15,7 @@ class RotationPlanController {
       const { specialAssignments = [], preassigned = [], cycles } = req.body;
       const costCenter = req.user.costCenter;
       const shift = req.user.shift;
+      const plant = req.user.plant;
 
       const service = new RotationPlanService();
       const data = await service.generateRotationData(
@@ -22,7 +23,8 @@ class RotationPlanController {
         preassigned,
         cycles,
         costCenter,
-        shift
+        shift,
+        plant
       );
       return res.json(data);
     } catch (error) {
@@ -34,6 +36,7 @@ class RotationPlanController {
     try {
       const costCenter = req.user.costCenter;
       const shift = req.user.shift;
+      const plant = req.user.plant;
       const {
         specialRotation,
         highPriorityRotation,
@@ -48,7 +51,8 @@ class RotationPlanController {
         cycleRotations,
         allWorkers,
         costCenter,
-        shift
+        shift,
+        plant
       );
       return res
         .status(200)
@@ -69,6 +73,7 @@ class RotationPlanController {
     try {
       const costCenter = req.user.costCenter;
       const shift = req.user.shift;
+      const plant = req.user.plant;
       const rotationService = new RotationPlanService();
       const {
         specialRotation,
@@ -94,7 +99,8 @@ class RotationPlanController {
         cycleRotations,
         allWorkers,
         costCenter,
-        shift
+        shift,
+        plant
       );
       return res.json({
         result,
@@ -110,11 +116,13 @@ class RotationPlanController {
   async downloadConfirmedRotation(req, res, next) {
     const costCenter = req.user.costCenter;
     const shift = req.user.shift;
+    const plant = req.user.plant;
 
     try {
       const confirmedRotation = await ConfirmedRotation.findOne({
         costCenter,
         shift,
+        plant,
       })
         .sort({ createdAt: -1 })
         .lean();
@@ -138,7 +146,8 @@ class RotationPlanController {
         cycleRotations,
         allWorkers,
         costCenter,
-        shift
+        shift,
+        plant
       );
       res
         .status(200)

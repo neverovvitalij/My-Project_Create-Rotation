@@ -5,6 +5,7 @@ const RotationQueueSchema = new Schema(
     station: { type: String, required: true },
     costCenter: { type: String, required: true },
     shift: { type: String, required: true },
+    plant: { type: String, required: true },
     queue: [
       {
         workerId: {
@@ -17,6 +18,7 @@ const RotationQueueSchema = new Schema(
         role: { type: String, required: true },
         costCenter: { type: String, required: true },
         shift: { type: String, required: true },
+        plant: { type: String, required: true },
       },
     ],
   },
@@ -26,7 +28,7 @@ const RotationQueueSchema = new Schema(
 );
 
 RotationQueueSchema.index(
-  { station: 1, costCenter: 1, shift: 1 },
+  { station: 1, costCenter: 1, shift: 1, plant: 1 },
   { unique: true }
 );
 

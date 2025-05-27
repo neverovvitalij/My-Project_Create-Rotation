@@ -5,6 +5,7 @@ module.exports = class UserDto {
   role;
   costCenter;
   shift;
+  plant;
 
   constructor(model) {
     this.email = model?.email;
@@ -13,5 +14,6 @@ module.exports = class UserDto {
     this.role = model?.role;
     this.costCenter = model?.costCenter;
     this.shift = model?.shift;
+    this.plant = model?.plant;
   }
 };

@@ -9,6 +9,7 @@ const WorkerSchema = new Schema({
   },
   costCenter: { type: String, required: true },
   shift: { type: String, required: true },
+  plant: { type: String, required: true },
   stations: [
     {
       name: { type: String, required: true },
@@ -19,6 +20,9 @@ const WorkerSchema = new Schema({
   status: { type: Boolean, required: true, default: true },
 });
 
-WorkerSchema.index({ name: 1, costCenter: 1, shift: 1 }, { unique: true });
+WorkerSchema.index(
+  { name: 1, costCenter: 1, shift: 1, plant: 1 },
+  { unique: true }
+);
 
 module.exports = model('WorkerModel', WorkerSchema);

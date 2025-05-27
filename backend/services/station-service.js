@@ -4,22 +4,23 @@ const WorkerModel = require('../models/worker-model');
 const ApiError = require('../exceptions/api-error');
 
 class StationService {
-  async getStations(costCenter, shift) {
+  async getStations(costCenter, shift, plant) {
     try {
-      const stations = await StationModel.find(costCenter, shift).lean();
+      const stations = await StationModel.find(costCenter, shift, plant).lean();
       return stations;
     } catch (error) {
       throw ApiError.BadRequest('Error fetching stations', error.message);
     }
   }
 
-  async addStation(name, priority, group, costCenter, shift) {
+  async addStation(name, priority, group, costCenter, shift, plant) {
     try {
       // Check if a station with this name already exists
       const existingStation = await StationModel.exists({
         name,
         costCenter,
         shift,
+        plant,
       });
       if (existingStation) {
         throw ApiError.BadRequest('Station already exists');
@@ -32,6 +33,7 @@ class StationService {
         group,
         costCenter,
         shift,
+        plant,
       });
       await station.save();
 
@@ -40,11 +42,13 @@ class StationService {
         station: name,
         costCenter,
         shift,
+        plant,
       });
       if (!rotationQueue) {
         const workers = await WorkerModel.find({
           costCenter,
           shift,
+          plant,
           stations: { $elemMatch: { name, isActive: true } },
         }).sort({ name: 1 }); //Sort workers by name
 
@@ -55,12 +59,14 @@ class StationService {
           role: w.role,
           costCenter: w.costCenter,
           shift: w.shift,
+          plant: w.plant,
         }));
 
         rotationQueue = new RotationQueueModel({
           station: name,
           costCenter,
           shift,
+          plant,
           queue: queueItems,
         });
         await rotationQueue.save();
@@ -75,13 +81,14 @@ class StationService {
     }
   }
 
-  async deleteStation(name, costCenter, shift) {
+  async deleteStation(name, costCenter, shift, plant) {
     try {
       // Remove station from the database
       const station = await StationModel.findOneAndDelete({
         name,
         costCenter,
         shift,
+        plant,
       });
       if (!station) {
         throw ApiError.BadRequest('Station not found');
@@ -92,6 +99,7 @@ class StationService {
         station: name,
         costCenter,
         shift,
+        plant,
       });
       if (rotationQueue) {
         console.log(`Queue for station "${name}" has been deleted.`);
@@ -102,7 +110,7 @@ class StationService {
       // Remove this station from all workers station lists
       const result = await WorkerModel.updateMany(
         { 'stations.name': name },
-        { $pull: { stations: { name, costCenter, shift } } }
+        { $pull: { stations: { name, costCenter, shift, plant } } }
       );
 
       if (result.modifiedCount > 0) {
@@ -120,10 +128,10 @@ class StationService {
     }
   }
 
-  async stationChangeStatus(name, newStatus, costCenter, shift) {
+  async stationChangeStatus(name, newStatus, costCenter, shift, plant) {
     try {
       const station = await StationModel.findOneAndUpdate(
-        { name, costCenter, shift },
+        { name, costCenter, shift, plant },
         { $set: { status: newStatus } },
         { new: true }
       );

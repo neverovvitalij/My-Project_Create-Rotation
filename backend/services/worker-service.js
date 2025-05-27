@@ -3,9 +3,9 @@ const RotationQueueModel = require('../models/rotationqueue-model');
 const ApiError = require('../exceptions/api-error');
 
 class WorkerService {
-  async getAllWorkers(costCenter, shift) {
+  async getAllWorkers(costCenter, shift, plant) {
     try {
-      const workers = await WorkerModel.find(costCenter, shift).lean();
+      const workers = await WorkerModel.find(costCenter, shift, plant).lean();
       if (!workers || workers.length === 0) {
         console.log('Add worker to the dataBase');
       }
@@ -20,6 +20,7 @@ class WorkerService {
     role,
     costCenter,
     shift,
+    plant,
     stations,
     group,
     status = true
@@ -29,6 +30,7 @@ class WorkerService {
         name: name.trim(),
         costCenter,
         shift,
+        plant,
       });
       if (exists) {
         throw ApiError.BadRequest(`Worker "${name.trim()}" already exists`);
@@ -39,6 +41,7 @@ class WorkerService {
         role,
         costCenter,
         shift,
+        plant,
         stations,
         group,
         status,
@@ -53,6 +56,7 @@ class WorkerService {
           station: stationName,
           costCenter,
           shift,
+          plant,
         });
         const entry = {
           workerId: worker._id,
@@ -61,6 +65,7 @@ class WorkerService {
           role: worker.role,
           costCenter: worker.costCenter,
           shift: worker.shift,
+          plant: worker.plant,
         };
 
         if (rq) {
@@ -82,6 +87,7 @@ class WorkerService {
             queue: [entry],
             costCenter,
             shift,
+            plant,
           });
         }
 
@@ -97,12 +103,13 @@ class WorkerService {
     }
   }
 
-  async deleteWorker(name, costCenter, shift) {
+  async deleteWorker(name, costCenter, shift, plant) {
     try {
       const candidate = await WorkerModel.findOneAndDelete({
         name,
         costCenter,
         shift,
+        plant,
       });
 
       if (!candidate) {
@@ -110,7 +117,7 @@ class WorkerService {
       }
 
       const pullResult = await RotationQueueModel.updateMany(
-        { costCenter, shift },
+        { costCenter, shift, plant },
         { $pull: { queue: { workerId: candidate._id } } }
       );
 
@@ -126,10 +133,10 @@ class WorkerService {
     }
   }
 
-  async workerChangeStatus(name, newStatus, costCenter, shift) {
+  async workerChangeStatus(name, newStatus, costCenter, shift, plant) {
     try {
       const worker = await WorkerModel.findOneAndUpdate(
-        { name, costCenter, shift },
+        { name, costCenter, shift, plant },
         { $set: { status: newStatus } },
         { new: true }
       );
@@ -145,10 +152,16 @@ class WorkerService {
     }
   }
 
-  async removeStationFromWorker(name, stationToRemove, costCenter, shift) {
+  async removeStationFromWorker(
+    name,
+    stationToRemove,
+    costCenter,
+    shift,
+    plant
+  ) {
     try {
       const updatedWorker = await WorkerModel.findOneAndUpdate(
-        { name, costCenter, shift },
+        { name, costCenter, shift, plant },
         { $pull: { stations: { name: stationToRemove } } },
         { new: true }
       );
@@ -161,6 +174,7 @@ class WorkerService {
         station: stationToRemove,
         costCenter: updatedWorker.costCenter,
         shift: updatedWorker.shift,
+        plant: updatedWorker.plant,
       });
       if (!rotationQueue) {
         console.log(
@@ -199,10 +213,10 @@ class WorkerService {
     }
   }
 
-  async addStationToWorker(name, stationToAdd, costCenter, shift) {
+  async addStationToWorker(name, stationToAdd, costCenter, shift, plant) {
     try {
       const updatedWorker = await WorkerModel.findOneAndUpdate(
-        { name, costCenter, shift },
+        { name, costCenter, shift, plant },
         { $addToSet: { stations: { name: stationToAdd, isActive: true } } },
         { new: true }
       );
@@ -216,12 +230,14 @@ class WorkerService {
         station: stationToAdd,
         costCenter: updatedWorker.costCenter,
         shift: updatedWorker.shift,
+        plant: updatedWorker.plant,
       });
       if (!rotationQueue) {
         rotationQueue = new RotationQueueModel({
           station: stationToAdd,
           costCenter: updatedWorker.costCenter,
           shift: updatedWorker.shift,
+          plant: updatedWorker.plant,
           queue: [],
         });
       }
@@ -242,6 +258,7 @@ class WorkerService {
           role: updatedWorker.role,
           costCenter: updatedWorker.costCenter,
           shift: updatedWorker.shift,
+          plant: updatedWorker.plant,
         };
 
         rotationQueue.queue.splice(insertIndex, 0, queueItem);

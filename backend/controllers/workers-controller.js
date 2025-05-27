@@ -5,7 +5,12 @@ class WorkerController {
     try {
       const costCenter = req.user.costCenter;
       const shift = req.user.shift;
-      const workers = await workerService.getAllWorkers({ costCenter, shift });
+      const plant = req.user.plant;
+      const workers = await workerService.getAllWorkers({
+        costCenter,
+        shift,
+        plant,
+      });
       res.json(workers);
     } catch (error) {
       next(error);
@@ -16,12 +21,14 @@ class WorkerController {
     try {
       const costCenter = req.user.costCenter;
       const shift = req.user.shift;
+      const plant = req.user.plant;
       const { name, role, stations, group } = req.body;
       const personData = await workerService.addWorker(
         name,
         role,
         costCenter,
         shift,
+        plant,
         stations,
         group
       );
@@ -38,12 +45,14 @@ class WorkerController {
     try {
       const costCenter = req.user.costCenter;
       const shift = req.user.shift;
+      const plant = req.user.plant;
       const { name } = req.body;
 
       const deletedWorker = await workerService.deleteWorker(
         name,
         costCenter,
-        shift
+        shift,
+        plant
       );
       return res.json(deletedWorker);
     } catch (error) {
@@ -55,12 +64,14 @@ class WorkerController {
     try {
       const costCenter = req.user.costCenter;
       const shift = req.user.shift;
+      const plant = req.user.plant;
       const { name, newStatus } = req.body;
       const updatedWorker = await workerService.workerChangeStatus(
         name,
         newStatus,
         costCenter,
-        shift
+        shift,
+        plant
       );
       return res.json(updatedWorker);
     } catch (error) {
@@ -72,12 +83,14 @@ class WorkerController {
     try {
       const costCenter = req.user.costCenter;
       const shift = req.user.shift;
+      const plant = req.user.plant;
       const { name, stationToRemove } = req.body;
       const updatedWorker = await workerService.removeStationFromWorker(
         name,
         stationToRemove,
         costCenter,
-        shift
+        shift,
+        plant
       );
       return res.json(updatedWorker);
     } catch (error) {
@@ -89,13 +102,15 @@ class WorkerController {
     try {
       const costCenter = req.user.costCenter;
       const shift = req.user.shift;
+      const plant = req.user.plant;
       const { name, stationToAdd } = req.body;
 
       const updatedWorker = workerService.addStationToWorker(
         name,
         stationToAdd,
         costCenter,
-        shift
+        shift,
+        plant
       );
       return res.json(updatedWorker);
     } catch (error) {

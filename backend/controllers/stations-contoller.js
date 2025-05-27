@@ -5,7 +5,12 @@ class SationController {
     try {
       const costCenter = req.user.costCenter;
       const shift = req.user.shift;
-      const stations = await stationService.getStations({ costCenter, shift });
+      const plant = req.user.plant;
+      const stations = await stationService.getStations({
+        costCenter,
+        shift,
+        plant,
+      });
       res.json(stations);
     } catch (error) {
       next(error);
@@ -16,6 +21,7 @@ class SationController {
     try {
       const costCenter = req.user.costCenter;
       const shift = req.user.shift;
+      const plant = req.user.plant;
 
       const { name, priority, group } = req.body;
       const response = await stationService.addStation(
@@ -23,7 +29,8 @@ class SationController {
         priority,
         group,
         costCenter,
-        shift
+        shift,
+        plant
       );
       return res.json(response);
     } catch (error) {
@@ -35,12 +42,14 @@ class SationController {
     try {
       const costCenter = req.user.costCenter;
       const shift = req.user.shift;
+      const plant = req.user.plant;
 
       const { name } = req.body;
       const response = await stationService.deleteStation(
         name,
         costCenter,
-        shift
+        shift,
+        plant
       );
       return res.json(response);
     } catch (error) {
@@ -52,13 +61,15 @@ class SationController {
     try {
       const costCenter = req.user.costCenter;
       const shift = req.user.shift;
+      const plant = req.user.plant;
 
       const { name, newStatus } = req.body;
       const updatedStation = await stationService.stationChangeStatus(
         name,
         newStatus,
         costCenter,
-        shift
+        shift,
+        plant
       );
       return res.json(updatedStation);
     } catch (error) {

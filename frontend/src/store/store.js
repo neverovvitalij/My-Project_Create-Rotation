@@ -127,14 +127,15 @@ export default class Store {
     }
   }
 
-  async registration(email, password, role, costCenter, shift) {
+  async registration(email, password, role, costCenter, shift, plant) {
     try {
       const response = await AuthServise.registration(
         email,
         password,
         role,
         costCenter,
-        shift
+        shift,
+        plant
       );
       if (response) {
         setTimeout(() => {
@@ -210,13 +211,14 @@ export default class Store {
     }
   }
 
-  async addWorker(candidate, role, costCenter, shift) {
+  async addWorker(candidate, role, costCenter, shift, plant) {
     try {
       const response = await WorkerService.addWorker(
         candidate,
         role,
         costCenter,
-        shift
+        shift,
+        plant
       );
       this.setEmployeeList([...this.employeeList, response.data]);
       this.setErrorMsg('');

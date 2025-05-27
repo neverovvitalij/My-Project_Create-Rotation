@@ -7,6 +7,7 @@ const StationSchema = new mongoose.Schema({
   status: { type: Boolean, required: true, default: true },
   costCenter: { type: String, required: true },
   shift: { type: String, required: true },
+  plant: { type: String, required: true },
 });
 
 StationSchema.index({ name: 1, costCenter: 1, shift: 1 }, { unique: true });

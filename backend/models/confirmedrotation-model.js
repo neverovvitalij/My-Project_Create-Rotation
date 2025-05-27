@@ -7,6 +7,7 @@ const WorkerInfoSchema = new mongoose.Schema(
     status: { type: Boolean, required: true },
     costCenter: { type: String, required: true },
     shift: { type: String, required: true },
+    plant: { type: String, required: true },
     role: { type: String, required: true },
   },
   { _id: false }
@@ -17,6 +18,7 @@ const ConfirmedRotationSchema = new mongoose.Schema(
     date: { type: Date, default: Date.now, unique: true },
     costCenter: { type: String, required: true },
     shift: { type: String, required: true },
+    plant: { type: String, required: true },
     rotation: {
       specialRotation: { type: Map, of: String, required: false },
       highPriorityRotation: { type: Map, of: String, required: true },
@@ -30,7 +32,7 @@ const ConfirmedRotationSchema = new mongoose.Schema(
 );
 
 ConfirmedRotationSchema.index(
-  { date: 1, costCenter: 1, shift: 1 },
+  { date: 1, costCenter: 1, shift: 1, plant: 1 },
   { unique: true }
 );
 
