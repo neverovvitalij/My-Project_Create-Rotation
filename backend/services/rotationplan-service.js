@@ -487,7 +487,9 @@ class RotationPlanService {
     specialRotation,
     highPriorityRotation,
     cycleRotations,
-    allWorkers
+    allWorkers,
+    costCenter,
+    shift
   ) {
     try {
       // == (1) Build the filename ==
@@ -520,7 +522,7 @@ class RotationPlanService {
       // == (5) Main header row ==
       worksheet.mergeCells(1, 1, 1, totalCols - 1);
       const titleCell = worksheet.getCell(1, 1);
-      titleCell.value = 'Rotationsplan 395.5 A‑Schicht Halle 4.0';
+      titleCell.value = `Rotationsplan ${costCenter} ${shift}‑Schicht`;
       titleCell.font = { bold: true, size: 16 };
       titleCell.alignment = { horizontal: 'left', vertical: 'middle' };
       titleCell.fill = {

@@ -32,6 +32,8 @@ class RotationPlanController {
 
   async previewExcel(req, res, next) {
     try {
+      const costCenter = req.user.costCenter;
+      const shift = req.user.shift;
       const {
         specialRotation,
         highPriorityRotation,
@@ -44,7 +46,9 @@ class RotationPlanController {
         specialRotation,
         highPriorityRotation,
         cycleRotations,
-        allWorkers
+        allWorkers,
+        costCenter,
+        shift
       );
       return res
         .status(200)
@@ -132,7 +136,9 @@ class RotationPlanController {
         specialRotation,
         highPriorityRotation,
         cycleRotations,
-        allWorkers
+        allWorkers,
+        costCenter,
+        shift
       );
       res
         .status(200)
