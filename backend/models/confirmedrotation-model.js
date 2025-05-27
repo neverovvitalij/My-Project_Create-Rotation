@@ -34,4 +34,9 @@ ConfirmedRotationSchema.index(
   { unique: true }
 );
 
+ConfirmedRotationSchema.index(
+  { createdAt: 1 },
+  { expireAfterSeconds: 30 * 24 * 60 * 60 }
+);
+
 module.exports = mongoose.model('ConfirmedRotation', ConfirmedRotationSchema);
