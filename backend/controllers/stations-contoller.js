@@ -3,8 +3,9 @@ const stationService = require('../services/station-service');
 class SationController {
   async getStations(req, res, next) {
     try {
-      const cc = req.user.costCenter;
-      const stations = await stationService.getStations({ costCenter: cc });
+      const costCenter = req.user.costCenter;
+      const shift = req.user.shift;
+      const stations = await stationService.getStations({ costCenter, shift });
       res.json(stations);
     } catch (error) {
       next(error);
@@ -14,12 +15,15 @@ class SationController {
   async addStation(req, res, next) {
     try {
       const costCenter = req.user.costCenter;
+      const shift = req.user.shift;
+
       const { name, priority, group } = req.body;
       const response = await stationService.addStation(
         name,
         priority,
         group,
-        costCenter
+        costCenter,
+        shift
       );
       return res.json(response);
     } catch (error) {
@@ -29,8 +33,15 @@ class SationController {
 
   async deleteStation(req, res, next) {
     try {
+      const costCenter = req.user.costCenter;
+      const shift = req.user.shift;
+
       const { name } = req.body;
-      const response = await stationService.deleteStation(name);
+      const response = await stationService.deleteStation(
+        name,
+        costCenter,
+        shift
+      );
       return res.json(response);
     } catch (error) {
       next(error);
@@ -39,10 +50,15 @@ class SationController {
 
   async stationChangeStatus(req, res, next) {
     try {
+      const costCenter = req.user.costCenter;
+      const shift = req.user.shift;
+
       const { name, newStatus } = req.body;
       const updatedStation = await stationService.stationChangeStatus(
         name,
-        newStatus
+        newStatus,
+        costCenter,
+        shift
       );
       return res.json(updatedStation);
     } catch (error) {

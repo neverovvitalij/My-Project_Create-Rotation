@@ -16,19 +16,21 @@ class RotationPlanService {
    * @param {Array<{station: string, worker: string}>} preassigned
    * @param {number} cycles                number of rotation cycles
    * @param {string} costCenter            cost center identifier
+   * @param {string} shift                 shift identifier
    * @returns {Promise<Object>}            rotation data structure
    */
   async generateRotationData(
     specialAssignments = [],
     preassigned = [],
     cycles,
-    costCenter
+    costCenter,
+    shift
   ) {
     // (1) Load station definitions if not already loaded
     let activeStations;
     try {
       if (!this.stations || this.stations.length === 0) {
-        await this.initialize(costCenter);
+        await this.initialize(costCenter, shift);
       }
       // Keep only active stations
       activeStations = this.stations.filter((s) => s.status === true);
@@ -49,7 +51,7 @@ class RotationPlanService {
 
     // (2) load queues
     try {
-      await this.loadRotationQueues(activeStations, costCenter);
+      await this.loadRotationQueues(activeStations, costCenter, shift);
     } catch (err) {
       console.error('Error initializing/loading rotation queues:', err);
       throw new Error('Failed to initialize rotation queues');
@@ -234,7 +236,7 @@ class RotationPlanService {
       // (4) Persist updated queue order back to DB
       for (const [stationName, queue] of this.rotationQueues) {
         await RotationQueueModel.findOneAndUpdate(
-          { station: stationName, costCenter },
+          { station: stationName, costCenter, shift },
           {
             queue: queue.map((p) => ({
               workerId: p._id,
@@ -242,6 +244,7 @@ class RotationPlanService {
               group: p.group,
               role: p.role,
               costCenter: p.costCenter,
+              shift: p.shift,
             })),
           }
         );
@@ -271,17 +274,20 @@ class RotationPlanService {
     }
   }
 
-  async loadRotationQueues(activeStations, costCenter) {
+  async loadRotationQueues(activeStations, costCenter, shift) {
     //  Ensure each active station has a rotation queue document
     for (const station of activeStations) {
       let rq = await RotationQueueModel.findOne({
         station: station.name,
         costCenter,
+        shift,
       });
       if (!rq) {
         // Build queue of eligible workers for this station
         const workers = await WorkerModel.find({
           stations: { $elemMatch: { name: station.name, isActive: true } },
+          costCenter,
+          shift,
         }).sort({ name: 1 });
 
         // Create new RotationQueue document
@@ -293,8 +299,10 @@ class RotationPlanService {
             group: w.group,
             role: w.role,
             costCenter: w.costCenter,
+            shift: w.shift,
           })),
           costCenter,
+          shift,
         });
         await rq.save();
       }
@@ -306,9 +314,10 @@ class RotationPlanService {
       const rotationQueue = await RotationQueueModel.findOne({
         station: station.name,
         costCenter,
+        shift,
       }).populate(
         'queue.workerId',
-        '_id name role costCenter group status stations'
+        '_id name role costCenter shift group status stations'
       );
 
       const queue = (rotationQueue?.queue || [])
@@ -322,6 +331,7 @@ class RotationPlanService {
             group: w.group,
             role: w.role,
             costCenter: w.costCenter,
+            shift: w.shift,
             status: w.status,
             stations: w.stations,
           };
@@ -333,8 +343,8 @@ class RotationPlanService {
   /**
    * Loads station definitions from database.
    */
-  async initialize(costCenter) {
-    const stations = await StationModel.find({ costCenter }).sort({
+  async initialize(costCenter, shift) {
+    const stations = await StationModel.find({ costCenter, shift }).sort({
       priority: -1,
     });
     if (!stations.length) throw new Error('No stations found for costCenter');
@@ -346,7 +356,7 @@ class RotationPlanService {
     }));
   }
 
-  async initializeQueue(costCenter) {
+  async initializeQueue(costCenter, shift) {
     if (!this.stations || this.stations.length === 0) {
       throw new Error(
         'Stations list is empty. Please initialize stations first.'
@@ -364,6 +374,7 @@ class RotationPlanService {
       let rotationQueue = await RotationQueueModel.findOne({
         station: stationName,
         costCenter,
+        shift,
       });
 
       if (!rotationQueue) {
@@ -371,6 +382,7 @@ class RotationPlanService {
           station: stationName,
           queue: [],
           costCenter,
+          shift,
         });
       }
 
@@ -381,6 +393,7 @@ class RotationPlanService {
         group: worker.group,
         role: worker.role,
         costCenter: worker.costCenter,
+        shift: worker.shift,
       }));
 
       // Save the queue in the database
@@ -393,7 +406,8 @@ class RotationPlanService {
     highPriorityRotation,
     cycleRotations,
     allWorkers,
-    costCenter
+    costCenter,
+    shift
   ) {
     if (!highPriorityRotation || !cycleRotations) {
       throw new Error(
@@ -404,6 +418,7 @@ class RotationPlanService {
     try {
       const confirmedRotation = new ConfirmedRotation({
         costCenter,
+        shift,
         rotation: {
           specialRotation: { ...specialRotation },
           highPriorityRotation: { ...highPriorityRotation },
@@ -419,6 +434,7 @@ class RotationPlanService {
         const rotationQueue = await RotationQueueModel.findOne({
           station,
           costCenter,
+          shift,
         });
         if (!rotationQueue || rotationQueue.queue.length === 0) {
           return;

@@ -14,13 +14,15 @@ class RotationPlanController {
     try {
       const { specialAssignments = [], preassigned = [], cycles } = req.body;
       const costCenter = req.user.costCenter;
+      const shift = req.user.shift;
 
       const service = new RotationPlanService();
       const data = await service.generateRotationData(
         specialAssignments,
         preassigned,
         cycles,
-        costCenter
+        costCenter,
+        shift
       );
       return res.json(data);
     } catch (error) {
@@ -62,6 +64,7 @@ class RotationPlanController {
   async confirmRotation(req, res, next) {
     try {
       const costCenter = req.user.costCenter;
+      const shift = req.user.shift;
       const rotationService = new RotationPlanService();
       const {
         specialRotation,
@@ -86,7 +89,8 @@ class RotationPlanController {
         highPriorityRotation,
         cycleRotations,
         allWorkers,
-        costCenter
+        costCenter,
+        shift
       );
       return res.json({
         result,
@@ -101,9 +105,13 @@ class RotationPlanController {
   // Download the latest confirmed plan
   async downloadConfirmedRotation(req, res, next) {
     const costCenter = req.user.costCenter;
+    const shift = req.user.shift;
 
     try {
-      const confirmedRotation = await ConfirmedRotation.findOne({ costCenter })
+      const confirmedRotation = await ConfirmedRotation.findOne({
+        costCenter,
+        shift,
+      })
         .sort({ createdAt: -1 })
         .lean();
 

@@ -10,6 +10,7 @@ const RegisterForm = () => {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('');
   const [costCenter, setCostCenter] = useState('');
+  const [shift, setShift] = useState('');
   const [msgType, setMsgType] = useState('');
   const navigate = useNavigate();
   const storeRef = useRef(store);
@@ -25,7 +26,7 @@ const RegisterForm = () => {
   const handleChangeSubmit = async (event) => {
     event.preventDefault();
     try {
-      await store.registration(email, password, role, costCenter);
+      await store.registration(email, password, role, costCenter, shift);
       setMsgType('success');
       store.setAuthMsg('Please check your spam folder.');
     } catch (error) {
@@ -81,6 +82,21 @@ const RegisterForm = () => {
           <option value="395.5">395.5</option>
           <option value="385.5">385.5</option>
           <option value="311.5">311.5</option>
+        </select>
+
+        <select
+          placeholder="Schicht"
+          className={styles.input}
+          value={shift}
+          onChange={(e) => setShift(e.target.value)}
+          required
+        >
+          <option value="" disabled>
+            Schicht
+          </option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
         </select>
 
         <div className={styles.buttonContainer}>

@@ -2,8 +2,9 @@ const { Schema, model, default: mongoose } = require('mongoose');
 
 const RotationQueueSchema = new Schema(
   {
-    station: { type: String, unique: true, required: true },
+    station: { type: String, required: true },
     costCenter: { type: String, required: true },
+    shift: { type: String, required: true },
     queue: [
       {
         workerId: {
@@ -15,12 +16,18 @@ const RotationQueueSchema = new Schema(
         group: { type: Number, required: true },
         role: { type: String, required: true },
         costCenter: { type: String, required: true },
+        shift: { type: String, required: true },
       },
     ],
   },
   {
     timestamps: true,
   }
+);
+
+RotationQueueSchema.index(
+  { station: 1, costCenter: 1, shift: 1 },
+  { unique: true }
 );
 
 module.exports = model('RotationQueueModel', RotationQueueSchema);

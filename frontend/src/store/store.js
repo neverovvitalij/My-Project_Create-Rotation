@@ -127,13 +127,14 @@ export default class Store {
     }
   }
 
-  async registration(email, password, role, costCenter) {
+  async registration(email, password, role, costCenter, shift) {
     try {
       const response = await AuthServise.registration(
         email,
         password,
         role,
-        costCenter
+        costCenter,
+        shift
       );
       if (response) {
         setTimeout(() => {
@@ -209,12 +210,13 @@ export default class Store {
     }
   }
 
-  async addWorker(candidate, role, costCenter) {
+  async addWorker(candidate, role, costCenter, shift) {
     try {
       const response = await WorkerService.addWorker(
         candidate,
         role,
-        costCenter
+        costCenter,
+        shift
       );
       this.setEmployeeList([...this.employeeList, response.data]);
       this.setErrorMsg('');
@@ -226,14 +228,9 @@ export default class Store {
     }
   }
 
-  async addNewStation({ name, priority, group, costCenter }) {
+  async addNewStation({ name, priority, group }) {
     try {
-      const response = await StationsService.addStation(
-        name,
-        priority,
-        group,
-        costCenter
-      );
+      const response = await StationsService.addStation(name, priority, group);
       this.setNewStation(response.data);
       this.setErrorMsg('');
       this.loadData();

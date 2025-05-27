@@ -1,18 +1,3 @@
-// const mongoose = require('mongoose');
-
-// const ConfirmedRotationSchema = new mongoose.Schema({
-//   date: { type: Date, default: Date.now, unique: true },
-//   rotation: {
-//     specialRotation: { type: Map, of: String, required: false },
-//     highPriorityRotation: { type: Map, of: String, required: true },
-//     cycleRotations: {
-//       type: [{ type: Map, of: String }],
-//       required: true,
-//     },
-//   },
-// });
-
-// module.exports = mongoose.model('ConfirmedRotation', ConfirmedRotationSchema);
 const mongoose = require('mongoose');
 
 const WorkerInfoSchema = new mongoose.Schema(
@@ -21,6 +6,7 @@ const WorkerInfoSchema = new mongoose.Schema(
     group: { type: Number, required: true },
     status: { type: Boolean, required: true },
     costCenter: { type: String, required: true },
+    shift: { type: String, required: true },
     role: { type: String, required: true },
   },
   { _id: false }
@@ -30,6 +16,7 @@ const ConfirmedRotationSchema = new mongoose.Schema(
   {
     date: { type: Date, default: Date.now, unique: true },
     costCenter: { type: String, required: true },
+    shift: { type: String, required: true },
     rotation: {
       specialRotation: { type: Map, of: String, required: false },
       highPriorityRotation: { type: Map, of: String, required: true },
@@ -40,6 +27,11 @@ const ConfirmedRotationSchema = new mongoose.Schema(
   {
     timestamps: true,
   }
+);
+
+ConfirmedRotationSchema.index(
+  { date: 1, costCenter: 1, shift: 1 },
+  { unique: true }
 );
 
 module.exports = mongoose.model('ConfirmedRotation', ConfirmedRotationSchema);

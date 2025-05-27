@@ -9,6 +9,7 @@ const UserSchema = new Schema({
     required: true,
   },
   costCenter: { type: String, required: true },
+  shift: { type: String, required: true },
   isActivated: { type: Boolean, default: false },
   userActivationStatus: { type: Boolean, default: false },
   adminActivationStatus: { type: Boolean, default: false },

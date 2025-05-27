@@ -1,8 +1,12 @@
 import api from '../http/index';
 
 export default class StationsService {
-  static async addStation(name, priority, group, costCenter) {
-    return api.post('/new-station', { name, priority, group, costCenter });
+  static async addStation(name, priority, group) {
+    return api.post('/new-station', {
+      name,
+      priority,
+      group,
+    });
   }
 
   static async getStations() {

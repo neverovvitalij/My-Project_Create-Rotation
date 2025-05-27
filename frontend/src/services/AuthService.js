@@ -1,8 +1,14 @@
 import api from '../http/index';
 
 export default class AuthService {
-  static async registration(email, password, role, costCenter) {
-    return api.post('/registration', { email, password, role, costCenter });
+  static async registration(email, password, role, costCenter, shift) {
+    return api.post('/registration', {
+      email,
+      password,
+      role,
+      costCenter,
+      shift,
+    });
   }
 
   static async login(email, password) {

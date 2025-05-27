@@ -3,9 +3,9 @@ const RotationQueueModel = require('../models/rotationqueue-model');
 const ApiError = require('../exceptions/api-error');
 
 class WorkerService {
-  async getAllWorkers(costCenter) {
+  async getAllWorkers(costCenter, shift) {
     try {
-      const workers = await WorkerModel.find(costCenter).lean();
+      const workers = await WorkerModel.find(costCenter, shift).lean();
       if (!workers || workers.length === 0) {
         console.log('Add worker to the dataBase');
       }
@@ -15,11 +15,20 @@ class WorkerService {
     }
   }
 
-  async addWorker(name, role, costCenter, stations, group, status = true) {
+  async addWorker(
+    name,
+    role,
+    costCenter,
+    shift,
+    stations,
+    group,
+    status = true
+  ) {
     try {
       const exists = await WorkerModel.exists({
         name: name.trim(),
         costCenter,
+        shift,
       });
       if (exists) {
         throw ApiError.BadRequest(`Worker "${name.trim()}" already exists`);
@@ -29,6 +38,7 @@ class WorkerService {
         name: name.trim(),
         role,
         costCenter,
+        shift,
         stations,
         group,
         status,
@@ -42,6 +52,7 @@ class WorkerService {
         let rq = await RotationQueueModel.findOne({
           station: stationName,
           costCenter,
+          shift,
         });
         const entry = {
           workerId: worker._id,
@@ -49,6 +60,7 @@ class WorkerService {
           group: worker.group,
           role: worker.role,
           costCenter: worker.costCenter,
+          shift: worker.shift,
         };
 
         if (rq) {
@@ -69,6 +81,7 @@ class WorkerService {
             station: stationName,
             queue: [entry],
             costCenter,
+            shift,
           });
         }
 
@@ -84,12 +97,26 @@ class WorkerService {
     }
   }
 
-  async deleteWorker(name) {
+  async deleteWorker(name, costCenter, shift) {
     try {
-      const candidate = await WorkerModel.findOneAndDelete({ name });
+      const candidate = await WorkerModel.findOneAndDelete({
+        name,
+        costCenter,
+        shift,
+      });
+
       if (!candidate) {
-        throw ApiError.BadRequest(`Worker ${name} was not found`);
+        throw ApiError.BadRequest(`Worker ${name} was not found for deletion`);
       }
+
+      const pullResult = await RotationQueueModel.updateMany(
+        { costCenter, shift },
+        { $pull: { queue: { workerId: candidate._id } } }
+      );
+
+      console.log(
+        `Removed worker "${name}" from ${pullResult.modifiedCount} rotation queues`
+      );
 
       console.log('Deleted worker:', candidate.name);
       return candidate;
@@ -99,10 +126,10 @@ class WorkerService {
     }
   }
 
-  async workerChangeStatus(name, newStatus) {
+  async workerChangeStatus(name, newStatus, costCenter, shift) {
     try {
       const worker = await WorkerModel.findOneAndUpdate(
-        { name },
+        { name, costCenter, shift },
         { $set: { status: newStatus } },
         { new: true }
       );
@@ -118,11 +145,10 @@ class WorkerService {
     }
   }
 
-  async removeStationFromWorker(name, stationToRemove) {
+  async removeStationFromWorker(name, stationToRemove, costCenter, shift) {
     try {
-      // 1) Убираем станцию у самого воркера
       const updatedWorker = await WorkerModel.findOneAndUpdate(
-        { name },
+        { name, costCenter, shift },
         { $pull: { stations: { name: stationToRemove } } },
         { new: true }
       );
@@ -131,10 +157,10 @@ class WorkerService {
         return;
       }
 
-      // 2) Находим очередь для данной станции (и учитываем costCenter)
       const rotationQueue = await RotationQueueModel.findOne({
         station: stationToRemove,
         costCenter: updatedWorker.costCenter,
+        shift: updatedWorker.shift,
       });
       if (!rotationQueue) {
         console.log(
@@ -143,8 +169,6 @@ class WorkerService {
         return;
       }
 
-      // 3) Фильтруем массив queue, оставляя только те элементы, у которых
-      //    workerId не равен _id удаляемого воркера
       const beforeCount = rotationQueue.queue.length;
       rotationQueue.queue = rotationQueue.queue.filter(
         (item) => item.workerId.toString() !== updatedWorker._id.toString()
@@ -175,11 +199,10 @@ class WorkerService {
     }
   }
 
-  async addStationToWorker(name, stationToAdd) {
+  async addStationToWorker(name, stationToAdd, costCenter, shift) {
     try {
-      // 1) Обновляем воркера, добавляя станцию в его список
       const updatedWorker = await WorkerModel.findOneAndUpdate(
-        { name },
+        { name, costCenter, shift },
         { $addToSet: { stations: { name: stationToAdd, isActive: true } } },
         { new: true }
       );
@@ -192,40 +215,38 @@ class WorkerService {
       let rotationQueue = await RotationQueueModel.findOne({
         station: stationToAdd,
         costCenter: updatedWorker.costCenter,
+        shift: updatedWorker.shift,
       });
       if (!rotationQueue) {
         rotationQueue = new RotationQueueModel({
           station: stationToAdd,
           costCenter: updatedWorker.costCenter,
+          shift: updatedWorker.shift,
           queue: [],
         });
       }
 
-      // 3) Проверяем, есть ли уже этот воркер в очереди
       const exists = rotationQueue.queue.some(
         (item) => item.workerId.toString() === updatedWorker._id.toString()
       );
       if (!exists) {
-        // 4) Находим позицию по алфавиту
         const idx = rotationQueue.queue.findIndex(
           (item) => updatedWorker.name.localeCompare(item.name) < 0
         );
         const insertIndex = idx === -1 ? rotationQueue.queue.length : idx;
 
-        // 5) Собираем полный объект, как просит схема
         const queueItem = {
           workerId: updatedWorker._id,
           name: updatedWorker.name,
           group: updatedWorker.group,
           role: updatedWorker.role,
           costCenter: updatedWorker.costCenter,
+          shift: updatedWorker.shift,
         };
 
-        // 6) Вставляем в нужное место
         rotationQueue.queue.splice(insertIndex, 0, queueItem);
       }
 
-      // 7) Обновляем время изменения и сохраняем
       rotationQueue.updatedAt = Date.now();
       await rotationQueue.save();
 

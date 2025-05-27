@@ -25,17 +25,27 @@ router.post('/reset-password', usersController.resetPassword);
 router.get('/activate/:type/:link', usersController.activate);
 router.get('/workers', authMiddleware, workersController.getWorkers);
 router.post('/add-worker', authMiddleware, workersController.addWorker);
-router.patch('/change-worker-status', workersController.workerChangeStatus);
-router.patch('/change-station-status', stationsController.stationChangeStatus);
+router.patch(
+  '/change-worker-status',
+  authMiddleware,
+  workersController.workerChangeStatus
+);
+router.patch(
+  '/change-station-status',
+  authMiddleware,
+  stationsController.stationChangeStatus
+);
 router.patch(
   '/worker/:name/station-to-delete',
+  authMiddleware,
   workersController.removeStationFromWorker
 );
 router.patch(
   '/worker/:name/station-to-add',
+  authMiddleware,
   workersController.addStationToWorker
 );
-router.delete('/delete-worker', workersController.deleteWorker);
+router.delete('/delete-worker', authMiddleware, workersController.deleteWorker);
 router.post(
   '/rotation-preview-excel',
   authMiddleware,
@@ -59,6 +69,10 @@ router.get(
 );
 router.get('/stations', authMiddleware, stationsController.getStations);
 router.post('/new-station', authMiddleware, stationsController.addStation);
-router.delete('/delete-station', stationsController.deleteStation);
+router.delete(
+  '/delete-station',
+  authMiddleware,
+  stationsController.deleteStation
+);
 
 module.exports = router;
