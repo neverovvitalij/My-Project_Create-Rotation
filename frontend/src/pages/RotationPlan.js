@@ -20,7 +20,6 @@ const RotationPlan = () => {
   const [msg, setMsg] = useState('');
 
   const rotations = toJS(store.rotation);
-  const stationsList = toJS(store.stations);
   const employees = toJS(store.employeeList);
 
   const onClickPreview = async () => {
@@ -215,7 +214,7 @@ const RotationPlan = () => {
                   >
                     <option value="">Assign</option>
                     <option value="sonder">Special</option>
-                    {stationsList.map((station) => (
+                    {emp.stations.map((station) => (
                       <option key={station._id} value={station.name}>
                         {station.name}
                       </option>

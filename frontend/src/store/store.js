@@ -285,6 +285,14 @@ export default class Store {
         stationToAdd
       );
       this.loadData();
+
+      const idx = this.employeeList.findIndex(
+        (w) => w.name === response.data.name
+      );
+      if (idx !== -1) {
+        this.employeeList[idx] = response.data;
+      }
+
       return response.data;
     } catch (error) {
       console.error('Error adding station:', error.message || error);

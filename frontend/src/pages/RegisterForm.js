@@ -42,77 +42,79 @@ const RegisterForm = () => {
     <>
       <form className={styles.container} onSubmit={handleChangeSubmit}>
         <h2 className={styles.title}>Register</h2>
-        <input
-          placeholder="Email"
-          className={styles.input}
-          value={email}
-          type="text"
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          placeholder="Password"
-          className={styles.input}
-          value={password}
-          type="password"
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <select
-          placeholder="Role"
-          className={styles.input}
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          required
-        >
-          <option value="" disabled>
-            Select role
-          </option>
-          <option value="GV">GV</option>
-          <option value="MEISTER">Meister</option>
-          <option></option>
-        </select>
+        <fieldset disabled={msgType} style={{ border: 'none', padding: 0 }}>
+          <input
+            placeholder="Email"
+            className={styles.input}
+            value={email}
+            type="text"
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            placeholder="Password"
+            className={styles.input}
+            value={password}
+            type="password"
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <select
+            placeholder="Role"
+            className={styles.input}
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            required
+          >
+            <option value="" disabled>
+              Select role
+            </option>
+            <option value="GV">GV</option>
+            <option value="MEISTER">Meister</option>
+            <option></option>
+          </select>
 
-        <select
-          placeholder="Werk"
-          className={styles.input}
-          value={plant}
-          onChange={(e) => setPlant(e.target.value)}
-          required
-        >
-          <option value="" disabled>
-            Werk
-          </option>
-          <option value="054">054</option>
-        </select>
+          <select
+            placeholder="Werk"
+            className={styles.input}
+            value={plant}
+            onChange={(e) => setPlant(e.target.value)}
+            required
+          >
+            <option value="" disabled>
+              Werk
+            </option>
+            <option value="054">054</option>
+          </select>
 
-        <select
-          placeholder="CostCenter"
-          className={styles.input}
-          value={costCenter}
-          onChange={(e) => setCostCenter(e.target.value)}
-          required
-        >
-          <option value="" disabled>
-            Select CostCenter
-          </option>
-          <option value="395.5">395.5</option>
-          <option value="385.5">385.5</option>
-          <option value="311.5">311.5</option>
-        </select>
+          <select
+            placeholder="CostCenter"
+            className={styles.input}
+            value={costCenter}
+            onChange={(e) => setCostCenter(e.target.value)}
+            required
+          >
+            <option value="" disabled>
+              Kostenstelle
+            </option>
+            <option value="395.5">395.5</option>
+            <option value="385.5">385.5</option>
+            <option value="311.5">311.5</option>
+          </select>
 
-        <select
-          placeholder="Schicht"
-          className={styles.input}
-          value={shift}
-          onChange={(e) => setShift(e.target.value)}
-          required
-        >
-          <option value="" disabled>
-            Schicht
-          </option>
-          <option value="A">A</option>
-          <option value="B">B</option>
-          <option value="C">C</option>
-        </select>
+          <select
+            placeholder="Schicht"
+            className={styles.input}
+            value={shift}
+            onChange={(e) => setShift(e.target.value)}
+            required
+          >
+            <option value="" disabled>
+              Schicht
+            </option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+          </select>
+        </fieldset>
 
         <div className={styles.buttonContainer}>
           <button

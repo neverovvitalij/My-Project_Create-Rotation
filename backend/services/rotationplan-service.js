@@ -120,10 +120,15 @@ class RotationPlanService {
         if (!assigned) {
           for (const worker of queue) {
             if (specialWorkers.has(worker.name)) continue;
+
             const stationInfo = worker.stations.find(
               (s) => s.name === station.name
             );
-            if (worker.status && stationInfo?.isActive) {
+            if (
+              worker.status &&
+              stationInfo?.isActive &&
+              !Object.values(fixedAssignments).includes(worker.name)
+            ) {
               highPriorityRotation.set(station.name, worker);
               fixedAssignments[station.name] = worker.name;
               break;
@@ -277,13 +282,14 @@ class RotationPlanService {
     }
   }
 
-  async loadRotationQueues(activeStations, costCenter, shift) {
+  async loadRotationQueues(activeStations, costCenter, shift, plant) {
     //  Ensure each active station has a rotation queue document
     for (const station of activeStations) {
       let rq = await RotationQueueModel.findOne({
         station: station.name,
         costCenter,
         shift,
+        plant,
       });
       if (!rq) {
         // Build queue of eligible workers for this station
@@ -291,6 +297,7 @@ class RotationPlanService {
           stations: { $elemMatch: { name: station.name, isActive: true } },
           costCenter,
           shift,
+          plant,
         }).sort({ name: 1 });
 
         // Create new RotationQueue document
@@ -303,9 +310,11 @@ class RotationPlanService {
             role: w.role,
             costCenter: w.costCenter,
             shift: w.shift,
+            plant: w.plant,
           })),
           costCenter,
           shift,
+          plant,
         });
         await rq.save();
       }
@@ -318,9 +327,10 @@ class RotationPlanService {
         station: station.name,
         costCenter,
         shift,
+        plant,
       }).populate(
         'queue.workerId',
-        '_id name role costCenter shift group status stations'
+        '_id name role costCenter shift plant group status stations'
       );
 
       const queue = (rotationQueue?.queue || [])
@@ -335,6 +345,7 @@ class RotationPlanService {
             role: w.role,
             costCenter: w.costCenter,
             shift: w.shift,
+            plant: w.plant,
             status: w.status,
             stations: w.stations,
           };
@@ -346,10 +357,12 @@ class RotationPlanService {
   /**
    * Loads station definitions from database.
    */
-  async initialize(costCenter, shift) {
-    const stations = await StationModel.find({ costCenter, shift }).sort({
-      priority: -1,
-    });
+  async initialize(costCenter, shift, plant) {
+    const stations = await StationModel.find({ costCenter, shift, plant }).sort(
+      {
+        priority: -1,
+      }
+    );
     if (!stations.length) throw new Error('No stations found for costCenter');
     this.stations = stations.map((s) => ({
       name: s.name,
@@ -359,7 +372,7 @@ class RotationPlanService {
     }));
   }
 
-  async initializeQueue(costCenter, shift) {
+  async initializeQueue(costCenter, shift, plant) {
     if (!this.stations || this.stations.length === 0) {
       throw new Error(
         'Stations list is empty. Please initialize stations first.'
@@ -378,6 +391,7 @@ class RotationPlanService {
         station: stationName,
         costCenter,
         shift,
+        plant,
       });
 
       if (!rotationQueue) {
@@ -386,6 +400,7 @@ class RotationPlanService {
           queue: [],
           costCenter,
           shift,
+          plant,
         });
       }
 
@@ -397,6 +412,7 @@ class RotationPlanService {
         role: worker.role,
         costCenter: worker.costCenter,
         shift: worker.shift,
+        plant: worker.plant,
       }));
 
       // Save the queue in the database
@@ -410,7 +426,8 @@ class RotationPlanService {
     cycleRotations,
     allWorkers,
     costCenter,
-    shift
+    shift,
+    plant
   ) {
     if (!highPriorityRotation || !cycleRotations) {
       throw new Error(
@@ -422,6 +439,7 @@ class RotationPlanService {
       const confirmedRotation = new ConfirmedRotation({
         costCenter,
         shift,
+        plant,
         rotation: {
           specialRotation: { ...specialRotation },
           highPriorityRotation: { ...highPriorityRotation },
@@ -438,6 +456,7 @@ class RotationPlanService {
           station,
           costCenter,
           shift,
+          plant,
         });
         if (!rotationQueue || rotationQueue.queue.length === 0) {
           return;
