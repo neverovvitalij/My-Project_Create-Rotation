@@ -8,7 +8,6 @@ const WorkerInfoSchema = new mongoose.Schema(
     costCenter: { type: String, required: true },
     shift: { type: String, required: true },
     plant: { type: String, required: true },
-    role: { type: String, required: true },
   },
   { _id: false }
 );

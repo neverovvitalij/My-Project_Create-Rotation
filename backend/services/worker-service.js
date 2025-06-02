@@ -17,7 +17,6 @@ class WorkerService {
 
   async addWorker(
     name,
-    role,
     costCenter,
     shift,
     plant,
@@ -38,7 +37,6 @@ class WorkerService {
 
       const worker = await WorkerModel.create({
         name: name.trim(),
-        role,
         costCenter,
         shift,
         plant,
@@ -62,7 +60,6 @@ class WorkerService {
           workerId: worker._id,
           name: worker.name.trim(),
           group: worker.group,
-          role: worker.role,
           costCenter: worker.costCenter,
           shift: worker.shift,
           plant: worker.plant,

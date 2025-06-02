@@ -211,11 +211,10 @@ export default class Store {
     }
   }
 
-  async addWorker(candidate, role, costCenter, shift, plant) {
+  async addWorker(candidate, costCenter, shift, plant) {
     try {
       const response = await WorkerService.addWorker(
         candidate,
-        role,
         costCenter,
         shift,
         plant

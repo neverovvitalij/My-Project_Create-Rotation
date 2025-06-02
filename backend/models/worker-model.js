@@ -4,8 +4,7 @@ const WorkerSchema = new Schema({
   name: { type: String, required: true },
   role: {
     type: String,
-    enum: ['WORKER', 'GV'],
-    required: true,
+    default: 'WORKER',
   },
   costCenter: { type: String, required: true },
   shift: { type: String, required: true },

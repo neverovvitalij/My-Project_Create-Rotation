@@ -15,7 +15,6 @@ const RotationQueueSchema = new Schema(
         },
         name: { type: String, required: true },
         group: { type: Number, required: true },
-        role: { type: String, required: true },
         costCenter: { type: String, required: true },
         shift: { type: String, required: true },
         plant: { type: String, required: true },

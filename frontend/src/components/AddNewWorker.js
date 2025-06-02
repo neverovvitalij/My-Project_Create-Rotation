@@ -6,7 +6,6 @@ import styles from '../styles/AddNewWorker.module.css';
 const AddNewWorker = () => {
   const [candidateName, setCandidateName] = useState('');
   const [group, setGroup] = useState('');
-  const [role, setRole] = useState('');
   const [selectedStations, setSelectedStations] = useState([]);
   const { store } = useContext(Context);
 
@@ -31,7 +30,6 @@ const AddNewWorker = () => {
       name: candidateName,
       stations,
       group: parseInt(group, 10),
-      role,
     };
     await store.addWorker(candidate);
 
@@ -63,10 +61,8 @@ const AddNewWorker = () => {
       <form onSubmit={handleChangeSubmit} className={styles.form}>
         <div className={styles.inputRow}>
           <div className={styles.inputGroup}>
-            <label htmlFor="name" className={styles.label}>
-              Name:
-            </label>
             <input
+              htmlFor="name"
               id="name"
               value={candidateName}
               type="text"
@@ -74,26 +70,21 @@ const AddNewWorker = () => {
               className={styles.inputField}
               placeholder="Enter worker name"
             />
-            <label className={styles.label}>Role:</label>
-            <input
-              value={role}
-              type="text"
-              onChange={(e) => setRole(e.target.value)}
-              className={styles.inputField}
-              placeholder="Enter worker role"
-            />
           </div>
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>Group:</label>
-            <input
-              className={styles.inputField}
-              placeholder="Station group (number > 0)"
-              value={group}
-              type="number"
-              min="1"
-              onChange={(e) => setGroup(e.target.value)}
-            />
-          </div>
+          <select
+            className={styles.inputField}
+            value={group}
+            onChange={(e) => setGroup(e.target.value)}
+          >
+            <option value="" disabled>
+              Grupe wählen
+            </option>
+            <option value={1}>1</option>
+            <option value={2}>2</option>
+            <option value={3}>3</option>
+            <option value={4}>4</option>
+            <option value={5}>5</option>
+          </select>
         </div>
 
         <div className={styles.stationSelection}>

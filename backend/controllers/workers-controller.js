@@ -22,10 +22,9 @@ class WorkerController {
       const costCenter = req.user.costCenter;
       const shift = req.user.shift;
       const plant = req.user.plant;
-      const { name, role, stations, group } = req.body;
+      const { name, stations, group } = req.body;
       const personData = await workerService.addWorker(
         name,
-        role,
         costCenter,
         shift,
         plant,
