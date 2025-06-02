@@ -68,12 +68,8 @@ class RotationPlanService {
 
       // (A) Process special assignments ("Sonder")
       for (const { worker: workerName, job } of specialAssignments) {
-        const workerObj = Array.from(this.rotationQueues.values())
-          .flat()
-          .find((w) => w.name === workerName);
-        if (!workerObj) continue;
-        specialRotation.set(workerObj.name, { worker: workerObj, job });
-        specialWorkers.add(workerObj.name);
+        specialRotation.set(workerName, { worker: workerName, job });
+        specialWorkers.add(workerName);
       }
 
       // (B) High-priority assignments (stations priority >= 2)
