@@ -100,41 +100,47 @@ const StationsList = () => {
       </button>
       {showAddStationForm && (
         <div className={styles.addNewStationContainer} ref={addStationFormRef}>
-          <div className={styles.addStationForm}>
-            <form onSubmit={handleFormSubmit}>
-              <input
-                className={styles.addStationInput}
-                placeholder="New station"
-                value={stationName}
-                type="text"
-                required
-                onChange={(e) => setStationName(e.target.value)}
-              />
-              <input
-                className={styles.addStationInput}
-                placeholder="Station priority (number > 0)"
-                value={stationPriority}
-                type="number"
-                required
-                min="1"
-                onChange={(e) => setStationPriority(e.target.value)}
-              />
-              <input
-                className={styles.addStationInput}
-                placeholder="Station group (number > 0)"
-                value={stationGroup}
-                type="number"
-                min="1"
-                onChange={(e) => setStationGroup(e.target.value)}
-              />
-              <button className={styles.addStationButton} type="submit">
-                Add Station
-              </button>
-              {store.errorMsg && (
-                <p className={styles.errorMessage}>{store.errorMsg}</p>
-              )}
-            </form>
-          </div>
+          <form onSubmit={handleFormSubmit} className={styles.addStationForm}>
+            <input
+              className={styles.addStationInput}
+              placeholder="New station"
+              value={stationName}
+              type="text"
+              required
+              onChange={(e) => setStationName(e.target.value)}
+            />
+            <select
+              className={styles.addStationInput}
+              value={stationPriority}
+              onChange={(e) => setStationPriority(e.target.value)}
+            >
+              <option value="" disabled>
+                Priorität
+              </option>
+              <option value={1}>1</option>
+              <option value={2}>2</option>
+            </select>
+            <select
+              className={styles.addStationInput}
+              value={stationGroup}
+              onChange={(e) => setStationGroup(e.target.value)}
+            >
+              <option value="" disabled>
+                Gruppe
+              </option>
+              <option value={1}>1</option>
+              <option value={2}>2</option>
+              <option value={3}>3</option>
+              <option value={4}>4</option>
+              <option value={5}>5</option>
+            </select>
+            <button className={styles.addStationButton} type="submit">
+              Add Station
+            </button>
+            {store.errorMsg && (
+              <p className={styles.errorMessage}>{store.errorMsg}</p>
+            )}
+          </form>
         </div>
       )}
     </div>

@@ -86,7 +86,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px;
+  gap: 8px;
 }
 
 .addStationInput {
@@ -94,11 +94,11 @@
   padding: 10px;
   border-radius: 6px;
   border: 1px solid #ccc;
-  width: 100%;
-  max-width: 300px;
   background-color: #1f1f2d;
   color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 30%;
+  box-sizing: border-box;
 }
 
 .addStationInput::placeholder {
@@ -139,9 +139,5 @@
 
   .groupColumn {
     max-width: 100%;
-  }
-
-  .addStationInput {
-    width: 100%;
   }
 }
