@@ -303,7 +303,6 @@ class RotationPlanService {
             workerId: w._id,
             name: w.name.trim(),
             group: w.group,
-            role: w.role,
             costCenter: w.costCenter,
             shift: w.shift,
             plant: w.plant,
@@ -326,7 +325,7 @@ class RotationPlanService {
         plant,
       }).populate(
         'queue.workerId',
-        '_id name role costCenter shift plant group status stations'
+        '_id name costCenter shift plant group status stations'
       );
 
       const queue = (rotationQueue?.queue || [])
@@ -338,7 +337,6 @@ class RotationPlanService {
             _id: w._id,
             name: w.name,
             group: w.group,
-            role: w.role,
             costCenter: w.costCenter,
             shift: w.shift,
             plant: w.plant,
@@ -405,7 +403,6 @@ class RotationPlanService {
         workerId: worker._id,
         name: worker.name.trim(),
         group: worker.group,
-        role: worker.role,
         costCenter: worker.costCenter,
         shift: worker.shift,
         plant: worker.plant,
