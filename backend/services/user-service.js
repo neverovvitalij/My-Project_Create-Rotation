@@ -8,38 +8,43 @@ const ApiError = require('../exceptions/api-error');
 
 class UserService {
   async registration(email, password, role, costCenter, shift, plant) {
-    const candidate = await UserModel.findOne({ email });
-    if (candidate) {
-      throw ApiError.BadRequest(`User ${email} is already registered`);
+    try {
+      const candidate = await UserModel.findOne({ email });
+      if (candidate) {
+        throw ApiError.BadRequest(`User ${email} is already registered`);
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 5);
+      const userActivationLink = uuidv4();
+      const adminActivationLink = uuidv4();
+
+      const user = await UserModel.create({
+        email,
+        password: hashedPassword,
+        role,
+        costCenter,
+        activationLink: userActivationLink,
+        adminActivationLink,
+        shift,
+        plant,
+      });
+
+      await mailService.sendActivationMail(
+        email,
+        `${process.env.API_URL}/api/activate/user/${userActivationLink}`,
+        process.env.ADMIN_EMAIL,
+        `${process.env.API_URL}/api/activate/admin/${adminActivationLink}`
+      );
+
+      const userDto = new UserDto(user);
+      const tokens = tokenService.generateToken({ ...userDto });
+      await tokenService.saveToken(userDto.id, tokens.refreshToken);
+
+      return { ...tokens, user: userDto };
+    } catch (error) {
+      console.error('Register Failed', error.message);
+      throw error;
     }
-
-    const hashedPassword = await bcrypt.hash(password, 5);
-    const userActivationLink = uuidv4();
-    const adminActivationLink = uuidv4();
-
-    const user = await UserModel.create({
-      email,
-      password: hashedPassword,
-      role,
-      costCenter,
-      activationLink: userActivationLink,
-      adminActivationLink,
-      shift,
-      plant,
-    });
-
-    await mailService.sendActivationMail(
-      email,
-      `${process.env.API_URL}/api/activate/user/${userActivationLink}`,
-      process.env.ADMIN_EMAIL,
-      `${process.env.API_URL}/api/activate/admin/${adminActivationLink}`
-    );
-
-    const userDto = new UserDto(user);
-    const tokens = tokenService.generateToken({ ...userDto });
-    await tokenService.saveToken(userDto.id, tokens.refreshToken);
-
-    return { ...tokens, user: userDto };
   }
 
   async activate(type, activationLink) {
@@ -69,20 +74,25 @@ class UserService {
   }
 
   async login(email, password) {
-    const user = await UserModel.findOne({ email });
-    if (!user) {
-      throw ApiError.BadRequest(`User ${email} was not found!`);
-    }
-    const isPassEquals = await bcrypt.compare(password, user.password);
-    if (!isPassEquals) {
-      throw ApiError.BadRequest('Incorrect password');
-    }
-    const userDto = new UserDto(user);
-    const tokens = tokenService.generateToken({ ...userDto });
+    try {
+      const user = await UserModel.findOne({ email });
+      if (!user) {
+        throw ApiError.BadRequest(`User ${email} was not found!`);
+      }
+      const isPassEquals = await bcrypt.compare(password, user.password);
+      if (!isPassEquals) {
+        throw ApiError.BadRequest('Incorrect password');
+      }
+      const userDto = new UserDto(user);
+      const tokens = tokenService.generateToken({ ...userDto });
 
-    await tokenService.saveToken(userDto.id, tokens.refreshToken);
+      await tokenService.saveToken(userDto.id, tokens.refreshToken);
 
-    return { ...tokens, user: userDto };
+      return { ...tokens, user: userDto };
+    } catch (error) {
+      console.error('Login failed', error.message);
+      throw error;
+    }
   }
 
   async logout(refreshToken) {
@@ -91,24 +101,44 @@ class UserService {
   }
 
   async refresh(refreshToken) {
-    if (!refreshToken) {
-      console.error('Refresh token is missing');
-      throw ApiError.UnauthorizedError();
+    try {
+      if (!refreshToken) {
+        console.error('Refresh token is missing');
+        throw ApiError.UnauthorizedError();
+      }
+      const userData = tokenService.validateRefreshToken(refreshToken);
+      if (!userData) {
+        console.error('Refresh token is invalid or expired');
+        throw ApiError.UnauthorizedError();
+      }
+
+      const tokenFromDb = await tokenService.findToken({
+        userId: userData.id,
+        refreshToken,
+      });
+      if (!tokenFromDb) {
+        console.error(
+          'Refresh token not found in DB (or does not belong to this user)'
+        );
+        throw ApiError.UnauthorizedError();
+      }
+
+      const user = await UserModel.findById(userData.id);
+      if (!user) {
+        console.error(`User with ID=${userData.id} not found`);
+        throw ApiError.UnauthorizedError();
+      }
+
+      const userDto = new UserDto(user);
+      const tokens = tokenService.generateToken({ ...userDto });
+
+      await tokenService.saveToken(userDto.id, tokens.refreshToken);
+
+      return { ...tokens, user: userDto };
+    } catch (error) {
+      console.error(error.message);
+      throw error;
     }
-    const userData = tokenService.validateRefreshToken(refreshToken);
-    const tokenFromDb = await tokenService.findToken(refreshToken);
-
-    if (!userData || !tokenFromDb) {
-      console.error('Token validation failed');
-      throw ApiError.UnauthorizedError;
-    }
-    const user = await UserModel.findById(userData.id);
-    const userDto = new UserDto(user);
-    const tokens = tokenService.generateToken({ ...userDto });
-
-    await tokenService.saveToken(userDto.id, tokens.refreshToken);
-
-    return { ...tokens, user: userDto };
   }
 
   async requestPasswordReset(email) {

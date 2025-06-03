@@ -58,6 +58,54 @@ class RotationPlanService {
       console.error('Error initializing/loading rotation queues:', err);
       throw new Error('Failed to initialize rotation queues');
     }
+
+    try {
+      await this.loadRotationQueues(activeStations, costCenter, shift, plant);
+    } catch (err) {
+      throw new Error('Failed to initialize rotation queues');
+    }
+
+    // === Check available workers for priority stations ===
+    try {
+      // Build an array of stations with priority > 1 that are active
+      const priorityStations = activeStations
+        .filter((stn) => stn.priority > 1 && stn.status)
+        .sort((a, b) => b.priority - a.priority);
+
+      // Fetch all active workers for the given costCenter/shift/plant
+      const availableWorkers = await WorkerModel.find({
+        costCenter,
+        shift,
+        plant,
+        status: true,
+      });
+
+      // Make a copy to remove assigned workers as we go
+      const pool = [...availableWorkers];
+
+      for (const station of priorityStations) {
+        // Find the first worker in the pool who can work this station
+        const idx = pool.findIndex(
+          (worker) =>
+            Array.isArray(worker.stations) &&
+            worker.stations.some((s) => s.name === station.name && s.isActive)
+        );
+
+        if (idx === -1) {
+          // No suitable worker found for this priority station
+          throw new Error(`Insufficient workers for station "${station.name}"`);
+        }
+
+        // Remove the assigned worker from further consideration
+        pool.splice(idx, 1);
+      }
+
+      // If we reach here, each priority station has an assigned worker
+    } catch (err) {
+      // Abort further generation by re-throwing the error
+      throw err;
+    }
+
     try {
       // Initialize result containers
       const specialRotation = new Map();

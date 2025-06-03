@@ -310,8 +310,13 @@ export default class Store {
         cycles
       );
       this.setDailyRotation(response.data);
+      return response.data;
     } catch (error) {
-      this.setErrorMsg('Error creating cycleRotations plan');
+      const msg =
+        error.response?.data?.message ||
+        'Unknown error while generating rotation';
+      this.setErrorMsg(msg);
+      throw error;
     }
   }
 

@@ -139,7 +139,6 @@ const RotationPlan = () => {
         >
           Load rotation
         </button>
-
         <select
           placeholder="Cycles"
           className={styles.cyclesDropdown}
@@ -170,6 +169,8 @@ const RotationPlan = () => {
       </div>
       {loader && <FaSpinner className={styles.spinner} />}
       {msg && <p className={styles.success}>{msg}</p>}
+      {store.errorMsg && <p className={styles.error}>{store.errorMsg}</p>}
+
       {isFullyAssigned && (
         <p className={styles.error}>
           Bitte prüfen Sie die Anzahl der Mitarbeiter und Stationen.

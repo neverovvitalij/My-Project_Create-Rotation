@@ -28,7 +28,9 @@ class RotationPlanController {
       );
       return res.json(data);
     } catch (error) {
-      next(ApiError.BadRequest('Error creating rotation JSON', error.message));
+      next(
+        ApiError.BadRequest(error.message || 'Error creating rotation JSON')
+      );
     }
   }
 
