@@ -51,17 +51,24 @@ class RotationPlanService {
       throw new Error('Station initialization failed');
     }
 
-    // (2) load queues
+    // Fetch all active workers for the given costCenter/shift/plant
+    let availableWorkers;
     try {
-      await this.loadRotationQueues(activeStations, costCenter, shift, plant);
-    } catch (err) {
-      console.error('Error initializing/loading rotation queues:', err);
-      throw new Error('Failed to initialize rotation queues');
+      availableWorkers = await WorkerModel.find({
+        costCenter,
+        shift,
+        plant,
+        status: true,
+      });
+    } catch (error) {
+      console.error('Error fetch all active workers:', err.message);
+      throw new Error('Failed to fetch all active workers');
     }
-
+    // (2) load queues and
     try {
       await this.loadRotationQueues(activeStations, costCenter, shift, plant);
     } catch (err) {
+      console.error('Error initializing/loading rotation queues:', err.message);
       throw new Error('Failed to initialize rotation queues');
     }
 
@@ -72,23 +79,10 @@ class RotationPlanService {
         .filter((stn) => stn.priority > 1 && stn.status)
         .sort((a, b) => b.priority - a.priority);
 
-      // Fetch all active workers for the given costCenter/shift/plant
-      const availableWorkers = await WorkerModel.find({
-        costCenter,
-        shift,
-        plant,
-        status: true,
-      });
-
-      // Make a copy to remove assigned workers as we go
-      const pool = [...availableWorkers];
-
       for (const station of priorityStations) {
         // Find the first worker in the pool who can work this station
-        const idx = pool.findIndex(
-          (worker) =>
-            Array.isArray(worker.stations) &&
-            worker.stations.some((s) => s.name === station.name && s.isActive)
+        const idx = availableWorkers.findIndex((worker) =>
+          worker.stations.some((s) => s.name === station.name && s.isActive)
         );
 
         if (idx === -1) {
@@ -97,12 +91,9 @@ class RotationPlanService {
         }
 
         // Remove the assigned worker from further consideration
-        pool.splice(idx, 1);
+        availableWorkers.splice(idx, 1);
       }
-
-      // If we reach here, each priority station has an assigned worker
     } catch (err) {
-      // Abort further generation by re-throwing the error
       throw err;
     }
 
@@ -182,6 +173,32 @@ class RotationPlanService {
       }
 
       // (C) Generate daily cycles for regular rotation
+      try {
+        const preassignedWorkers = [...preassigned, ...specialAssignments];
+        const namesPre = new Set(preassignedWorkers.map((obj) => obj.name));
+
+        const pool = availableWorkers.filter((obj) => !namesPre.has(obj.name));
+
+        const cycleStations = activeStations.filter(
+          (stn) => stn.priority === 1 && stn.status
+        );
+
+        for (const station of cycleStations) {
+          const idx = pool.findIndex((worker) =>
+            worker.stations.some((s) => s.name === station.name && s.isActive)
+          );
+
+          if (idx === -1) {
+            throw new Error(
+              `Insufficient workers for station "${station.name}"`
+            );
+          }
+
+          pool.splice(idx, 1);
+        }
+      } catch (err) {
+        throw err;
+      }
       for (let cycle = 0; cycle < cycles; cycle++) {
         const dailyRotation = {};
         // Keep track of already assigned names to avoid duplicates
@@ -322,7 +339,7 @@ class RotationPlanService {
       };
     } catch (error) {
       console.error('Error generating rotation data:', error);
-      throw new Error('Error generating rotation data');
+      throw new Error(error || 'Error generating rotation data');
     }
   }
 

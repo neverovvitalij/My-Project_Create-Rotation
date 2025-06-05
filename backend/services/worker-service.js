@@ -20,7 +20,7 @@ class WorkerService {
     costCenter,
     shift,
     plant,
-    stations,
+    stations = [],
     group,
     status = true
   ) {

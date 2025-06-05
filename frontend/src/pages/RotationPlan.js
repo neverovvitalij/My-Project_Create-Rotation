@@ -23,6 +23,7 @@ const RotationPlan = () => {
   const employees = toJS(store.employeeList);
 
   const onClickPreview = async () => {
+    store.setErrorMsg('');
     setLoader(true);
     try {
       setMsg('');
@@ -114,6 +115,8 @@ const RotationPlan = () => {
   const handleCheck = async (worker) => {
     const newStatus = !worker.status;
     await store.changeWorkerStatus(worker.name, newStatus);
+    setPreassigned([]);
+    setSpecialAssignments([]);
   };
 
   const groupedEmployees = useMemo(() => {

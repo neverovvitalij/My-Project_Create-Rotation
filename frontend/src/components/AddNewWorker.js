@@ -11,19 +11,17 @@ const AddNewWorker = () => {
 
   const handleChangeSubmit = async (event) => {
     event.preventDefault();
-    const stations = selectedStations.map((station) => ({
-      name: station,
-      isActive: true,
-    }));
+    const stations =
+      selectedStations.map((station) => ({
+        name: station,
+        isActive: true,
+      })) || [];
 
     if (!candidateName) {
       return store.setErrorMsg('Employee name is missing');
     }
     if (!group) {
       return store.setErrorMsg('Employee group is missing');
-    }
-    if (stations.length <= 0) {
-      return store.setErrorMsg('At least one station must be selected');
     }
 
     const candidate = {
