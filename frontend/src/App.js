@@ -73,7 +73,7 @@ function App() {
   return (
     <BrowserRouter>
       <div className={styles.App}>
-        <h1 className={styles.header}>Rotationsplan leicht erstellen!</h1>
+        <h1 className={styles.header}>Rotationsplan einfach erstellen!</h1>
         {store.isAuth && <UserAria />}
         <Routes>
           <Route

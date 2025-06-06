@@ -66,7 +66,7 @@ const AddNewWorker = () => {
               type="text"
               onChange={(e) => setCandidateName(e.target.value)}
               className={styles.inputField}
-              placeholder="Enter worker name"
+              placeholder="Mitarbeiternamen eingeben"
             />
           </div>
           <select
@@ -92,8 +92,8 @@ const AddNewWorker = () => {
             className={styles.toggleStationsButton}
           >
             {selectedStations.length === store.stations.length
-              ? 'Deselect All Stations'
-              : 'Select All Stations'}
+              ? 'Alle Stationen abwählen'
+              : 'Alle Stationen auswählen'}
           </button>
 
           <div className={styles.stationsList}>
@@ -129,7 +129,7 @@ const AddNewWorker = () => {
         </div>
 
         <button type="submit" className={styles.submitButton}>
-          Add Worker
+          Mitarbeiter hinzufügen
         </button>
         {store.errorMsg && (
           <h2 className={styles.errorMsg}>{store.errorMsg}</h2>

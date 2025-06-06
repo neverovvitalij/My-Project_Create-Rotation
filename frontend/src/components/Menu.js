@@ -11,7 +11,7 @@ const Menu = () => {
           isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
         }
       >
-        StationsListe
+        Stationenliste
       </NavLink>
       <NavLink
         to="/dashboard/workersliste"
@@ -19,7 +19,7 @@ const Menu = () => {
           isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
         }
       >
-        WorkersListe
+        Mitarbeiterliste
       </NavLink>
       <NavLink
         to="/dashboard/rotationplan"
@@ -27,7 +27,7 @@ const Menu = () => {
           isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
         }
       >
-        RotationPlan
+        Rotationsplan
       </NavLink>
     </nav>
   );

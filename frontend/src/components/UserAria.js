@@ -17,28 +17,28 @@ const UserAria = () => {
         <div className={styles.userInfo}>
           {store.isAuth && store.user.isActivated ? (
             <h3>
-              You are logged in as {store.user.email}{' '}
+              Sie sind eingeloggt als {store.user.email}{' '}
               <AiOutlineDownSquare
                 title="Email confirmed"
                 className={styles.greenicon}
               />{' '}
-              authorized
+              autorisiert
             </h3>
           ) : (
             <h3>
-              You are logged in as {store.user.email}{' '}
+              Sie sind eingeloggt als {store.user.email}{' '}
               <AiOutlineExclamationCircle
-                title="Please confirm your email!"
+                title="Bitte bestätige deine E-Mail-Adresse"
                 className={styles.redicon}
               />{' '}
-              NOT authorized (please confirm your email)
+              Nicht autorisiert (Bitte bestätige deine E-Mail-Adresse)
             </h3>
           )}
           <button
             className={styles.logoutButton}
             onClick={() => store.logout()}
           >
-            Logout
+            Abmelden
           </button>
         </div>
         <Menu />

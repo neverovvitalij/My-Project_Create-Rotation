@@ -75,13 +75,13 @@ const StationsList = () => {
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.header}>Station List</h2>
+      <h2 className={styles.header}>Stationenliste</h2>
 
       {/* Dynamic group display */}
       <div className={styles.stationGroups}>
         {Object.entries(groupedStations).map(([group, stations]) => (
           <div key={group} className={styles.groupColumn}>
-            <h3>Group {group}</h3>
+            <h3>Gruppe {group}</h3>
             {stations
               .slice()
               .sort((a, b) => a.name.localeCompare(b.name))
@@ -96,7 +96,7 @@ const StationsList = () => {
         className={styles.toggleButton}
         onClick={toggleAddStationForm}
       >
-        {showAddStationForm ? 'hide form' : 'Add station'}
+        {showAddStationForm ? 'Formular ausblenden' : 'Station hinzufügen'}
       </button>
       {showAddStationForm && (
         <div className={styles.addNewStationContainer} ref={addStationFormRef}>
@@ -136,7 +136,7 @@ const StationsList = () => {
               <option value={5}>5</option>
             </select>
             <button className={styles.addStationButton} type="submit">
-              Add Station
+              Station hinzufügen
             </button>
             {store.errorMsg && (
               <p className={styles.errorMessage}>{store.errorMsg}</p>

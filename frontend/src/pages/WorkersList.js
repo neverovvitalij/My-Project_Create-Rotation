@@ -36,12 +36,12 @@ const WorkersList = () => {
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.header}>Employee List</h2>
+      <h2 className={styles.header}>Mitarbeiterliste</h2>
       <div className={styles.workersGrid}>
         {store.employeeList.length > 0 ? (
           Object.entries(groupedEmploees).map(([group, workers]) => (
             <div className={styles.groupColumn} key={group}>
-              <h3>Group {group}</h3>
+              <h3>Gruppe {group}</h3>
               {workers
                 .slice()
                 .sort((a, b) => a.name.localeCompare(b.name))
@@ -57,7 +57,7 @@ const WorkersList = () => {
           ))
         ) : (
           <p className={styles.noWorkersMessage}>
-            No workers found. Please add new ones.
+            Keine Mitarbeiter gefunden. Bitte füge neue hinzu
           </p>
         )}
       </div>
@@ -66,7 +66,7 @@ const WorkersList = () => {
         className={styles.toggleButton}
         onClick={toggleAddWorkerFrom}
       >
-        {showAddWorkerForm ? 'Hide form' : 'Add worker'}
+        {showAddWorkerForm ? 'Formular ausblenden' : 'Mitarbeiter hinzufügen'}
       </button>
       {showAddWorkerForm && (
         <div className={styles.addNewWorkerContainer} ref={addWorkerFromRef}>

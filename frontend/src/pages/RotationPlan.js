@@ -115,8 +115,12 @@ const RotationPlan = () => {
   const handleCheck = async (worker) => {
     const newStatus = !worker.status;
     await store.changeWorkerStatus(worker.name, newStatus);
-    setPreassigned([]);
-    setSpecialAssignments([]);
+    setPreassigned((prev) =>
+      prev.filter((item) => item.worker !== worker.name)
+    );
+    setSpecialAssignments((prev) =>
+      prev.filter((item) => item.worker !== worker.name)
+    );
   };
 
   const groupedEmployees = useMemo(() => {
@@ -140,7 +144,7 @@ const RotationPlan = () => {
           className={styles.button}
           onClick={onClickPreview}
         >
-          Load rotation
+          Rotation laden
         </button>
         <select
           placeholder="Cycles"
@@ -161,12 +165,12 @@ const RotationPlan = () => {
             className={styles.button}
             onClick={confirmRotation}
           >
-            Save plan
+            Plan speichern
           </button>
         ) : null}
         {rotationForDownload && (
           <button onClick={downloadRotation} className={styles.button}>
-            Download plan
+            Plan herunterladen
           </button>
         )}
       </div>
@@ -179,7 +183,7 @@ const RotationPlan = () => {
           Bitte prüfen Sie die Anzahl der Mitarbeiter und Stationen.
         </p>
       )}
-      <h2>{`Rotations plan ${rotations.date}`}</h2>
+      <h2>Rotationsplan</h2>
       <ExcelPreview
         ref={previewRef}
         preassigned={toJS(preassigned)}
@@ -188,13 +192,13 @@ const RotationPlan = () => {
       {/* List of employees */}
       <h3
         className={styles.groupHeader}
-      >{`Available employees ${store.activeEmployee} | Needed ${store.activeStations}`}</h3>
+      >{`Verfügbare Mitarbeiter (gesamt) ${store.activeEmployee} | Benötigt ${store.activeStations}`}</h3>
       {Object.entries(groupedEmployees).map(([groupName, groupEmps]) => (
         <section key={groupName} className={styles.groupSection}>
-          <h3 className={styles.groupHeader}>Group {groupName}</h3>
+          <h3 className={styles.groupHeader}>Gruppe {groupName}</h3>
           <h3
             className={styles.groupHeader}
-          >{`Available employees ${store.activeEmployeeByGroup[groupName]} | Needed ${store.stationsByGroup[groupName]}`}</h3>
+          >{`Verfügbare Mitarbeiter ${store.activeEmployeeByGroup[groupName]} | Benötigt ${store.stationsByGroup[groupName]}`}</h3>
           <ul className={styles.available}>
             {groupEmps.map((emp) => {
               const stationValue = getCurrentStationForWorker(emp.name);
@@ -216,8 +220,8 @@ const RotationPlan = () => {
                     }
                     disabled={!emp.status}
                   >
-                    <option value="">Assign</option>
-                    <option value="sonder">Special</option>
+                    <option value="">Zuweisen</option>
+                    <option value="sonder">Sonder</option>
                     {emp.stations.map((station) => (
                       <option key={station._id} value={station.name}>
                         {station.name}
