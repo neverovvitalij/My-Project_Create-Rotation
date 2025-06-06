@@ -1,0 +1,29 @@
+.container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  background-color: #1e1e2d;
+  color: white;
+  padding: 30px;
+}
+
+.container a {
+  color: white;
+  font-size: 16px;
+  padding-right: 20px;
+}
+
+.container p {
+  margin-left: 50%;
+}
+
+@media (max-width: 768px) {
+  .container {
+    max-width: 95%;
+    padding: 5px;
+  }
+
+  .container p {
+    margin-left: 10%;
+  }
+}

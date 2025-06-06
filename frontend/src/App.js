@@ -19,6 +19,7 @@ import RegisterForm from './pages/RegisterForm';
 import ReqResPassword from './pages/ReqResPassword';
 import ResetPassword from './pages/ResetPassword';
 import styles from './App.module.css';
+import Footer from './components/Footer';
 
 function AuthGuard({ children }) {
   const { store } = useContext(Context);
@@ -123,6 +124,7 @@ function App() {
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <Footer />
       </div>
     </BrowserRouter>
   );
