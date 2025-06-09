@@ -10,7 +10,38 @@ body {
   background-color: #1e1e2d;
 }
 
-/*globsl styles for Excel-preview */
+/*global styles for Dark/Light Theme */
+:root {
+  --bg: #1e1e2d;
+  --header: #f7e500;
+  --userAriaBg: #2b2b3d;
+  --addNewWorkerBG: #3a3a4f;
+  --userAriaHD: #fff;
+  --greenicon: #4caf50;
+  --NavLinkBG: #2f80f2;
+  --NavLinkBGText: #ffffff;
+  --NavLinkBGTextActive: #2b2b3d;
+  --NavLinkBGActive: #f7e500;
+  --logoutButton: #ff4444;
+  --rotationLoadButtons: #f7e500;
+  --rotationLoadButtonsHover: #d6c400;
+}
+[data-theme='light'] {
+  --bg: #ffecba;
+  --header: #33425b;
+  --userAriaBg: #e1d0a4;
+  --addNewWorkerBG: #c8b992;
+  --userAriaHD: #2c2c42;
+  --greenicon: #2b2b3d;
+  --NavLinkBG: #d6b678;
+  --NavLinkBGText: #2b2b3d;
+  --NavLinkBGActive: #d8ae5a;
+  --logoutButton: #2b2b3d;
+  --rotationLoadButtons: #d6b678;
+  --rotationLoadButtonsHover: #d8ae5a;
+}
+
+/*global styles for Excel-preview */
 #preview-table {
   border-collapse: separate !important;
   border-spacing: 0 8px !important;

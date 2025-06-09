@@ -4,7 +4,7 @@
   align-items: center;
   padding: 10px 15px;
   margin: 5px;
-  background-color: #3a3a4f;
+  background-color: var(--userAriaBg);
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s ease, background-color 0.2s ease;
@@ -12,14 +12,14 @@
 }
 
 .stationCard:hover {
-  background-color: #505068;
+  background-color: var(--addNewWorkerBG);
   transform: scale(1.02);
 }
 
 .stationName {
   font-size: 16px;
   font-weight: bold;
-  color: #ffffff;
+  color: var(--userAriaHD);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -27,7 +27,7 @@
 
 .deleteIcon {
   font-size: 20px;
-  color: #ff4d4d;
+  color: var(--logoutButton);
   transition: color 0.2s ease;
 }
 
@@ -37,7 +37,7 @@
 
 .stationPriority {
   font-size: 16px;
-  color: gold;
+  color: var(--header);
   margin-left: auto;
 }
 

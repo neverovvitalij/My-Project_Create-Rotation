@@ -2,13 +2,14 @@
   display: flex;
   justify-content: center;
   width: 100%;
-  background-color: #1e1e2d;
-  color: white;
+  background-color: var(--bg);
+  color: var(--userAriaHD);
   padding: 30px;
+  margin-top: 15px;
 }
 
 .container a {
-  color: white;
+  color: var(--userAriaHD);
   font-size: 16px;
   padding-right: 20px;
 }

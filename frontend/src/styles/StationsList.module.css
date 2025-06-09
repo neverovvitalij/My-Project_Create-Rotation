@@ -3,7 +3,7 @@
   max-width: 1200px;
   margin: 20px auto;
   padding: 30px 20px;
-  background-color: #1f1f2d;
+  background-color: var(--userAriaBg);
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   display: flex;
@@ -14,7 +14,7 @@
 .header {
   font-size: 28px;
   font-weight: bold;
-  color: #f7e500;
+  color: var(--header);
   text-align: center;
   margin-bottom: 20px;
 }
@@ -29,7 +29,7 @@
 .groupColumn {
   flex: 1 1 280px;
   max-width: 300px;
-  background-color: #2d2d3d;
+  background-color: var(--userAriaBg);
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -37,7 +37,7 @@
 }
 
 .groupColumn h3 {
-  color: #f7e500;
+  color: var(--header);
   text-align: center;
   margin-bottom: 15px;
   font-size: 20px;
@@ -47,7 +47,7 @@
 .toggleButton {
   margin: 20px auto;
   padding: 12px 30px;
-  background-color: #f7e500;
+  background-color: var(--rotationLoadButtons);
   color: #2b2b3d;
   border: none;
   border-radius: 5px;
@@ -59,7 +59,7 @@
 }
 
 .toggleButton:hover {
-  background-color: #d6c400;
+  background-color: var(--rotationLoadButtonsHover);
   transform: scale(1.05);
 }
 
@@ -75,7 +75,7 @@
 }
 
 .addNewStationContainer {
-  background-color: #2d2d3d;
+  background-color: var(--userAriaBg);
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -94,8 +94,8 @@
   padding: 10px;
   border-radius: 6px;
   border: 1px solid #ccc;
-  background-color: #1f1f2d;
-  color: #fff;
+  background-color: var(--bg);
+  color: var(--NavLinkBGText);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   width: 30%;
   box-sizing: border-box;
@@ -106,7 +106,7 @@
 }
 
 .addStationButton {
-  background-color: #f7e500;
+  background-color: var(--rotationLoadButtons);
   padding: 10px 20px;
   border-radius: 6px;
   border: none;
@@ -117,7 +117,7 @@
 }
 
 .addStationButton:hover {
-  background-color: #e0d100;
+  background-color: var(--rotationLoadButtonsHover);
 }
 
 .errorMessage {

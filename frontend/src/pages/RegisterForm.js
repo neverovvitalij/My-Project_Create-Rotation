@@ -47,7 +47,8 @@ const RegisterForm = () => {
             placeholder="Email"
             className={styles.input}
             value={email}
-            type="text"
+            type="email"
+            required
             onChange={(e) => setEmail(e.target.value)}
           />
           <input
@@ -55,6 +56,7 @@ const RegisterForm = () => {
             className={styles.input}
             value={password}
             type="password"
+            required
             onChange={(e) => setPassword(e.target.value)}
           />
           <select

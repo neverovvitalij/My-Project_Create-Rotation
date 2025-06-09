@@ -6,13 +6,13 @@
   max-width: 95%;
   margin: 0 auto;
   padding: 20px;
-  background-color: #1f1f2d;
+  background-color: var(--bg);
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 h2 {
-  color: #f7e500;
+  color: var(--header);
   font-size: 24px;
   font-weight: bold;
   text-align: center;
@@ -35,7 +35,8 @@ h2 {
   align-items: center;
   justify-content: space-between;
   padding: 15px;
-  background-color: #2d2d3d;
+  background-color: var(--userAriaBg);
+  color: var(--userAriaHD);
   border-radius: 8px;
   gap: 10px;
   flex: 1 1 200px;
@@ -49,8 +50,8 @@ h2 {
 }
 
 .stationDropdown {
-  background-color: #383850;
-  color: #ffffff;
+  background-color: var(--userAriaBg);
+  color: var(--userAriaHD);
   border: 1px solid #f7e500;
   border-radius: 5px;
   padding: 8px 10px;
@@ -65,8 +66,8 @@ h2 {
 }
 
 .cyclesDropdown {
-  background-color: #383850;
-  color: #ffffff;
+  background-color: var(--userAriaBg);
+  color: var(--NavLinkBGText);
   border: 1px solid #f7e500;
   border-radius: 5px;
   font-size: 16px;
@@ -80,7 +81,7 @@ h2 {
 
 .stationDropdown:hover,
 .stationDropdown:focus {
-  background-color: #4a4a6a;
+  background-color: var(--userAriaBg);
   border-color: #f7e500;
 }
 
@@ -99,7 +100,7 @@ h2 {
 }
 
 .groupHeader {
-  color: #f7e500;
+  color: var(--header);
   margin-bottom: 10px;
   font-size: 20px;
 }
@@ -112,7 +113,7 @@ h2 {
 }
 
 .button {
-  background-color: #f7e500;
+  background-color: var(--rotationLoadButtons);
   color: #2b2b3d;
   border: none;
   border-radius: 5px;
@@ -125,7 +126,7 @@ h2 {
 }
 
 .button:hover {
-  background-color: #d6c400;
+  background-color: var(--rotationLoadButtonsHover);
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -182,6 +183,7 @@ h2 {
   }
 
   .buttonPanel {
+    flex-direction: column;
     padding: 10px;
   }
 }

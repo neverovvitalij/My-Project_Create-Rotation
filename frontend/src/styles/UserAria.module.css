@@ -6,10 +6,10 @@
   width: 95%;
   max-width: 1200px;
   margin: 20px;
-  background-color: #2b2b3d;
+  background-color: var(--userAriaBg);
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  /* margin-bottom: 15px; */
+  margin-bottom: 15px;
 }
 
 .header {
@@ -17,21 +17,26 @@
   justify-content: space-between;
   align-items: flex-start;
   width: 95%;
-  color: #fff;
+  color: var(--userAriaHD);
 }
 
 .userInfo {
   display: flex;
-  flex-direction: column;
   align-items: flex-start;
+  justify-content: space-between;
   gap: 10px;
+  padding-top: 10px;
 }
 
 .logoutButton {
-  padding: 5px 10px;
-  border-radius: 8px;
+  width: 5rem;
+  height: 2rem;
+  padding: 0.25rem;
+  font-size: 1.25rem;
+  border-width: 1.5px;
+  border-radius: 0.4rem;
   cursor: pointer;
-  background-color: #ff4444;
+  background-color: var(--logoutButton);
   color: white;
   font-size: 14px;
   transition: background-color 0.3s ease, transform 0.2s ease;
@@ -49,22 +54,34 @@
 }
 
 .greenicon {
-  color: #4caf50;
+  color: var(--greenicon);
 }
 
 .redicon {
-  color: #f44336;
+  color: var(--logoutButton);
+}
+
+.themeToggle {
+  width: 2rem;
+  height: 2rem;
+  padding: 0.25rem;
+  font-size: 1.25rem;
+  border-width: 1.5px;
+  border-radius: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.button:active {
+  transform: scale(0.95);
 }
 
 @media (max-width: 768px) {
   .container {
     padding: 5px;
-  }
-
-  .userInfo h3 {
-    font-size: 16px;
-    line-height: 1.4;
-    text-align: center;
   }
 
   .header {
@@ -76,5 +93,10 @@
 
   .logoutButton {
     align-self: center;
+  }
+
+  .userInfo {
+    flex-direction: column;
+    align-items: center;
   }
 }
