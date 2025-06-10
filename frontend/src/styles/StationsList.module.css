@@ -3,7 +3,7 @@
   max-width: 1200px;
   margin: 20px auto;
   padding: 30px 20px;
-  background-color: var(--userAriaBg);
+  background-color: var(--bg-form);
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   display: flex;
@@ -14,7 +14,7 @@
 .header {
   font-size: 28px;
   font-weight: bold;
-  color: var(--header);
+  color: var(--text-primary);
   text-align: center;
   margin-bottom: 20px;
 }
@@ -28,8 +28,8 @@
 
 .groupColumn {
   flex: 1 1 280px;
-  max-width: 300px;
-  background-color: var(--userAriaBg);
+  max-width: 20%;
+  background-color: var(--bg-secondary);
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -37,7 +37,7 @@
 }
 
 .groupColumn h3 {
-  color: var(--header);
+  color: var(--text-primary);
   text-align: center;
   margin-bottom: 15px;
   font-size: 20px;
@@ -47,7 +47,7 @@
 .toggleButton {
   margin: 20px auto;
   padding: 12px 30px;
-  background-color: var(--rotationLoadButtons);
+  background-color: var(--color-accent);
   color: #2b2b3d;
   border: none;
   border-radius: 5px;
@@ -59,7 +59,7 @@
 }
 
 .toggleButton:hover {
-  background-color: var(--rotationLoadButtonsHover);
+  background-color: var(--color-accent-hover);
   transform: scale(1.05);
 }
 
@@ -75,7 +75,7 @@
 }
 
 .addNewStationContainer {
-  background-color: var(--userAriaBg);
+  background-color: var(--bg-secondary);
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -94,8 +94,8 @@
   padding: 10px;
   border-radius: 6px;
   border: 1px solid #ccc;
-  background-color: var(--bg);
-  color: var(--NavLinkBGText);
+  background-color: var(--bg-primary);
+  color: var(--navlink-text);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   width: 30%;
   box-sizing: border-box;
@@ -106,7 +106,7 @@
 }
 
 .addStationButton {
-  background-color: var(--rotationLoadButtons);
+  background-color: var(--color-accent);
   padding: 10px 20px;
   border-radius: 6px;
   border: none;
@@ -117,7 +117,7 @@
 }
 
 .addStationButton:hover {
-  background-color: var(--rotationLoadButtonsHover);
+  background-color: var(--color-accent-hover);
 }
 
 .errorMessage {

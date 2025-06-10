@@ -2,14 +2,14 @@
   display: flex;
   justify-content: center;
   width: 100%;
-  background-color: var(--bg);
-  color: var(--userAriaHD);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   padding: 30px;
   margin-top: 15px;
 }
 
 .container a {
-  color: var(--userAriaHD);
+  color: var(--text-primary);
   font-size: 16px;
   padding-right: 20px;
 }

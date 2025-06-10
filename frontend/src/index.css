@@ -12,33 +12,33 @@ body {
 
 /*global styles for Dark/Light Theme */
 :root {
-  --bg: #1e1e2d;
-  --header: #f7e500;
-  --userAriaBg: #2b2b3d;
-  --addNewWorkerBG: #3a3a4f;
-  --userAriaHD: #fff;
-  --greenicon: #4caf50;
-  --NavLinkBG: #2f80f2;
-  --NavLinkBGText: #ffffff;
-  --NavLinkBGTextActive: #2b2b3d;
-  --NavLinkBGActive: #f7e500;
-  --logoutButton: #ff4444;
-  --rotationLoadButtons: #f7e500;
-  --rotationLoadButtonsHover: #d6c400;
+  --bg-primary: #1e1e2d;
+  --color-accent: #f7e500;
+  --bg-secondary: #2b2b3d;
+  --bg-form: #3a3a4f;
+  --text-primary: #fff;
+  --color-success: #4caf50;
+  --navlink-bg: #2f80f2;
+  --navlink-text: #ffffff;
+  --navlink-text-active: #2b2b3d;
+  --navlink-bg-active: #f7e500;
+  --color-error: #ff4444;
+  --color-accent: #f7e500;
+  --color-accent-hover: #d6c400;
 }
 [data-theme='light'] {
-  --bg: #ffecba;
-  --header: #33425b;
-  --userAriaBg: #e1d0a4;
-  --addNewWorkerBG: #c8b992;
-  --userAriaHD: #2c2c42;
-  --greenicon: #2b2b3d;
-  --NavLinkBG: #d6b678;
-  --NavLinkBGText: #2b2b3d;
-  --NavLinkBGActive: #d8ae5a;
-  --logoutButton: #2b2b3d;
-  --rotationLoadButtons: #d6b678;
-  --rotationLoadButtonsHover: #d8ae5a;
+  --bg-primary: #ffecba;
+  --color-accent: #33425b;
+  --bg-secondary: #e1d0a4;
+  --bg-form: #c8b992;
+  --text-primary: #2c2c42;
+  --color-success: #2b2b3d;
+  --navlink-bg: #d6b678;
+  --navlink-text: #2b2b3d;
+  --navlink-bg-active: #d8ae5a;
+  --color-error: #2b2b3d;
+  --color-accent: #d6b678;
+  --color-accent-hover: #d8ae5a;
 }
 
 /*global styles for Excel-preview */
@@ -54,22 +54,22 @@ body {
   padding: 6px 12px;
   border: 1px solid #444;
   background: rgba(255, 255, 255, 0.05);
-  color: #eee;
+  color: var(--text-primary);
 }
 
 #preview-table tr:first-child td,
 #preview-table thead th {
-  background: #4b5d7f !important;
-  color: #fff !important;
+  background: var(--navlink-bg) !important;
+  color: var(--text-primary) !important;
   font-weight: bold;
 }
 
 #preview-table tbody tr:nth-child(odd) td {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-primary);
 }
 
 #preview-table tbody tr:nth-child(even) td {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--bg-form);
 }
 
 #preview-table tbody tr td[colspan] {

@@ -6,7 +6,7 @@
   width: 95%;
   max-width: 1200px;
   margin: 0 auto;
-  background-color: var(--userAriaBg);
+  background-color: var(--bg-secondary);
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }

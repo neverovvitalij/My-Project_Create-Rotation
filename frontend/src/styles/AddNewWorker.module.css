@@ -1,5 +1,5 @@
 .container {
-  background-color: var(--addNewWorkerBG);
+  background-color: var(--bg-form);
   padding: 25px;
   border-radius: 12px;
   max-width: 800px;
@@ -47,7 +47,7 @@
 }
 
 .toggleStationsButton {
-  background-color: var(--rotationLoadButtons);
+  background-color: var(--color-accent);
   border: none;
   padding: 10px 15px;
   font-size: 16px;
@@ -59,7 +59,7 @@
 }
 
 .toggleStationsButton:hover {
-  background-color: var(--rotationLoadButtonsHover);
+  background-color: var(--color-accent-hover);
 }
 
 .stationsList {
@@ -72,8 +72,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: var(--bg);
-  color: var(--userAriaHD);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   padding: 10px;
   border-radius: 8px;
   width: 160px;
@@ -82,7 +82,7 @@
 }
 
 .stationItem:hover {
-  background-color: var(--rotationLoadButtonsHover);
+  background-color: var(--color-accent-hover);
 }
 
 .stationCheckbox {
@@ -96,7 +96,7 @@
 }
 
 .selected {
-  background-color: var(--rotationLoadButtonsHover);
+  background-color: var(--color-accent-hover);
   color: black;
 }
 
@@ -107,7 +107,7 @@
 }
 
 .submitButton {
-  background-color: var(--rotationLoadButtons);
+  background-color: var(--color-accent);
   padding: 12px 20px;
   border-radius: 8px;
   border: none;
@@ -118,7 +118,7 @@
 }
 
 .submitButton:hover {
-  background-color: var(--rotationLoadButtonsHover);
+  background-color: var(--color-accent-hover);
 }
 
 .submitButton:active {

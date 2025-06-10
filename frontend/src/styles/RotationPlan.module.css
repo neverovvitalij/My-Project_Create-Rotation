@@ -6,13 +6,13 @@
   max-width: 95%;
   margin: 0 auto;
   padding: 20px;
-  background-color: var(--bg);
+  background-color: var(--bg-primary);
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 h2 {
-  color: var(--header);
+  color: var(--text-primary);
   font-size: 24px;
   font-weight: bold;
   text-align: center;
@@ -35,8 +35,8 @@ h2 {
   align-items: center;
   justify-content: space-between;
   padding: 15px;
-  background-color: var(--userAriaBg);
-  color: var(--userAriaHD);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
   border-radius: 8px;
   gap: 10px;
   flex: 1 1 200px;
@@ -50,8 +50,8 @@ h2 {
 }
 
 .stationDropdown {
-  background-color: var(--userAriaBg);
-  color: var(--userAriaHD);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
   border: 1px solid #f7e500;
   border-radius: 5px;
   padding: 8px 10px;
@@ -66,8 +66,8 @@ h2 {
 }
 
 .cyclesDropdown {
-  background-color: var(--userAriaBg);
-  color: var(--NavLinkBGText);
+  background-color: var(--bg-form);
+  color: var(--navlink-text);
   border: 1px solid #f7e500;
   border-radius: 5px;
   font-size: 16px;
@@ -81,8 +81,8 @@ h2 {
 
 .stationDropdown:hover,
 .stationDropdown:focus {
-  background-color: var(--userAriaBg);
-  border-color: #f7e500;
+  background-color: var(--bg-secondary);
+  border-color: var(--color-accent);
 }
 
 .stationDropdown option {
@@ -100,7 +100,7 @@ h2 {
 }
 
 .groupHeader {
-  color: var(--header);
+  color: var(--text-primary);
   margin-bottom: 10px;
   font-size: 20px;
 }
@@ -113,7 +113,7 @@ h2 {
 }
 
 .button {
-  background-color: var(--rotationLoadButtons);
+  background-color: var(--color-accent);
   color: #2b2b3d;
   border: none;
   border-radius: 5px;
@@ -126,7 +126,7 @@ h2 {
 }
 
 .button:hover {
-  background-color: var(--rotationLoadButtonsHover);
+  background-color: var(--color-accent-hover);
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -143,6 +143,7 @@ h2 {
 
 .spinner {
   animation: spin 1s linear infinite;
+  color: var(--text-primary);
 }
 
 .error {

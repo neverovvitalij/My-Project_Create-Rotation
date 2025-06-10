@@ -6,7 +6,7 @@
   width: 95%;
   max-width: 1200px;
   margin: 20px;
-  background-color: var(--userAriaBg);
+  background-color: var(--bg-secondary);
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   margin-bottom: 15px;
@@ -17,7 +17,7 @@
   justify-content: space-between;
   align-items: flex-start;
   width: 95%;
-  color: var(--userAriaHD);
+  color: var(--text-primary);
 }
 
 .userInfo {
@@ -36,7 +36,7 @@
   border-width: 1.5px;
   border-radius: 0.4rem;
   cursor: pointer;
-  background-color: var(--logoutButton);
+  background-color: var(--color-error);
   color: white;
   font-size: 14px;
   transition: background-color 0.3s ease, transform 0.2s ease;
@@ -54,11 +54,11 @@
 }
 
 .greenicon {
-  color: var(--greenicon);
+  color: var(--color-success);
 }
 
 .redicon {
-  color: var(--logoutButton);
+  color: var(--color-error);
 }
 
 .themeToggle {
