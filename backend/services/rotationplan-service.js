@@ -175,13 +175,21 @@ class RotationPlanService {
       // (C) Generate daily cycles for regular rotation
       try {
         const preassignedWorkers = [...preassigned, ...specialAssignments];
-        const namesPre = new Set(preassignedWorkers.map((obj) => obj.name));
+        const namesPre = new Set(preassignedWorkers.map((obj) => obj.worker));
 
-        const pool = availableWorkers.filter((obj) => !namesPre.has(obj.name));
+        let pool = availableWorkers.filter((obj) => !namesPre.has(obj.name));
 
-        const cycleStations = activeStations.filter(
-          (stn) => stn.priority === 1 && stn.status
-        );
+        const cycleStations = activeStations
+          .filter((stn) => stn.priority === 1 && stn.status)
+          .sort((a, b) => {
+            const countA = pool.filter((w) =>
+              w.stations.some((s) => s.name === a.name && s.isActive)
+            ).length;
+            const countB = pool.filter((w) =>
+              w.stations.some((s) => s.name === b.name && s.isActive)
+            ).length;
+            return countA - countB;
+          });
 
         for (const station of cycleStations) {
           const idx = pool.findIndex((worker) =>
@@ -190,15 +198,19 @@ class RotationPlanService {
 
           if (idx === -1) {
             throw new Error(
-              `Insufficient workers for station "${station.name}"`
+              `Nicht genügend Mitarbeitende für Station: "${station.name}"`
             );
           }
 
           pool.splice(idx, 1);
         }
       } catch (err) {
+        console.error(
+          `Fehler bei der Überprüfung der Zyklus-Stationen: ${err.message}`
+        );
         throw err;
       }
+
       for (let cycle = 0; cycle < cycles; cycle++) {
         const dailyRotation = {};
         // Keep track of already assigned names to avoid duplicates

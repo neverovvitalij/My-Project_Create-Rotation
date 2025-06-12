@@ -6,3 +6,5 @@ node_modules/
 
 # prodatcion files
 prodaction/
+
+.DS_Store
