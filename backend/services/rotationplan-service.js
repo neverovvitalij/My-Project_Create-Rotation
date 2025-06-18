@@ -72,6 +72,25 @@ class RotationPlanService {
       throw new Error('Failed to initialize rotation queues');
     }
 
+    // Auto-preassigning single-station workers
+
+    const singleSkillWorkers = availableWorkers.filter(
+      (w) => w.stations.filter((stn) => stn.isActive).length === 1
+    );
+
+    for (const worker of singleSkillWorkers) {
+      const stationInfo = worker.stations.find((stn) => stn.isActive);
+
+      preassigned.push({ worker: worker.name, station: stationInfo.name });
+
+      availableWorkers = availableWorkers.filter((w) => w.name !== worker.name);
+      const queue = this.rotationQueues.get(stationInfo.name) || [];
+      const idx = queue.findIndex((p) => p.name === worker.name);
+      if (idx !== -1) {
+        queue.push(queue.splice(idx, 1)[0]);
+      }
+    }
+
     // === Check available workers for priority stations ===
     try {
       // Build an array of stations with priority > 1 that are active
@@ -87,13 +106,18 @@ class RotationPlanService {
 
         if (idx === -1) {
           // No suitable worker found for this priority station
-          throw new Error(`Insufficient workers for station "${station.name}"`);
+          throw new Error(
+            `Nicht genügend Mitarbeitende für Station: "${station.name}"`
+          );
         }
 
         // Remove the assigned worker from further consideration
         availableWorkers.splice(idx, 1);
       }
     } catch (err) {
+      console.error(
+        `Fehler bei der Überprüfung der Priority-Stationen: ${err.message}`
+      );
       throw err;
     }
 
@@ -174,13 +198,22 @@ class RotationPlanService {
 
       // (C) Generate daily cycles for regular rotation
       try {
-        const preassignedWorkers = [...preassigned, ...specialAssignments];
-        const namesPre = new Set(preassignedWorkers.map((obj) => obj.worker));
+        const namesPre = new Set(
+          [...preassigned, ...specialAssignments].map(({ worker }) => worker)
+        );
+        const preassignedStations = new Set(
+          preassigned.map(({ station }) => station)
+        );
 
         let pool = availableWorkers.filter((obj) => !namesPre.has(obj.name));
 
         const cycleStations = activeStations
-          .filter((stn) => stn.priority === 1 && stn.status)
+          .filter(
+            (stn) =>
+              stn.priority === 1 &&
+              stn.status &&
+              !preassignedStations.has(stn.name)
+          )
           .sort((a, b) => {
             const countA = pool.filter((w) =>
               w.stations.some((s) => s.name === a.name && s.isActive)
@@ -208,7 +241,7 @@ class RotationPlanService {
         console.error(
           `Fehler bei der Überprüfung der Zyklus-Stationen: ${err.message}`
         );
-        throw err;
+        throw err.message;
       }
 
       for (let cycle = 0; cycle < cycles; cycle++) {
