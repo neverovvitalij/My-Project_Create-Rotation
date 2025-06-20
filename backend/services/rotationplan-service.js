@@ -74,21 +74,29 @@ class RotationPlanService {
 
     // Auto-preassigning single-station workers
 
-    const singleSkillWorkers = availableWorkers.filter(
-      (w) => w.stations.filter((stn) => stn.isActive).length === 1
-    );
+    const workerSchedules = {}; // будем хранить расписание для каждого «недоформированного» работника
+    const removedStations = new Set();
+    // найдём всех, у кого countActiveStations < cycles (и >0)
+    const schedulable = availableWorkers.filter((w) => {
+      const skills = w.stations.filter((s) => s.isActive).map((s) => s.name);
+      return skills.length > 0 && skills.length < cycles;
+    });
 
-    for (const worker of singleSkillWorkers) {
-      const stationInfo = worker.stations.find((stn) => stn.isActive);
+    schedulable.forEach((w) => {
+      const skills = w.stations.filter((s) => s.isActive).map((s) => s.name);
+      skills.forEach((st) => removedStations.add(st));
+    });
 
-      preassigned.push({ worker: worker.name, station: stationInfo.name });
-
-      availableWorkers = availableWorkers.filter((w) => w.name !== worker.name);
-      const queue = this.rotationQueues.get(stationInfo.name) || [];
-      const idx = queue.findIndex((p) => p.name === worker.name);
-      if (idx !== -1) {
-        queue.push(queue.splice(idx, 1)[0]);
-      }
+    for (const w of schedulable) {
+      // список его активных станций
+      const skills = w.stations.filter((s) => s.isActive).map((s) => s.name);
+      // генерируем массив длины cycles, повторяя skills по кругу
+      workerSchedules[w.name] = Array.from(
+        { length: cycles },
+        (_, i) => skills[i % skills.length]
+      );
+      // удаляем его из общего пула – дальше он будет назначаться только по этому расписанию
+      availableWorkers = availableWorkers.filter((x) => x.name !== w.name);
     }
 
     // === Check available workers for priority stations ===
@@ -212,7 +220,8 @@ class RotationPlanService {
             (stn) =>
               stn.priority === 1 &&
               stn.status &&
-              !preassignedStations.has(stn.name)
+              !preassignedStations.has(stn.name) &&
+              !removedStations.has(stn.name)
           )
           .sort((a, b) => {
             const countA = pool.filter((w) =>
@@ -252,7 +261,21 @@ class RotationPlanService {
           ...specialWorkers,
         ]);
 
+        // 0) Pre-fill schedule for workers whose number of skills is less than cycles
+        for (const [workerName, schedule] of Object.entries(workerSchedules)) {
+          if (assignedWorkers.has(workerName)) continue;
+          const stationName = schedule[cycle];
+          const queue = this.rotationQueues.get(stationName) || [];
+          const idx = queue.findIndex((p) => p.name === workerName);
+          if (idx !== -1) {
+            dailyRotation[stationName] = queue[idx];
+            assignedWorkers.add(workerName);
+            queue.push(queue.splice(idx, 1)[0]);
+          }
+        }
+
         for (const station of activeStations) {
+          if (dailyRotation.hasOwnProperty(station.name)) continue;
           if (station.priority >= 2) continue;
           const queue = this.rotationQueues.get(station.name) || [];
           if (queue.length === 0) continue;
