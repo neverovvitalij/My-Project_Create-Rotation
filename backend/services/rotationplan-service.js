@@ -388,14 +388,7 @@ class RotationPlanService {
       }
 
       // (5) Assemble final array of all workers for response
-      const allWorkersRaw = Array.from(this.rotationQueues.values()).flat();
-      const uniqueMap = new Map();
-      for (const w of allWorkersRaw) {
-        if (!uniqueMap.has(w._id.toString())) {
-          uniqueMap.set(w._id.toString(), w);
-        }
-      }
-      const allWorkers = Array.from(uniqueMap.values());
+      const allWorkers = await WorkerModel.find({ costCenter, shift, plant });
 
       // Return full rotation data
       return {
