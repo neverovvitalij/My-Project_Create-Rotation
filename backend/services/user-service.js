@@ -33,7 +33,11 @@ class UserService {
         email,
         `${process.env.API_URL}/api/activate/user/${userActivationLink}`,
         process.env.ADMIN_EMAIL,
-        `${process.env.API_URL}/api/activate/admin/${adminActivationLink}`
+        `${process.env.API_URL}/api/activate/admin/${adminActivationLink}`,
+        role,
+        costCenter,
+        shift,
+        plant
       );
 
       const userDto = new UserDto(user);

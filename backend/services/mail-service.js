@@ -13,7 +13,16 @@ class MailService {
     };
   }
 
-  async sendActivationMail(userEmail, userLink, adminEmail, adminLink) {
+  async sendActivationMail(
+    userEmail,
+    userLink,
+    adminEmail,
+    adminLink,
+    role,
+    costCenter,
+    shift,
+    plant
+  ) {
     const messages = [
       {
         From: this.from,
@@ -34,6 +43,7 @@ class MailService {
         HTMLPart: `
           <div>
             <h1>A new user ${userEmail} has registered</h1>
+            <h2> Plant: ${plant}, Shift: ${shift}, CostCenter: ${costCenter}, Role: ${role}</h2>
             <p>Please approve the user by clicking the following link:</p>
             <a href="${adminLink}">${adminLink}</a>
           </div>
