@@ -24,6 +24,12 @@ class SationController {
       const plant = req.user.plant;
 
       const { name, priority, group } = req.body;
+      if (typeof name === 'string' && /[.$]/.test(name)) {
+        return res.status(400).json({
+          error:
+            'Der Name darf keinen Punkt („.“) oder Dollar („$“) enthalten.',
+        });
+      }
       const response = await stationService.addStation(
         name,
         priority,

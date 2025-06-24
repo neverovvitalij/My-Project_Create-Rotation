@@ -77,7 +77,7 @@ class StationService {
       return station;
     } catch (error) {
       console.error('Error while adding station:', error.message);
-      throw ApiError.BadRequest('Error adding station', error.message);
+      throw ApiError.BadRequest(`Error adding station: ${error.message}`);
     }
   }
 

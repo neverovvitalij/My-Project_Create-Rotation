@@ -236,7 +236,11 @@ export default class Store {
       this.setErrorMsg('');
       this.loadData();
     } catch (error) {
-      this.setErrorMsg(`Station ${name} already exists`);
+      const serverMsg =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        error.message;
+      this.setErrorMsg(serverMsg);
     }
   }
 
