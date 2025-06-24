@@ -633,342 +633,246 @@ class RotationPlanService {
     shift
   ) {
     try {
-      // == (1) Build the filename ==
+      const ExcelJS = require('exceljs');
+      // 1) Filename
       const currentDate = new Date().toISOString().split('T')[0];
       const fileName = `rotationsplan_${currentDate}_${Date.now()}.xlsx`;
-      const fileNameParts = fileName.split('_');
-      const dateFromFile = fileNameParts[1];
+      const dateFromFile = fileName.split('_')[1];
 
-      // == (2) Create the workbook and worksheet ==
+      // 2) Workbook & worksheet
       const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet('Rotationplan');
+      const ws = workbook.addWorksheet('Rotationplan');
 
-      // == (3) Define thin border style ==
-      const borderStyle = {
+      // 3) Common border style
+      const border = {
         top: { style: 'thin' },
         left: { style: 'thin' },
         bottom: { style: 'thin' },
         right: { style: 'thin' },
       };
+      const fillGray = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFEFEFEF' },
+      };
+      const fillBlue = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFADD8E6' },
+      };
 
-      // == (4) Sheet layout parameters ==
+      // 4) Layout
       const numCycles = cycleRotations.length;
-      const leftNumCycles = Math.min(numCycles, 5);
-      const leftCols = 1 + leftNumCycles;
+      const leftCycles = Math.min(numCycles, 5);
+      const leftCols = 1 + leftCycles;
       const gapCols = 1;
       const rightCols = 2;
       const totalCols = leftCols + gapCols + rightCols;
       const rightStart = leftCols + gapCols + 1;
 
-      // == (5) Main header row ==
-      worksheet.mergeCells(1, 1, 1, totalCols - 1);
-      const titleCell = worksheet.getCell(1, 1);
-      titleCell.value = `Rotationsplan ${costCenter} ${shift}‑Schicht`;
+      // 5) Title row
+      ws.mergeCells(1, 1, 1, totalCols - 1);
+      const titleCell = ws.getCell(1, 1);
+      titleCell.value = `Rotationsplan ${costCenter} ${shift}-Schicht`;
       titleCell.font = { bold: true, size: 16 };
       titleCell.alignment = { horizontal: 'left', vertical: 'middle' };
-      titleCell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFEFEFEF' },
-      };
+      titleCell.fill = fillGray;
 
-      const dateCell = worksheet.getCell(1, totalCols);
+      const dateCell = ws.getCell(1, totalCols);
       dateCell.value = dateFromFile;
       dateCell.font = { bold: true, size: 14 };
       dateCell.alignment = { horizontal: 'right', vertical: 'middle' };
-      dateCell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFEFEFEF' },
-      };
+      dateCell.fill = fillGray;
 
-      worksheet.getRow(1).height = 30;
-      worksheet.getRow(1).eachCell((cell) => {
+      ws.getRow(1).height = 30;
+      ws.getRow(1).eachCell((cell) => {
         cell.border = {
-          ...borderStyle,
+          ...border,
           bottom: { style: 'thick', color: { argb: 'FF000000' } },
         };
       });
 
-      // == (6) Top block: High‑Priority + Sonder ==
-      let rowIdx = 2;
-      const hdr = worksheet.getRow(rowIdx);
-      hdr.getCell(1).value = 'Mitarbeiter';
-      hdr.getCell(2).value = 'Station';
-      [1, 2].forEach((c) => {
-        const cell = hdr.getCell(c);
-        cell.font = { bold: true };
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'FFADD8E6' },
-        };
-        cell.border = borderStyle;
-      });
-      for (let c = 3; c <= totalCols; c++) hdr.getCell(c).border = borderStyle;
-      worksheet.mergeCells(rowIdx, rightStart, rowIdx, totalCols);
-      const sHdr = worksheet.getCell(rowIdx, rightStart);
-      sHdr.value = 'Sondertätigkeiten';
-      sHdr.font = { bold: true, size: 14 };
-      sHdr.alignment = {
-        horizontal: 'center',
-        vertical: 'middle',
-        wrapText: true,
-      };
-      sHdr.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFADD8E6' },
-      };
-      sHdr.border = borderStyle;
-      hdr.commit();
-
-      // Populate HP + Special rows
-      rowIdx++;
-      const hpEntries = Object.entries(highPriorityRotation || {}).map(
-        ([station, w]) => [station, typeof w === 'object' ? w.name : w]
-      );
-
-      // entries вида [имя_сотрудника, его_работа]
-      const srEntries = Object.entries(specialRotation || {}).map(
-        ([workerName, spec]) => [
-          workerName,
-          // если spec — объект с полем job, то job, иначе — сам spec
-          typeof spec === 'object' && spec.job != null ? spec.job : spec,
-        ]
-      );
-
-      const topLen = Math.max(hpEntries.length, srEntries.length);
-      for (let i = 0; i < topLen; i++) {
-        const row = worksheet.getRow(rowIdx);
-
-        if (i < hpEntries.length) {
-          const [station, worker] = hpEntries[i];
-          row.getCell(1).value = worker;
-          row.getCell(2).value = station;
-          row.getCell(1).fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FFADD8E6' },
-          };
-          if (i % 2) {
-            row.getCell(2).fill = {
-              type: 'pattern',
-              pattern: 'solid',
-              fgColor: { argb: 'FFD3D3D3' },
-            };
-          }
-        }
-        if (i < srEntries.length) {
-          const [workerName, job] = srEntries[i];
-          row.getCell(rightStart).value = workerName;
-          row.getCell(rightStart + 1).value = job;
-          row.getCell(rightStart).fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FFADD8E6' },
-          };
-          if (i % 2) {
-            row.getCell(rightStart + 1).fill = {
-              type: 'pattern',
-              pattern: 'solid',
-              fgColor: { argb: 'FFD3D3D3' },
-            };
-          }
-        }
-        for (let c = 1; c <= totalCols; c++) {
-          row.getCell(c).border = borderStyle;
-        }
-        row.commit();
-        rowIdx++;
-      }
-
-      // spacer
-      worksheet.addRow([]);
-      rowIdx++;
-
-      // == (7) Pivot by group, with sub-headers ==
+      // 6) Left part: groups (unchanged from before)...
+      let row = 2;
       const hpNames = new Set(
         Object.values(highPriorityRotation || {}).map((w) =>
           typeof w === 'object' ? w.name : w
         )
       );
-      const pivotSet = new Set();
+      const pivot = new Set();
       cycleRotations.forEach((rot) =>
-        Object.values(rot).forEach((worker) => {
-          const name =
-            worker && typeof worker === 'object' ? worker.name : worker;
-          if (name && !hpNames.has(name)) pivotSet.add(name.trim());
+        Object.values(rot).forEach((w) => {
+          const nm = typeof w === 'object' ? w.name : w;
+          if (nm && !hpNames.has(nm)) pivot.add(nm);
         })
       );
       const byGroup = {};
       allWorkers.forEach(({ name, group, status }) => {
-        if (pivotSet.has(name.trim()) && status) {
-          byGroup[group] = byGroup[group] || [];
-          byGroup[group].push(name.trim());
-        }
+        if (pivot.has(name) && status)
+          (byGroup[group] = byGroup[group] || []).push(name);
       });
-
-      // == (7.c) Worker rows with zebra striping ==
-      Object.entries(byGroup)
-        .sort(([a], [b]) => a.localeCompare(b))
-        .forEach(([grp, names]) => {
-          // Group header
-          const grRow = worksheet.addRow([`Gruppe ${grp}`]);
-          grRow.font = { bold: true };
-          worksheet.mergeCells(
-            grRow.number,
-            1,
-            grRow.number,
-            leftNumCycles + 1
-          );
-          grRow.eachCell((c) => (c.border = borderStyle));
-          grRow.commit();
-
-          // Sub-header with round numbers
-          const subTitles = [
-            'Mitarbeiter',
-            ...Array.from(
-              { length: leftNumCycles },
-              (_, i) => `Runde ${i + 1}`
-            ),
-          ];
-          const subRow = worksheet.addRow(subTitles);
-          subRow.eachCell((cell) => {
-            cell.font = { bold: true };
-            cell.fill = {
-              type: 'pattern',
-              pattern: 'solid',
-              fgColor: { argb: 'FFCCFFCC' },
-            };
-            cell.border = borderStyle;
-          });
-          subRow.commit();
-
-          // Actual worker rows
-          names.forEach((workerName, idx) => {
-            const data = [workerName];
-            for (let c = 0; c < leftNumCycles; c++) {
-              const rot = cycleRotations[c] || {};
-              const sts = Object.entries(rot)
-                .filter(([, worker]) => {
-                  const nm =
-                    worker && typeof worker === 'object' ? worker.name : worker;
-                  return nm === workerName;
-                })
-                .map(([station]) => station)
-                .join(', ');
-              data.push(sts);
-            }
-            const row = worksheet.addRow(data);
-            row.eachCell((cell, colNumber) => {
-              cell.border = borderStyle;
-              if (colNumber === 1) {
-                // first column always light-green
-                cell.fill = {
-                  type: 'pattern',
-                  pattern: 'solid',
-                  fgColor: { argb: 'FFCCFFCC' },
-                };
-              } else if (idx % 2 === 1) {
-                // zebra: odd rows dark-grey
-                cell.fill = {
-                  type: 'pattern',
-                  pattern: 'solid',
-                  fgColor: { argb: 'FFD3D3D3' },
-                };
-              }
-            });
-            row.commit();
-          });
-
-          // spacer
-          worksheet.addRow([]);
+      for (const [grp, names] of Object.entries(byGroup).sort((a, b) =>
+        a[0].localeCompare(b[0])
+      )) {
+        // group header
+        ws.mergeCells(row, 1, row, leftCols);
+        const gcell = ws.getCell(row, 1);
+        gcell.value = `Gruppe ${grp}`;
+        gcell.font = { bold: true };
+        gcell.border = border;
+        row++;
+        // subheader
+        const hdrRow = ws.getRow(row++);
+        [
+          'Mitarbeiter',
+          ...Array.from({ length: leftCycles }, (_, i) => `Runde ${i + 1}`),
+        ].forEach((txt, i) => {
+          const c = hdrRow.getCell(i + 1);
+          c.value = txt;
+          c.font = { bold: true };
+          c.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFCCFFCC' },
+          };
+          c.border = border;
         });
-
-      // == (8) Abwesend block ==
-      const absentList = allWorkers
-        .filter((w) => !w.status)
-        .map((w) => w.name.trim());
-      if (absentList.length) {
-        // header
-        const hdrRow = worksheet.getRow(rowIdx);
-        worksheet.mergeCells(rowIdx, rightStart, rowIdx, totalCols);
-        const aHdr = hdrRow.getCell(rightStart);
-        aHdr.value = 'Abwesend';
-        aHdr.font = { bold: true, size: 14 };
-        aHdr.alignment = { horizontal: 'center' };
-        aHdr.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'FFADD8E6' },
-        };
-        aHdr.border = borderStyle;
-        hdrRow.commit();
-        rowIdx++;
-
-        // two‑column layout, trim & reset font
-        const names = absentList.map((o) => o.trim());
-        for (let i = 0; i < names.length; i += 2) {
-          const row = worksheet.getRow(rowIdx);
-          // left cell
-          const leftCell = row.getCell(rightStart);
-          leftCell.value = names[i];
-          leftCell.font = { bold: false };
-          leftCell.border = borderStyle;
-          // right cell if exists
-          if (names[i + 1]) {
-            const rightCell = row.getCell(rightStart + 1);
-            rightCell.value = names[i + 1];
-            rightCell.font = { bold: false };
-            rightCell.border = borderStyle;
+        // worker rows
+        names.forEach((nm, idx) => {
+          const wrow = ws.getRow(row++);
+          wrow.getCell(1).value = nm;
+          for (let i = 0; i < leftCycles; i++) {
+            const rot = cycleRotations[i] || {};
+            const sts = Object.entries(rot)
+              .filter(([, w]) => ((w && w.name) || w) === nm)
+              .map(([st]) => st)
+              .join(', ');
+            wrow.getCell(i + 2).value = sts;
           }
-          row.commit();
-          rowIdx++;
-        }
-      }
-
-      // == (9) Draw thick outline & set widths ==
-      const last = worksheet.lastRow.number;
-      for (let r = 1; r <= last; r++) {
-        for (let c = 1; c <= totalCols; c++) {
-          const cell = worksheet.getCell(r, c);
-          const b = { ...borderStyle };
-          if (r === 1) b.top = { style: 'thick', color: { argb: 'FF000000' } };
-          if (r === last)
-            b.bottom = { style: 'thick', color: { argb: 'FF000000' } };
-          if (c === 1) b.left = { style: 'thick', color: { argb: 'FF000000' } };
-          if (c === totalCols)
-            b.right = { style: 'thick', color: { argb: 'FF000000' } };
-          cell.border = b;
-        }
-      }
-
-      worksheet.getColumn(1).width = 22;
-      for (let c = 2; c <= leftCols; c++) {
-        worksheet.getColumn(c).width = 8;
-      }
-      worksheet.getColumn(leftCols + 1).width = 3;
-      for (let c = rightStart; c <= totalCols; c++) {
-        worksheet.getColumn(c).width = 20;
-      }
-
-      // == (9.1) Auto-fit columns to their content ==
-      worksheet.columns.forEach((column) => {
-        let maxLength = 0;
-        column.eachCell({ includeEmpty: false }, (cell) => {
-          if (cell.row <= 2) return; // skip title and sub-header rows
-          const text = cell.value == null ? '' : cell.value.toString();
-          maxLength = Math.max(maxLength, text.length);
+          wrow.eachCell((cell, col) => {
+            cell.border = border;
+            if (col === 1)
+              cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFCCFFCC' },
+              };
+            else if (idx % 2)
+              cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFD3D3D3' },
+              };
+          });
         });
+        row++;
+      }
 
-        const cappedLength = Math.max(10, Math.min(maxLength, 20));
-
-        column.width = cappedLength + 2;
+      // 7) Right part: High Priority, Sonder, Abwesend all starting at row=2
+      // 7.1 High Priority
+      const hpEntries = Object.entries(highPriorityRotation || {}).map(
+        ([st, w]) => [typeof w === 'object' ? w.name : w, st]
+      );
+      const hpRow0 = 2;
+      // header
+      ws.getRow(hpRow0).getCell(rightStart).value = 'High Priority';
+      ws.getRow(hpRow0).getCell(rightStart).font = { bold: true };
+      ws.getRow(hpRow0).getCell(rightStart).fill = fillBlue;
+      ws.getRow(hpRow0).getCell(rightStart).border = border;
+      // entries
+      hpEntries.forEach(([nm, st], i) => {
+        const r = hpRow0 + i + 1;
+        const rowHP = ws.getRow(r);
+        rowHP.getCell(rightStart).value = nm;
+        rowHP.getCell(rightStart + 1).value = st;
+        // name cell fill = light blue
+        rowHP.getCell(rightStart).fill = fillBlue;
+        rowHP.getCell(rightStart).border = border;
+        rowHP.getCell(rightStart + 1).border = border;
+        if (i % 2) {
+          ws.getCell(r, rightStart + 1).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFD3D3D3' },
+          };
+        }
       });
 
-      // == (10) Save ==
+      // 7.2 Sondertätigkeiten
+      const srEntries = Object.entries(specialRotation || {}).map(
+        ([nm, spec]) => [nm, typeof spec === 'object' ? spec.job : spec]
+      );
+      const ztkRow0 = hpRow0 + hpEntries.length + 2; // one blank row
+      ws.getRow(ztkRow0).getCell(rightStart).value = 'Sondertätigkeiten';
+      ws.getRow(ztkRow0).getCell(rightStart).font = { bold: true };
+      ws.getRow(ztkRow0).getCell(rightStart).fill = fillBlue;
+      ws.getRow(ztkRow0).getCell(rightStart).border = border;
+      srEntries.forEach(([nm, job], i) => {
+        const r = ztkRow0 + i + 1;
+        const rowZ = ws.getRow(r);
+        rowZ.getCell(rightStart).value = nm;
+        rowZ.getCell(rightStart + 1).value = job;
+        // name cell fill = light blue
+        rowZ.getCell(rightStart).fill = fillBlue;
+        rowZ.getCell(rightStart).border = border;
+        rowZ.getCell(rightStart + 1).border = border;
+        if (i % 2) {
+          ws.getCell(r, rightStart + 1).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFD3D3D3' },
+          };
+        }
+      });
 
+      // 7.3 Abwesend
+      const absent = allWorkers.filter((w) => !w.status).map((w) => w.name);
+      const absRow0 = ztkRow0 + srEntries.length + 2;
+      ws.getRow(absRow0).getCell(rightStart).value = 'Abwesend';
+      ws.getRow(absRow0).getCell(rightStart).font = { bold: true };
+      ws.getRow(absRow0).getCell(rightStart).fill = fillBlue;
+      ws.getRow(absRow0).getCell(rightStart).border = border;
+      for (let i = 0; i < absent.length; i += 2) {
+        const r = absRow0 + i / 2 + 1;
+        const rowA = ws.getRow(r);
+        rowA.getCell(rightStart).value = absent[i];
+        rowA.getCell(rightStart).fill = titleCell.fill;
+        rowA.getCell(rightStart).border = border;
+        if (absent[i + 1]) {
+          rowA.getCell(rightStart + 1).value = absent[i + 1];
+          rowA.getCell(rightStart + 1).border = border;
+        }
+      }
+
+      // 8) Outline & column widths (unchanged)...
+      const last = ws.lastRow.number;
+      for (let r0 = 1; r0 <= last; r0++) {
+        for (let c0 = 1; c0 <= totalCols; c0++) {
+          const b = { ...border };
+          if (r0 === 1) b.top = { style: 'thick', color: { argb: 'FF000000' } };
+          if (r0 === last)
+            b.bottom = { style: 'thick', color: { argb: 'FF000000' } };
+          if (c0 === 1)
+            b.left = { style: 'thick', color: { argb: 'FF000000' } };
+          if (c0 === totalCols)
+            b.right = { style: 'thick', color: { argb: 'FF000000' } };
+          ws.getCell(r0, c0).border = b;
+        }
+      }
+      ws.getColumn(1).width = 22;
+      for (let c = 2; c <= leftCols; c++) ws.getColumn(c).width = 8;
+      ws.getColumn(leftCols + 1).width = 3;
+      for (let c = rightStart; c <= totalCols; c++) ws.getColumn(c).width = 20;
+      ws.columns.forEach((col) => {
+        let max = 0;
+        col.eachCell({ includeEmpty: false }, (cell) => {
+          if (cell.row === 1) return;
+          max = Math.max(max, String(cell.value || '').length);
+        });
+        col.width = Math.max(10, Math.min(max, 20)) + 2;
+      });
+
+      // 9) Save
       const buffer = await workbook.xlsx.writeBuffer();
       return { buffer, fileName };
     } catch (err) {
@@ -976,5 +880,358 @@ class RotationPlanService {
       throw new Error('Error creating Excel file');
     }
   }
+
+  // async buildExcelBuffer(
+  //   specialRotation,
+  //   highPriorityRotation,
+  //   cycleRotations,
+  //   allWorkers,
+  //   costCenter,
+  //   shift
+  // ) {
+  //   try {
+  //     // == (1) Build the filename ==
+  //     const currentDate = new Date().toISOString().split('T')[0];
+  //     const fileName = `rotationsplan_${currentDate}_${Date.now()}.xlsx`;
+  //     const fileNameParts = fileName.split('_');
+  //     const dateFromFile = fileNameParts[1];
+
+  //     // == (2) Create the workbook and worksheet ==
+  //     const workbook = new ExcelJS.Workbook();
+  //     const worksheet = workbook.addWorksheet('Rotationplan');
+
+  //     // == (3) Define thin border style ==
+  //     const borderStyle = {
+  //       top: { style: 'thin' },
+  //       left: { style: 'thin' },
+  //       bottom: { style: 'thin' },
+  //       right: { style: 'thin' },
+  //     };
+
+  //     // == (4) Sheet layout parameters ==
+  //     const numCycles = cycleRotations.length;
+  //     const leftNumCycles = Math.min(numCycles, 5);
+  //     const leftCols = 1 + leftNumCycles;
+  //     const gapCols = 1;
+  //     const rightCols = 2;
+  //     const totalCols = leftCols + gapCols + rightCols;
+  //     const rightStart = leftCols + gapCols + 1;
+
+  //     // == (5) Main header row ==
+  //     worksheet.mergeCells(1, 1, 1, totalCols - 1);
+  //     const titleCell = worksheet.getCell(1, 1);
+  //     titleCell.value = `Rotationsplan ${costCenter} ${shift}‑Schicht`;
+  //     titleCell.font = { bold: true, size: 16 };
+  //     titleCell.alignment = { horizontal: 'left', vertical: 'middle' };
+  //     titleCell.fill = {
+  //       type: 'pattern',
+  //       pattern: 'solid',
+  //       fgColor: { argb: 'FFEFEFEF' },
+  //     };
+
+  //     const dateCell = worksheet.getCell(1, totalCols);
+  //     dateCell.value = dateFromFile;
+  //     dateCell.font = { bold: true, size: 14 };
+  //     dateCell.alignment = { horizontal: 'right', vertical: 'middle' };
+  //     dateCell.fill = {
+  //       type: 'pattern',
+  //       pattern: 'solid',
+  //       fgColor: { argb: 'FFEFEFEF' },
+  //     };
+
+  //     worksheet.getRow(1).height = 30;
+  //     worksheet.getRow(1).eachCell((cell) => {
+  //       cell.border = {
+  //         ...borderStyle,
+  //         bottom: { style: 'thick', color: { argb: 'FF000000' } },
+  //       };
+  //     });
+
+  //     // == (6) Top block: High‑Priority + Sonder ==
+  //     let rowIdx = 2;
+  //     const hdr = worksheet.getRow(rowIdx);
+  //     hdr.getCell(1).value = 'Mitarbeiter';
+  //     hdr.getCell(2).value = 'Station';
+  //     [1, 2].forEach((c) => {
+  //       const cell = hdr.getCell(c);
+  //       cell.font = { bold: true };
+  //       cell.fill = {
+  //         type: 'pattern',
+  //         pattern: 'solid',
+  //         fgColor: { argb: 'FFADD8E6' },
+  //       };
+  //       cell.border = borderStyle;
+  //     });
+  //     for (let c = 3; c <= totalCols; c++) hdr.getCell(c).border = borderStyle;
+  //     worksheet.mergeCells(rowIdx, rightStart, rowIdx, totalCols);
+  //     const sHdr = worksheet.getCell(rowIdx, rightStart);
+  //     sHdr.value = 'Sondertätigkeiten';
+  //     sHdr.font = { bold: true, size: 14 };
+  //     sHdr.alignment = {
+  //       horizontal: 'center',
+  //       vertical: 'middle',
+  //       wrapText: true,
+  //     };
+  //     sHdr.fill = {
+  //       type: 'pattern',
+  //       pattern: 'solid',
+  //       fgColor: { argb: 'FFADD8E6' },
+  //     };
+  //     sHdr.border = borderStyle;
+  //     hdr.commit();
+
+  //     // Populate HP + Special rows
+  //     rowIdx++;
+  //     const hpEntries = Object.entries(highPriorityRotation || {}).map(
+  //       ([station, w]) => [station, typeof w === 'object' ? w.name : w]
+  //     );
+
+  //     // entries вида [имя_сотрудника, его_работа]
+  //     const srEntries = Object.entries(specialRotation || {}).map(
+  //       ([workerName, spec]) => [
+  //         workerName,
+  //         // если spec — объект с полем job, то job, иначе — сам spec
+  //         typeof spec === 'object' && spec.job != null ? spec.job : spec,
+  //       ]
+  //     );
+
+  //     const topLen = Math.max(hpEntries.length, srEntries.length);
+  //     for (let i = 0; i < topLen; i++) {
+  //       const row = worksheet.getRow(rowIdx);
+
+  //       if (i < hpEntries.length) {
+  //         const [station, worker] = hpEntries[i];
+  //         row.getCell(1).value = worker;
+  //         row.getCell(2).value = station;
+  //         row.getCell(1).fill = {
+  //           type: 'pattern',
+  //           pattern: 'solid',
+  //           fgColor: { argb: 'FFADD8E6' },
+  //         };
+  //         if (i % 2) {
+  //           row.getCell(2).fill = {
+  //             type: 'pattern',
+  //             pattern: 'solid',
+  //             fgColor: { argb: 'FFD3D3D3' },
+  //           };
+  //         }
+  //       }
+  //       if (i < srEntries.length) {
+  //         const [workerName, job] = srEntries[i];
+  //         row.getCell(rightStart).value = workerName;
+  //         row.getCell(rightStart + 1).value = job;
+  //         row.getCell(rightStart).fill = {
+  //           type: 'pattern',
+  //           pattern: 'solid',
+  //           fgColor: { argb: 'FFADD8E6' },
+  //         };
+  //         if (i % 2) {
+  //           row.getCell(rightStart + 1).fill = {
+  //             type: 'pattern',
+  //             pattern: 'solid',
+  //             fgColor: { argb: 'FFD3D3D3' },
+  //           };
+  //         }
+  //       }
+  //       for (let c = 1; c <= totalCols; c++) {
+  //         row.getCell(c).border = borderStyle;
+  //       }
+  //       row.commit();
+  //       rowIdx++;
+  //     }
+
+  //     // spacer
+  //     worksheet.addRow([]);
+  //     rowIdx++;
+
+  //     // == (7) Pivot by group, with sub-headers ==
+  //     const hpNames = new Set(
+  //       Object.values(highPriorityRotation || {}).map((w) =>
+  //         typeof w === 'object' ? w.name : w
+  //       )
+  //     );
+  //     const pivotSet = new Set();
+  //     cycleRotations.forEach((rot) =>
+  //       Object.values(rot).forEach((worker) => {
+  //         const name =
+  //           worker && typeof worker === 'object' ? worker.name : worker;
+  //         if (name && !hpNames.has(name)) pivotSet.add(name.trim());
+  //       })
+  //     );
+  //     const byGroup = {};
+  //     allWorkers.forEach(({ name, group, status }) => {
+  //       if (pivotSet.has(name.trim()) && status) {
+  //         byGroup[group] = byGroup[group] || [];
+  //         byGroup[group].push(name.trim());
+  //       }
+  //     });
+
+  //     // == (7.c) Worker rows with zebra striping ==
+  //     Object.entries(byGroup)
+  //       .sort(([a], [b]) => a.localeCompare(b))
+  //       .forEach(([grp, names]) => {
+  //         // Group header
+  //         const grRow = worksheet.addRow([`Gruppe ${grp}`]);
+  //         grRow.font = { bold: true };
+  //         worksheet.mergeCells(
+  //           grRow.number,
+  //           1,
+  //           grRow.number,
+  //           leftNumCycles + 1
+  //         );
+  //         grRow.eachCell((c) => (c.border = borderStyle));
+  //         grRow.commit();
+
+  //         // Sub-header with round numbers
+  //         const subTitles = [
+  //           'Mitarbeiter',
+  //           ...Array.from(
+  //             { length: leftNumCycles },
+  //             (_, i) => `Runde ${i + 1}`
+  //           ),
+  //         ];
+  //         const subRow = worksheet.addRow(subTitles);
+  //         subRow.eachCell((cell) => {
+  //           cell.font = { bold: true };
+  //           cell.fill = {
+  //             type: 'pattern',
+  //             pattern: 'solid',
+  //             fgColor: { argb: 'FFCCFFCC' },
+  //           };
+  //           cell.border = borderStyle;
+  //         });
+  //         subRow.commit();
+
+  //         // Actual worker rows
+  //         names.forEach((workerName, idx) => {
+  //           const data = [workerName];
+  //           for (let c = 0; c < leftNumCycles; c++) {
+  //             const rot = cycleRotations[c] || {};
+  //             const sts = Object.entries(rot)
+  //               .filter(([, worker]) => {
+  //                 const nm =
+  //                   worker && typeof worker === 'object' ? worker.name : worker;
+  //                 return nm === workerName;
+  //               })
+  //               .map(([station]) => station)
+  //               .join(', ');
+  //             data.push(sts);
+  //           }
+  //           const row = worksheet.addRow(data);
+  //           row.eachCell((cell, colNumber) => {
+  //             cell.border = borderStyle;
+  //             if (colNumber === 1) {
+  //               // first column always light-green
+  //               cell.fill = {
+  //                 type: 'pattern',
+  //                 pattern: 'solid',
+  //                 fgColor: { argb: 'FFCCFFCC' },
+  //               };
+  //             } else if (idx % 2 === 1) {
+  //               // zebra: odd rows dark-grey
+  //               cell.fill = {
+  //                 type: 'pattern',
+  //                 pattern: 'solid',
+  //                 fgColor: { argb: 'FFD3D3D3' },
+  //               };
+  //             }
+  //           });
+  //           row.commit();
+  //         });
+
+  //         // spacer
+  //         worksheet.addRow([]);
+  //       });
+
+  //     // == (8) Abwesend block ==
+  //     const absentList = allWorkers
+  //       .filter((w) => !w.status)
+  //       .map((w) => w.name.trim());
+  //     if (absentList.length) {
+  //       // header
+  //       const hdrRow = worksheet.getRow(rowIdx);
+  //       worksheet.mergeCells(rowIdx, rightStart, rowIdx, totalCols);
+  //       const aHdr = hdrRow.getCell(rightStart);
+  //       aHdr.value = 'Abwesend';
+  //       aHdr.font = { bold: true, size: 14 };
+  //       aHdr.alignment = { horizontal: 'center' };
+  //       aHdr.fill = {
+  //         type: 'pattern',
+  //         pattern: 'solid',
+  //         fgColor: { argb: 'FFADD8E6' },
+  //       };
+  //       aHdr.border = borderStyle;
+  //       hdrRow.commit();
+  //       rowIdx++;
+
+  //       // two‑column layout, trim & reset font
+  //       const names = absentList.map((o) => o.trim());
+  //       for (let i = 0; i < names.length; i += 2) {
+  //         const row = worksheet.getRow(rowIdx);
+  //         // left cell
+  //         const leftCell = row.getCell(rightStart);
+  //         leftCell.value = names[i];
+  //         leftCell.font = { bold: false };
+  //         leftCell.border = borderStyle;
+  //         // right cell if exists
+  //         if (names[i + 1]) {
+  //           const rightCell = row.getCell(rightStart + 1);
+  //           rightCell.value = names[i + 1];
+  //           rightCell.font = { bold: false };
+  //           rightCell.border = borderStyle;
+  //         }
+  //         row.commit();
+  //         rowIdx++;
+  //       }
+  //     }
+
+  //     // == (9) Draw thick outline & set widths ==
+  //     const last = worksheet.lastRow.number;
+  //     for (let r = 1; r <= last; r++) {
+  //       for (let c = 1; c <= totalCols; c++) {
+  //         const cell = worksheet.getCell(r, c);
+  //         const b = { ...borderStyle };
+  //         if (r === 1) b.top = { style: 'thick', color: { argb: 'FF000000' } };
+  //         if (r === last)
+  //           b.bottom = { style: 'thick', color: { argb: 'FF000000' } };
+  //         if (c === 1) b.left = { style: 'thick', color: { argb: 'FF000000' } };
+  //         if (c === totalCols)
+  //           b.right = { style: 'thick', color: { argb: 'FF000000' } };
+  //         cell.border = b;
+  //       }
+  //     }
+
+  //     worksheet.getColumn(1).width = 22;
+  //     for (let c = 2; c <= leftCols; c++) {
+  //       worksheet.getColumn(c).width = 8;
+  //     }
+  //     worksheet.getColumn(leftCols + 1).width = 3;
+  //     for (let c = rightStart; c <= totalCols; c++) {
+  //       worksheet.getColumn(c).width = 20;
+  //     }
+
+  //     // == (9.1) Auto-fit columns to their content ==
+  //     worksheet.columns.forEach((column) => {
+  //       let maxLength = 0;
+  //       column.eachCell({ includeEmpty: false }, (cell) => {
+  //         if (cell.row <= 2) return; // skip title and sub-header rows
+  //         const text = cell.value == null ? '' : cell.value.toString();
+  //         maxLength = Math.max(maxLength, text.length);
+  //       });
+
+  //       const cappedLength = Math.max(10, Math.min(maxLength, 20));
+
+  //       column.width = cappedLength + 2;
+  //     });
+
+  //     // == (10) Save ==
+
+  //     const buffer = await workbook.xlsx.writeBuffer();
+  //     return { buffer, fileName };
+  //   } catch (err) {
+  //     console.error('Error creating Excel file:', err);
+  //     throw new Error('Error creating Excel file');
+  //   }
+  // }
 }
 module.exports = RotationPlanService;
