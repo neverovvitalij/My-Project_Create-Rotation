@@ -74,9 +74,8 @@ class RotationPlanService {
 
     // Auto-preassigning single-station workers
 
-    const workerSchedules = {}; // будем хранить расписание для каждого «недоформированного» работника
+    const workerSchedules = {};
     const removedStations = new Set();
-    // найдём всех, у кого countActiveStations < cycles (и >0)
     const schedulable = availableWorkers.filter((w) => {
       const skills = w.stations.filter((s) => s.isActive).map((s) => s.name);
       return skills.length > 0 && skills.length < cycles;
@@ -88,38 +87,35 @@ class RotationPlanService {
     });
 
     for (const w of schedulable) {
-      // список его активных станций
       const skills = w.stations.filter((s) => s.isActive).map((s) => s.name);
-      // генерируем массив длины cycles, повторяя skills по кругу
       workerSchedules[w.name] = Array.from(
         { length: cycles },
         (_, i) => skills[i % skills.length]
       );
-      // удаляем его из общего пула – дальше он будет назначаться только по этому расписанию
       availableWorkers = availableWorkers.filter((x) => x.name !== w.name);
     }
 
     // === Check available workers for priority stations ===
     try {
-      // Build an array of stations with priority > 1 that are active
       const priorityStations = activeStations
         .filter((stn) => stn.priority > 1 && stn.status)
-        .sort((a, b) => b.priority - a.priority);
-
+        .map((stn) => {
+          const queue = this.rotationQueues.get(stn.name) || [];
+          const cnt = queue.filter((w) => w.status).length;
+          return { ...stn, cnt };
+        })
+        .sort((a, b) => a.cnt - b.cnt || b.priority - a.priority);
       for (const station of priorityStations) {
-        // Find the first worker in the pool who can work this station
         const idx = availableWorkers.findIndex((worker) =>
           worker.stations.some((s) => s.name === station.name && s.isActive)
         );
 
         if (idx === -1) {
-          // No suitable worker found for this priority station
           throw new Error(
-            `Nicht genügend Mitarbeitende für Station: "${station.name}"`
+            `Stationen mit Priorität ${station.priority} können nicht abgedeckt werden.`
           );
         }
 
-        // Remove the assigned worker from further consideration
         availableWorkers.splice(idx, 1);
       }
     } catch (err) {
@@ -171,12 +167,19 @@ class RotationPlanService {
           const stationInfo = worker.stations.find(
             (s) => s.name === station.name
           );
-          if (
+
+          const baseCond =
             worker.status &&
             stationInfo?.isActive &&
             !Object.values(fixedAssignments).includes(worker.name) &&
-            worker.group === station.group
-          ) {
+            worker.group === station.group;
+
+          if (station.priority === 3 && baseCond) {
+            highPriorityRotation.set(station.name, worker);
+            fixedAssignments[station.name] = worker.name;
+            assigned = true;
+            break;
+          } else if (baseCond) {
             highPriorityRotation.set(station.name, worker);
             fixedAssignments[station.name] = worker.name;
             assigned = true;
