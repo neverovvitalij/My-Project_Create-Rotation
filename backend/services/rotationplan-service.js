@@ -157,7 +157,18 @@ class RotationPlanService {
       }
 
       // 2) Fill remaining high-priority stations by matching group or any available
-      for (const station of activeStations.filter((s) => s.priority >= 2)) {
+      const priorityStations = activeStations
+        .filter(({ priority, status }) => priority >= 2 && status)
+        .map((stn) => {
+          const queue = this.rotationQueues.get(stn.name) || [];
+          const availableCount = queue.filter((w) => w.status).length;
+          return { ...stn, availableCount };
+        })
+        .sort(
+          (a, b) =>
+            a.availableCount - b.availableCount || b.priority - a.priority
+        );
+      for (const station of priorityStations) {
         if (fixedAssignments[station.name]) continue;
         const queue = this.rotationQueues.get(station.name) || [];
         let assigned = false;
@@ -171,15 +182,14 @@ class RotationPlanService {
           const baseCond =
             worker.status &&
             stationInfo?.isActive &&
-            !Object.values(fixedAssignments).includes(worker.name) &&
-            worker.group === station.group;
+            !Object.values(fixedAssignments).includes(worker.name);
 
           if (station.priority === 3 && baseCond) {
             highPriorityRotation.set(station.name, worker);
             fixedAssignments[station.name] = worker.name;
             assigned = true;
             break;
-          } else if (baseCond) {
+          } else if (baseCond && worker.group === station.group) {
             highPriorityRotation.set(station.name, worker);
             fixedAssignments[station.name] = worker.name;
             assigned = true;
