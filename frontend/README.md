@@ -1,128 +1,127 @@
-Rotationsplan Management System
+Rotation Plan Service
 
-Overview
+A full-stack web application for generating and managing daily rotation plans for manufacturing or production environments. Users can define stations, assign priorities, set up workers’ skills, and generate rotation schedules including high-priority, special assignments, and cyclical rotations.
 
-The Rotationsplan Management System is a web application designed to manage rotation schedules, station lists, and working personnel efficiently. Each registered user can create and manage rotation plans independently for their own production line without accessing data from other users.
+Table of Contents
+• Features
+• Tech Stack
+• Folder Structure
+• Installation
+• Environment Variables
+• Backend Usage
+• Frontend Usage
+• API Endpoints
+• Scripts
+• Contributing
+• License
 
 Features
+• Station Management: Create, update, and delete work stations with priority levels (1–3).
+• Worker Management: Define workers, their skills (stations they can operate), and availability status.
+• Rotation Generation: Automatic schedule generation:
+• Special assignments (“Sondertätigkeiten”).
+• High-priority station assignments.
+• Cyclical rotations for standard stations.
+• Excel Export: Export generated rotations to an Excel file with formatted borders, headers, and color-coded blocks.
+• Email Notifications: Send activation and password-reset emails via Mailjet.
+• Authentication: JWT-based signup, login, and token refresh.
 
-User authentication (registration, login, and password reset)
+Tech Stack
+• Frontend
+• React (v19)
+• MobX for state management
+• Axios for HTTP requests
+• React Router DOM for routing
+• xlsx for client-side Excel viewing/download
+• Create React App
+• Backend
+• Node.js (v18+)
+• Express.js
+• MongoDB with Mongoose
+• JSON Web Tokens for authentication
+• Bcrypt for password hashing
+• ExcelJS for server-side Excel generation
+• Mailjet for email services
 
-Independent rotation queue management per user
+Folder Structure
 
-Station and personnel list management
+root/
+├── frontend/ # React application
+│ ├── src/
+│ ├── public/
+│ └── package.json
+├── backend/ # API server
+│ ├── controllers/
+│ ├── models/
+│ ├── services/
+│ ├── dtos/
+│ ├── middlewares/
+│ ├── index.js
+│ └── package.json
+├── README.md
+└── .env.example # Environment variable template
 
-High-priority personnel assignments
+Installation 1. Clone the repository
 
-Excel export for rotation plans
+git clone git@github.com:yourusername/rotation-plan-service.git
+cd rotation-plan-service
 
-Technologies Used
+    2.	Backend setup
 
-Frontend: React, MobX, React Router
-
-Backend: Node.js, Express, MongoDB, Mongoose
-
-Authentication: JWT (JSON Web Tokens)
-
-Styling: CSS Modules
-
-Data Export: ExcelJS
-
-Installation
-
-Prerequisites
-
-Ensure you have the following installed on your system:
-
-Node.js (v18 or higher)
-
-MongoDB (Atlas or local instance)
-
-npm or yarn
-
-Setup
-
-Clone the repository:
-
-git clone https://github.com/neverovvitalij/My-Project_Create-Rotation
-cd rotationsplan
-
-Install dependencies for both frontend and backend:
-
+cd backend
 npm install
+cp .env.example .env
 
-Environment Variables
-
-Create a .env file in the backend directory and configure the following variables:
-
-PORT=8001
-CLIENT_URL=http://localhost:3000
-DB_URL=mongodb+srv://your-db-url
-JWT_SECRET=your-secret-key
-MAIL_USER=your-email@example.com
-MAIL_PASS=your-email-password
-
-Running the Application
-
-Start the Backend
+# Fill in .env with your settings
 
 npm run dev
 
-Start the Frontend
+    3.	Frontend setup
 
-cd frontend
+cd ../frontend
+npm install
 npm start
 
-API Endpoints
+Open your browser at http://localhost:3000 and the API at http://localhost:8080.
 
-Authentication
+Environment Variables
 
-POST /api/registration - Register a new user
+Create a .env file inside backend/ with at least:
 
-POST /api/login - User login
+PORT=8080
+DB_URL=mongodb+srv
+JWT_ACCESS_SECRET=your_jwt_secret
+JWT_REFRESH_SECRET=your_jwt_secret
+JWT_RESET_PASSWORD_SECRET=your_jwt_secret
+API_URL=http://localhost:8080
+CLIENT_URL=http://localhost:3000
+ADMIN_EMAIL=admin@yourdomain.com
+MAILJET_API_KEY=your_mailjet_key
+MAILJET_API_SECRET=your_mailjet_apikey
+MAILJET_SENDER_EMAIL=no-reply@yourdomain.com
+MAILJET_SENDER_NAME=no-reply@yourdomain.com
 
-POST /api/logout - User logout
+Backend Usage
+• Development: npm run dev (uses nodemon)
+• Production: node index.js (ensure environment variables are set and MongoDB is running)
 
-POST /api/request-reset-password - Request password reset
+Frontend Usage
+• Development: npm start
+• Production Build: npm run build
 
-POST /api/reset-password - Reset password
+Scripts
 
-Rotation Management
+Command Description
+npm start Run frontend in development mode
+npm run build Create production build of frontend
+npm run dev Run backend with nodemon
 
-POST /api/rotation/create - Create a new rotation queue
+Contributing 1. Fork this repository. 2. Create a feature branch: git checkout -b feature/my-feature. 3. Commit your changes: git commit -m "Add my feature". 4. Push to branch: git push origin feature/my-feature. 5. Open a pull request.
 
-GET /api/rotation - Fetch all rotations for a user
+Please follow conventional commits.
 
-PUT /api/rotation/:id - Update a rotation plan
+License
 
-DELETE /api/rotation/:id - Delete a rotation plan
-
-Station and Personnel Management
-
-POST /api/stations - Add a new station
-
-GET /api/stations - Retrieve all stations for a user
-
-DELETE /api/stations/:id - Remove a station
-
-POST /api/personnel - Add personnel to a station
-
-GET /api/personnel - Fetch personnel list
-
-Export Data
-
-GET /api/export/excel - Generate and download an Excel file for the rotation plan
-
-Deployment
-
-To deploy the application, configure an online database (MongoDB Atlas) and deploy both frontend and backend using services like:
-
-Frontend: Vercel, Netlify
-
-Backend: Heroku, Railway, Render
-
-Ensure environment variables are set correctly in your deployment service.
-
-Contact
+This project is private. Source code access is restricted. For inquiries, contact the repository owner.
 
 For support, contact: vitalij.neverov@gmail.com
