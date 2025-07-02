@@ -351,6 +351,25 @@ class RotationPlanService {
               }
             }
           }
+
+          // if no alternative worker is available, allow repeating the previous assignment for this station
+          if (!assigned) {
+            for (const worker of queue) {
+              const stationInfo = worker.stations.find(
+                (s) => s.name === station.name
+              );
+              if (
+                worker.status &&
+                stationInfo?.isActive &&
+                !assignedWorkers.has(worker.name)
+              ) {
+                dailyRotation[station.name] = worker;
+                assignedWorkers.add(worker.name);
+                assigned = true;
+                break;
+              }
+            }
+          }
         }
         // Resolve any duplicates within the same day by swapping
         const counts = {};
@@ -363,6 +382,7 @@ class RotationPlanService {
             const stations = Object.entries(dailyRotation)
               .filter(([_, w]) => w.name === workerName)
               .map(([st]) => st);
+
             // swap second occurrence with a unique one
             for (let i = 1; i < stations.length; i++) {
               const dupSt = stations[i];
