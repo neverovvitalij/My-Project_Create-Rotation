@@ -377,8 +377,12 @@ export default class Store {
           type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         });
 
-        let fileName =
-          'rotation_plan' + new Date().toISOString().split('T')[0] + '.xlsx';
+        const tomorrowDate = new Date(Date.now() + 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0]
+          .replace(/(\d{4})-(\d{2})-(\d{2})/, '$3-$2-$1');
+
+        let fileName = 'Rotationplan ' + tomorrowDate + '.xlsx';
         const cd = response.headers['content-disposition'];
         if (cd) {
           const match =

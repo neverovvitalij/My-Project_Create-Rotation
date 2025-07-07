@@ -667,9 +667,12 @@ class RotationPlanService {
   ) {
     try {
       // 1) Filename
-      const currentDate = new Date().toISOString().split('T')[0];
-      const fileName = `rotationsplan_${currentDate}_${Date.now()}.xlsx`;
-      const dateFromFile = fileName.split('_')[1];
+      const tomorrowDate = new Date(Date.now() + 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0]
+        .replace(/(\d{4})-(\d{2})-(\d{2})/, '$3-$2-$1');
+      const fileName = `rotationsplan_${tomorrowDate}.xlsx`;
+      const dateFromFile = fileName.split('_')[1].split('.')[0];
 
       // 2) Workbook & worksheet
       const workbook = new ExcelJS.Workbook();
