@@ -186,6 +186,7 @@ class UserService {
       user.password = hashedPassword;
 
       await user.save();
+      await mailService.sendPasswordChangedMail(user.email);
 
       return {
         success: true,

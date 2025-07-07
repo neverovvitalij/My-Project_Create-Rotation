@@ -91,6 +91,33 @@ class MailService {
       throw e;
     }
   }
+
+  async sendPasswordChangedMail(toEmail) {
+    const message = {
+      From: this.from,
+      To: [{ Email: toEmail }],
+      Subject: 'Your password has been changed',
+      HTMLPart: `
+        <div>
+          <h1>Password Changed</h1>
+          <p>Your password was successfully changed. If you did not do this, please contact support immediately.</p>
+        </div>
+      `,
+      TextPart: `Your password was successfully changed. If you did not do this, please contact support immediately.`,
+    };
+
+    try {
+      await this.mailjet
+        .post('send', { version: 'v3.1' })
+        .request({ Messages: [message] });
+      console.log('Password-changed confirmation email sent');
+    } catch (e) {
+      console.error(
+        'Error sending password-changed email:',
+        e?.response?.data || e
+      );
+    }
+  }
 }
 
 module.exports = new MailService();
