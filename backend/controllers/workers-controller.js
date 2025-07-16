@@ -23,7 +23,7 @@ class WorkerController {
       const shift = req.user.shift;
       const plant = req.user.plant;
       const { name, stations, group } = req.body;
-      const personData = await workerService.addWorker(
+      const employee = await workerService.addWorker(
         name,
         costCenter,
         shift,
@@ -31,7 +31,7 @@ class WorkerController {
         stations,
         group
       );
-      return res.json(personData);
+      return res.json(employee);
     } catch (error) {
       if (error.message.includes('is already registered')) {
         return res.status(400).json({ message: error.message });

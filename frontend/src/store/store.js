@@ -214,10 +214,9 @@ export default class Store {
 
   async addWorker(candidate) {
     try {
-      const response = await WorkerService.addWorker(candidate);
-      this.setEmployeeList([...this.employeeList, response.data]);
+      await WorkerService.addWorker(candidate);
       this.setErrorMsg('');
-      this.loadData();
+      await this.loadData();
     } catch (error) {
       this.setErrorMsg(
         error.response?.data?.message || 'Error adding employee'
@@ -227,10 +226,9 @@ export default class Store {
 
   async addNewStation({ name, priority, group }) {
     try {
-      const response = await StationsService.addStation(name, priority, group);
-      this.setNewStation(response.data);
+      await StationsService.addStation(name, priority, group);
       this.setErrorMsg('');
-      this.loadData();
+      await this.loadData();
     } catch (error) {
       const serverMsg =
         error.response?.data?.error ||
@@ -242,10 +240,9 @@ export default class Store {
 
   async deleteStation(station) {
     try {
-      const response = await StationsService.deleteStation(station);
-      this.setStations(this.stations.filter((s) => s.name !== response.name));
+      await StationsService.deleteStation(station);
       this.setErrorMsg('');
-      this.loadData();
+      await this.loadData();
     } catch (error) {
       this.setErrorMsg('Error deleting station:', error.message || error);
     }
@@ -253,12 +250,9 @@ export default class Store {
 
   async deleteWorker(name) {
     try {
-      const response = await WorkerService.deleteWorker(name);
-      this.setEmployeeList(
-        this.employeeList.filter((person) => person.name !== response.name)
-      );
+      await WorkerService.deleteWorker(name);
       this.setErrorMsg('');
-      this.loadData();
+      await this.loadData();
     } catch (error) {
       this.setErrorMsg('Error deleting employee:', error.message || error);
     }
@@ -270,10 +264,12 @@ export default class Store {
         name,
         stationToRemove
       );
-      this.loadData();
+      await this.loadData();
       return response.data;
     } catch (error) {
-      console.error('Error removing station:', error.message || error);
+      const msg = error.response?.data?.message || 'Error removing station';
+      this.setErrorMsg(msg);
+      throw error;
     }
   }
 
@@ -285,16 +281,11 @@ export default class Store {
       );
       await this.loadData();
 
-      const idx = this.employeeList.findIndex(
-        (w) => w.name === response.data.name
-      );
-      if (idx !== -1) {
-        this.employeeList[idx] = response.data;
-      }
-
       return response.data;
     } catch (error) {
-      console.error('Error adding station:', error.message || error);
+      const msg = error.response?.data?.message || 'Error adding station';
+      this.setErrorMsg(msg);
+      throw error;
     }
   }
 
@@ -406,13 +397,8 @@ export default class Store {
   async changeWorkerStatus(name, newStatus) {
     try {
       await WorkerService.workerChangeStatus(name, newStatus);
-
-      this.setEmployeeList(
-        this.employeeList.map((emp) =>
-          emp.name === name ? { ...emp, status: newStatus } : emp
-        )
-      );
       this.setErrorMsg('');
+      await this.loadData();
     } catch (error) {
       this.setErrorMsg('Status update error', error.message);
     }
@@ -421,13 +407,8 @@ export default class Store {
   async changeStationStatus(name, newStatus) {
     try {
       await StationsService.stationChangeStatus(name, newStatus);
-
-      this.setStations(
-        this.stations.map((station) =>
-          station.name === name ? { ...station, status: newStatus } : station
-        )
-      );
       this.setErrorMsg('');
+      await this.loadData();
     } catch (error) {
       this.setErrorMsg('Status update error', error.message);
     }

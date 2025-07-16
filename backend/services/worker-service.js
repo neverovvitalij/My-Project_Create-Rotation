@@ -137,7 +137,7 @@ class WorkerService {
         { $set: { status: newStatus } },
         { new: true }
       );
-      if (!worker) {
+      if (!updatedWorker) {
         return res.status(404).json({ message: 'Worker not found' });
       }
       return updatedWorker;
