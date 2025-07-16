@@ -14,7 +14,6 @@ const WorkerInfoSchema = new mongoose.Schema(
 
 const ConfirmedRotationSchema = new mongoose.Schema(
   {
-    date: { type: Date, default: Date.now, unique: true },
     costCenter: { type: String, required: true },
     shift: { type: String, required: true },
     plant: { type: String, required: true },
@@ -30,10 +29,7 @@ const ConfirmedRotationSchema = new mongoose.Schema(
   }
 );
 
-ConfirmedRotationSchema.index(
-  { date: 1, costCenter: 1, shift: 1, plant: 1 },
-  { unique: true }
-);
+ConfirmedRotationSchema.index({ costCenter: 1, shift: 1, plant: 1 });
 
 ConfirmedRotationSchema.index(
   { createdAt: 1 },

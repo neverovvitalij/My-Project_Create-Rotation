@@ -650,6 +650,7 @@ class RotationPlanService {
       }
 
       this.rotationQueues = null; // Reset local queue
+
       return { confirmedRotation };
     } catch (error) {
       console.error('Error confirming rotation:', error);

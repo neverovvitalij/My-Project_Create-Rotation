@@ -132,17 +132,15 @@ class WorkerService {
 
   async workerChangeStatus(name, newStatus, costCenter, shift, plant) {
     try {
-      const worker = await WorkerModel.findOneAndUpdate(
+      const updatedWorker = await WorkerModel.findOneAndUpdate(
         { name, costCenter, shift, plant },
         { $set: { status: newStatus } },
         { new: true }
       );
-      if (worker) {
-        return worker;
-      } else {
-        console.log('Worker not found');
-        return null;
+      if (!worker) {
+        return res.status(404).json({ message: 'Worker not found' });
       }
+      return updatedWorker;
     } catch (error) {
       console.log('Error during status update', error.message);
       throw error;
@@ -164,7 +162,10 @@ class WorkerService {
       );
       if (!updatedWorker) {
         console.log('Worker not found');
-        return;
+        return {
+          succes: false,
+          message: `${name} not found`,
+        };
       }
 
       const rotationQueue = await RotationQueueModel.findOne({
@@ -177,7 +178,10 @@ class WorkerService {
         console.log(
           `RotationQueue for station "${stationToRemove}" not found.`
         );
-        return;
+        return {
+          succes: false,
+          message: `RotationQueue for station "${stationToRemove}" not found.`,
+        };
       }
 
       const beforeCount = rotationQueue.queue.length;
@@ -198,6 +202,10 @@ class WorkerService {
           `Worker "${name}" removed from rotationQueue for station "${stationToRemove}".`
         );
       }
+      return {
+        succes: true,
+        message: `${stationToRemove} removed from ${name}`,
+      };
     } catch (error) {
       console.error(
         'Error while removing station from worker or rotationQueue:',
@@ -217,9 +225,13 @@ class WorkerService {
         { $addToSet: { stations: { name: stationToAdd, isActive: true } } },
         { new: true }
       );
+
       if (!updatedWorker) {
         console.log('Worker not found');
-        return;
+        return {
+          succes: false,
+          message: `${name} not found`,
+        };
       }
 
       // 2) Находим или создаём очередь для этой станции
@@ -267,6 +279,7 @@ class WorkerService {
       console.log(
         `RotationQueue for station "${stationToAdd}" updated with worker "${name}".`
       );
+      return updatedWorker;
     } catch (error) {
       console.error('Error while updating rotation queue:', error);
       throw ApiError.BadRequest(

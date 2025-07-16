@@ -1,5 +1,5 @@
 import { makeAutoObservable } from 'mobx';
-import AuthServise from '../services/AuthService.js';
+import AuthService from '../services/AuthService.js';
 import WorkerService from '../services/WorkerService.js';
 import StationsService from '../services/StationsService.js';
 import RotationPlanService from '../services/RotationPlanService.js';
@@ -118,7 +118,7 @@ export default class Store {
 
   async login(email, password) {
     try {
-      const response = await AuthServise.login(email, password);
+      const response = await AuthService.login(email, password);
       localStorage.setItem('token', response.data.accessToken);
       this.setAuth(true);
       this.setUser(response.data.user);
@@ -129,7 +129,7 @@ export default class Store {
 
   async registration(email, password, role, costCenter, shift, plant) {
     try {
-      const response = await AuthServise.registration(
+      const response = await AuthService.registration(
         email,
         password,
         role,
@@ -151,7 +151,7 @@ export default class Store {
 
   async logout() {
     try {
-      await AuthServise.logout();
+      await AuthService.logout();
       localStorage.removeItem('token');
       this.setAuth(false);
       this.setUser({});
@@ -164,7 +164,7 @@ export default class Store {
     this.setIsInitializing(true);
     this.setIsLoading(true);
     try {
-      const response = await AuthServise.refresh();
+      const response = await AuthService.refresh();
       localStorage.setItem('token', response.data.accessToken);
       this.setAuth(true);
       this.setUser(response.data.user);
@@ -178,7 +178,8 @@ export default class Store {
 
   async requestResetPassword(email) {
     try {
-      const response = await AuthServise.requestResetPassword(email);
+      const response = await AuthService.requestResetPassword(email);
+
       return response.data;
     } catch (error) {
       if (error.response) {
@@ -196,7 +197,7 @@ export default class Store {
 
   async resetPassword(token, newPassword) {
     try {
-      const response = await AuthServise.resetPassword(token, newPassword);
+      const response = await AuthService.resetPassword(token, newPassword);
       return response.data;
     } catch (error) {
       if (error.response) {
@@ -211,14 +212,9 @@ export default class Store {
     }
   }
 
-  async addWorker(candidate, costCenter, shift, plant) {
+  async addWorker(candidate) {
     try {
-      const response = await WorkerService.addWorker(
-        candidate,
-        costCenter,
-        shift,
-        plant
-      );
+      const response = await WorkerService.addWorker(candidate);
       this.setEmployeeList([...this.employeeList, response.data]);
       this.setErrorMsg('');
       this.loadData();
@@ -287,7 +283,7 @@ export default class Store {
         name,
         stationToAdd
       );
-      this.loadData();
+      await this.loadData();
 
       const idx = this.employeeList.findIndex(
         (w) => w.name === response.data.name

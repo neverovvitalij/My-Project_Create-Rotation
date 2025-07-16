@@ -104,13 +104,14 @@ class WorkerController {
       const plant = req.user.plant;
       const { name, stationToAdd } = req.body;
 
-      const updatedWorker = workerService.addStationToWorker(
+      const updatedWorker = await workerService.addStationToWorker(
         name,
         stationToAdd,
         costCenter,
         shift,
         plant
       );
+
       return res.json(updatedWorker);
     } catch (error) {
       next(error);
