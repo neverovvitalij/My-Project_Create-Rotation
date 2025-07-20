@@ -301,7 +301,6 @@ export default class Store {
         cycles
       );
       this.setDailyRotation(response.data);
-      return response.data;
     } catch (error) {
       const msg =
         error.response?.data?.message ||

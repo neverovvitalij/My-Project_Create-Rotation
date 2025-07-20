@@ -813,7 +813,6 @@ class RotationPlanService {
       // header
       ws.getRow(hpRow0).getCell(rightStart).value = 'Tagesrotation';
       ws.getRow(hpRow0).getCell(rightStart).font = { bold: true };
-      ws.getRow(hpRow0).getCell(rightStart).fill = fillBlue;
       ws.getRow(hpRow0).getCell(rightStart).border = border;
       // entries
       hpEntries.forEach(([nm, st], i) => {

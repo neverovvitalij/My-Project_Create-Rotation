@@ -9,7 +9,9 @@ class StationService {
       const stations = await StationModel.find(costCenter, shift, plant).lean();
       return stations;
     } catch (error) {
-      throw ApiError.BadRequest('Error fetching stations', error.message);
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error('Error fetching stations:', msg);
+      throw ApiError.BadRequest('Error fetching stations:', msg);
     }
   }
 
@@ -76,8 +78,9 @@ class StationService {
       }
       return station;
     } catch (error) {
-      console.error('Error while adding station:', error.message);
-      throw ApiError.BadRequest(`Error adding station: ${error.message}`);
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error('Error while adding station:', msg);
+      throw ApiError.BadRequest(`Error adding station: ${msg}`);
     }
   }
 
@@ -123,8 +126,9 @@ class StationService {
 
       return station;
     } catch (error) {
-      console.error('Error while deleting station:', error.message);
-      throw ApiError.BadRequest('Error modifying station', error.message);
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error('Error while deleting station:', msg);
+      throw ApiError.BadRequest('Error modifying station:', msg);
     }
   }
 
@@ -136,15 +140,14 @@ class StationService {
         { new: true }
       );
 
-      if (station) {
-        return station;
-      } else {
-        console.error('Station not found');
-        return null;
+      if (!station) {
+        throw new Error('Station not found');
       }
+      return station;
     } catch (error) {
-      console.log('Error updating status', error.message);
-      throw error;
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error('Error updating status:', msg);
+      throw ApiError.Internal('Failed to update station status');
     }
   }
 }
