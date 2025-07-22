@@ -304,7 +304,7 @@ export default class Store {
     } catch (error) {
       const msg =
         error.response?.data?.message ||
-        'Unknown error while generating rotation';
+        'Failed to generating rotation. Please try again.';
       this.setErrorMsg(msg);
       throw error;
     }
@@ -344,10 +344,12 @@ export default class Store {
         throw new Error('Server response is empty');
       }
       this.setErrorMsg('');
-      return response.data;
+      return {
+        success: true,
+      };
     } catch (error) {
       console.error(error.response?.data?.message || error.message);
-      this.setErrorMsg('Error confirming cycleRotations');
+      this.setErrorMsg('Failed to confirm rotation. Please try again.');
     }
   }
 

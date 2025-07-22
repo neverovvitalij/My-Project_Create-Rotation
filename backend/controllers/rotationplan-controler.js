@@ -104,10 +104,8 @@ class RotationPlanController {
         shift,
         plant
       );
-      return res.json({
-        result,
-        message: 'Plan has been confirmed and saved.',
-      });
+
+      return res.json(result);
     } catch (error) {
       console.error('Error confirming rotation:', error.message);
       next(ApiError.BadRequest('Error confirming plan', error.message));

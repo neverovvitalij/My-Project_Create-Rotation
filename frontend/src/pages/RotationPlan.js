@@ -95,10 +95,14 @@ const RotationPlan = () => {
 
     try {
       const response = await store.confirmRotation();
-      setMsg(response?.message);
-      setRotationForDownload(true);
+
+      if (response.success) {
+        setMsg('Plan has been confirmed and saved.');
+        setRotationForDownload(true);
+      }
     } catch (error) {
       console.error('Error confirming rotation:', error.message || error);
+      setRotationForDownload(false);
     } finally {
       setLoader(false);
     }
