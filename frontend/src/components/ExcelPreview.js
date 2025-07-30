@@ -19,12 +19,12 @@ const ExcelPreview = forwardRef(({ preassigned, specialAssignments }, ref) => {
   const loadPreview = async () => {
     // 1) Fetch the file as a Blob
     try {
-      const response = await RotationPlanService.previewExcel(
+      const response = await RotationPlanService.previewExcel({
         specialRotation,
         highPriorityRotation,
         cycleRotations,
-        allWorkers
-      );
+        allWorkers,
+      });
       // 2) Convert Blob to ArrayBuffer
       const arrayBuffer = await response.data.arrayBuffer();
       const data = new Uint8Array(arrayBuffer);

@@ -12,7 +12,7 @@ class RotationPlanController {
 
   async getRotationData(req, res, next) {
     try {
-      const { specialAssignments = [], preassigned = [], cycles } = req.body;
+      const { specialAssignments, preassigned, cycles } = req.body;
       const costCenter = req.user.costCenter;
       const shift = req.user.shift;
       const plant = req.user.plant;
