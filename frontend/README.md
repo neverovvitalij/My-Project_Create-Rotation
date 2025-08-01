@@ -1,93 +1,33 @@
-Rotation Plan Service
+Rotation Plan Scheduler
 
-A full-stack web application for generating and managing daily rotation plans for manufacturing or production environments. Users can define stations, assign priorities, set up workers’ skills, and generate rotation schedules including high-priority, special assignments, and cyclical rotations.
-
-Table of Contents
-• Features
-• Tech Stack
-• Folder Structure
-• Installation
-• Environment Variables
-• Backend Usage
-• Frontend Usage
-• API Endpoints
-• Scripts
-• Contributing
-• License
+A web application to generate and manage daily rotation schedules for production line workers. It automatically assigns employees to stations based on priorities, special assignments, and rotation cycles, and provides Excel previews and downloads.
 
 Features
-• Station Management: Create, update, and delete work stations with priority levels (1–3).
-• Worker Management: Define workers, their skills (stations they can operate), and availability status.
-• Rotation Generation: Automatic schedule generation:
-• Special assignments (“Sondertätigkeiten”).
-• High-priority station assignments.
-• Cyclical rotations for standard stations.
-• Excel Export: Export generated rotations to an Excel file with formatted borders, headers, and color-coded blocks.
-• Email Notifications: Send activation and password-reset emails via Mailjet.
-• Authentication: JWT-based signup, login, and token refresh.
+• Automatic Rotation: Generates rotations considering high-priority stations, special tasks, and cycle assignments.
+• Priority Handling: Ensures stations with higher priority are staffed first.
+• Special Assignments: Supports manual pre-assignment for specific tasks.
+• Excel Export & Preview: Preview rotation in-browser and download as formatted Excel file.
+• MongoDB Persistence: Saves confirmed rotations with automatic expiration.
+• Support: Frontend written in React + JavaScript; backend in Node.js + Express + Mongoose.
+• TypeScript Migration
+Originally the frontend was written in JavaScript and is now being gradually rewritten to TypeScript (React + TypeScript); the backend remains in Node.js + Express + Mongoose, with TypeScript support planned.
 
 Tech Stack
-• Frontend
-• React (v19)
-• MobX for state management
-• Axios for HTTP requests
-• React Router DOM for routing
-• xlsx for client-side Excel viewing/download
-• Create React App
-• Backend
-• Node.js (v18+)
-• Express.js
-• MongoDB with Mongoose
-• JSON Web Tokens for authentication
-• Bcrypt for password hashing
-• ExcelJS for server-side Excel generation
-• Mailjet for email services
+• Frontend: React, MobX, JavaScript/TypeScript, CSS Modules
+• Backend: Node.js, Express, MongoDB, Mongoose, ExcelJS
+• API: RESTful endpoints for rotation generation, confirmation, and Excel export
+• Dev Tools: Webpack, Babel, ESLint, Prettier
 
-Folder Structure
+Installation 1. Clone repository:
 
-root/
-├── frontend/ # React application
-│ ├── src/
-│ ├── public/
-│ └── package.json
-├── backend/ # API server
-│ ├── controllers/
-│ ├── models/
-│ ├── services/
-│ ├── dtos/
-│ ├── middlewares/
-│ ├── index.js
-│ └── package.json
-├── README.md
-└── .env.example # Environment variable template
+git clone https://github.com/neverovvitalij/My-Project_Create-Rotation
+cd My-App
 
-Installation 1. Clone the repository
-
-git clone git@github.com:yourusername/rotation-plan-service.git
-cd rotation-plan-service
-
-    2.	Backend setup
+    2.	Backend setup:
 
 cd backend
 npm install
-cp .env.example .env
-
-# Fill in .env with your settings
-
-npm run dev
-
-    3.	Frontend setup
-
-cd ../frontend
-npm install
-npm start
-
-Open your browser at http://localhost:3000 and the API at http://localhost:8080.
-
-Environment Variables
-
-Create a .env file inside backend/ with at least:
-
+.env # configure MongoDB URI, JWT secrets, etc.
 PORT=8080
 DB_URL=mongodb+srv
 JWT_ACCESS_SECRET=your_jwt_secret
@@ -101,26 +41,49 @@ MAILJET_API_SECRET=your_mailjet_apikey
 MAILJET_SENDER_EMAIL=no-reply@yourdomain.com
 MAILJET_SENDER_NAME=no-reply@yourdomain.com
 
-Backend Usage
-• Development: npm run dev (uses nodemon)
-• Production: node index.js (ensure environment variables are set and MongoDB is running)
+npm run dev
 
-Frontend Usage
-• Development: npm start
-• Production Build: npm run build
+    3.	Frontend setup:
 
-Scripts
+cd ../frontend
+npm install
+.env
+REACT_APP_API_URL=http://localhost:8080/api
 
-Command Description
-npm start Run frontend in development mode
-npm run build Create production build of frontend
-npm run dev Run backend with nodemon
+npm start
 
-Contributing 1. Fork this repository. 2. Create a feature branch: git checkout -b feature/my-feature. 3. Commit your changes: git commit -m "Add my feature". 4. Push to branch: git push origin feature/my-feature. 5. Open a pull request.
+Frontend runs at http://localhost:3000 and backend at http://localhost:8080 by default.
 
-Please follow conventional commits.
+Usage 1. Log in or register a user. 2. Create stations. 3. Add employees and assign their stations. 4. Configure special assignments and pre-assigned stations. 5. Select number of rotation cycles and generate daily schedule. 6. Preview the schedule in-browser. 7. Confirm rotation to save it in the database. 8. Download the schedule as an Excel file.
 
-License
+Project Structure
+
+├── backend/ # Express API and services
+│ ├── controllers/ # Request handlers
+│ ├── services/ # Business logic (rotation generation, Excel)
+│ ├── models/ # Mongoose schemas
+│ └── routes/ # API endpoints
+├── frontend/ # React + TypeScript app
+│ ├── src/
+│ │ ├── components/ # UI components
+│ │ ├── store/ # MobX store and types
+│ │ ├── services/ # API service wrappers
+│ │ └── styles/ # CSS Modules
+│ └── public/
+└── README.md
+
+PORT=8080
+DB_URL=mongodb+srv
+JWT_ACCESS_SECRET=your_jwt_secret
+JWT_REFRESH_SECRET=your_jwt_secret
+JWT_RESET_PASSWORD_SECRET=your_jwt_secret
+API_URL=http://localhost:8080
+CLIENT_URL=http://localhost:3000
+ADMIN_EMAIL=admin@yourdomain.com
+MAILJET_API_KEY=your_mailjet_key
+MAILJET_API_SECRET=your_mailjet_apikey
+MAILJET_SENDER_EMAIL=no-reply@yourdomain.com
+MAILJET_SENDER_NAME=no-reply@yourdomain.com
 
 This project is private. Source code access is restricted. For inquiries, contact the repository owner.
 
