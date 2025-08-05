@@ -161,13 +161,11 @@ export default class Store implements IStore {
         this.setUser(response.data.user);
       }, 10_000);
     } catch (error: unknown) {
-      if (isAxiosError<{ message?: string }>(error)) {
-        const msg = error.response?.data?.message ?? error.message;
-        this.setAuthMsg(msg);
-      } else {
-        this.setAuthMsg('Error registering');
-        console.error(error);
-      }
+      const msg = isAxiosError<{ message?: string }>(error)
+        ? error.response?.data?.message ?? error.message
+        : 'Error registering';
+      this.setAuthMsg(msg);
+      throw new Error(msg);
     }
   }
 

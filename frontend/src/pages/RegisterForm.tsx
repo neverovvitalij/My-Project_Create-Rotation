@@ -1,10 +1,18 @@
 import { observer } from 'mobx-react-lite';
-import { useContext, useEffect, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  FC,
+  FormEvent,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Context } from '../index';
 import styles from '../styles/RegisterForm.module.css';
 
-const RegisterForm = () => {
+const RegisterForm: FC = () => {
   const { store } = useContext(Context);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -12,7 +20,7 @@ const RegisterForm = () => {
   const [costCenter, setCostCenter] = useState('');
   const [shift, setShift] = useState('');
   const [plant, setPlant] = useState('');
-  const [msgType, setMsgType] = useState('');
+  const [msgType, setMsgType] = useState(false);
   const navigate = useNavigate();
   const storeRef = useRef(store);
 
@@ -24,15 +32,15 @@ const RegisterForm = () => {
     storeRef.current.setAuthMsg('');
   }, []);
 
-  const handleChangeSubmit = async (event) => {
+  const handleChangeSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
       await store.registration(email, password, role, costCenter, shift, plant);
-      setMsgType('success');
+      setMsgType(true);
       store.setAuthMsg('Please check your spam folder.');
     } catch (error) {
-      setMsgType('error');
-      console.error(error.message);
+      setMsgType(false);
+      console.error('Register failed:', error);
     }
     setEmail('');
     setPassword('');
@@ -49,7 +57,9 @@ const RegisterForm = () => {
             value={email}
             type="email"
             required
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setEmail(e.target.value)
+            }
           />
           <input
             placeholder="Password"
@@ -57,17 +67,20 @@ const RegisterForm = () => {
             value={password}
             type="password"
             required
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setPassword(e.target.value)
+            }
           />
           <select
-            placeholder="Role"
             className={styles.input}
             value={role}
-            onChange={(e) => setRole(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+              setRole(e.target.value)
+            }
             required
           >
             <option value="" disabled>
-              Select role
+              Role
             </option>
             <option value="GV">GV</option>
             <option value="MEISTER">Meister</option>
@@ -75,10 +88,11 @@ const RegisterForm = () => {
           </select>
 
           <select
-            placeholder="Werk"
             className={styles.input}
             value={plant}
-            onChange={(e) => setPlant(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+              setPlant(e.target.value)
+            }
             required
           >
             <option value="" disabled>
@@ -88,10 +102,11 @@ const RegisterForm = () => {
           </select>
 
           <select
-            placeholder="CostCenter"
             className={styles.input}
             value={costCenter}
-            onChange={(e) => setCostCenter(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+              setCostCenter(e.target.value)
+            }
             required
           >
             <option value="" disabled>
@@ -103,10 +118,11 @@ const RegisterForm = () => {
           </select>
 
           <select
-            placeholder="Schicht"
             className={styles.input}
             value={shift}
-            onChange={(e) => setShift(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+              setShift(e.target.value)
+            }
             required
           >
             <option value="" disabled>
@@ -117,23 +133,23 @@ const RegisterForm = () => {
             <option value="C">C</option>
             <option value="D">D</option>
           </select>
+          <div className={styles.buttonContainer}>
+            <button
+              type="submit"
+              className={`${styles.baseButton} ${styles.primaryButton}`}
+            >
+              Register
+            </button>
+            <button
+              type="button"
+              className={`${styles.baseButton} ${styles.secondaryButton}`}
+              onClick={handleGoToLogin}
+            >
+              Go to Login
+            </button>
+          </div>
         </fieldset>
 
-        <div className={styles.buttonContainer}>
-          <button
-            type="submit"
-            className={`${styles.baseButton} ${styles.primaryButton}`}
-          >
-            Register
-          </button>
-          <button
-            type="button"
-            className={`${styles.baseButton} ${styles.secondaryButton}`}
-            onClick={handleGoToLogin}
-          >
-            Go to Login
-          </button>
-        </div>
         {store.authMsg && (
           <p className={`${msgType ? styles.success : styles.error}`}>
             {store.authMsg}
