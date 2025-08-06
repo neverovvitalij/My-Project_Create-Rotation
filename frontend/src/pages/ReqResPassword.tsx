@@ -1,23 +1,35 @@
 import { observer } from 'mobx-react-lite';
-import { useContext, useState, useRef, useEffect } from 'react';
+import {
+  useContext,
+  useState,
+  useRef,
+  useEffect,
+  FC,
+  FormEvent,
+  ChangeEvent,
+} from 'react';
 import { FaSpinner } from 'react-icons/fa';
+import type { IconBaseProps } from 'react-icons';
 import { useNavigate } from 'react-router-dom';
 import { Context } from '../index';
 import styles from '../styles/ReqResPassword.module.css';
 
-const ReqResPassword = () => {
+const ReqResPassword: FC = () => {
   const { store } = useContext(Context);
   const [email, setEmail] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [serverResponse, setServerResponse] = useState(false);
   const navigate = useNavigate();
   const storeRef = useRef(store);
+  const Spinner = FaSpinner as React.FC<IconBaseProps>;
 
   useEffect(() => {
     storeRef.current.setAuthMsg('');
   }, []);
 
-  const handleSubmitReqChangePass = async (event) => {
+  const handleSubmitReqChangePass = async (
+    event: FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
     setSuccessMsg('');
     store.setAuthMsg('');
@@ -44,7 +56,9 @@ const ReqResPassword = () => {
       <input
         value={email}
         type="email"
-        onChange={(e) => setEmail(e.target.value)}
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          setEmail(e.target.value)
+        }
         className={styles.input}
       />
       <div className={styles.buttonContainer}>
@@ -63,7 +77,7 @@ const ReqResPassword = () => {
       >
         Home
       </button>
-      {serverResponse && <FaSpinner className={styles.spinner} />}
+      {serverResponse && <Spinner className={styles.spinner} />}
       {store.authMsg && <p className={styles.error}>{store.authMsg}</p>}
       {successMsg && <p className={styles.success}>{successMsg}</p>}
     </form>

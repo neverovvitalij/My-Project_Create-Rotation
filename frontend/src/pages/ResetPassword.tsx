@@ -1,12 +1,20 @@
 import { observer } from 'mobx-react-lite';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useContext, useState, useEffect, useRef } from 'react';
+import {
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  FC,
+  FormEvent,
+  ChangeEvent,
+} from 'react';
 import { Context } from '../index';
 import styles from '../styles/ResetPassword.module.css';
 
-const ResetPassword = () => {
+const ResetPassword: FC = () => {
   const { store } = useContext(Context);
-  const { token } = useParams();
+  const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const storeRef = useRef(store);
 
@@ -20,8 +28,12 @@ const ResetPassword = () => {
     }
   }, [token]);
 
-  const handleSubmitResetPassword = async (event) => {
+  const handleSubmitResetPassword = async (
+    event: FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
+    if (!token) return;
+
     store.setAuthMsg('');
     setSuccessMsg('');
 
@@ -47,14 +59,18 @@ const ResetPassword = () => {
         type="password"
         placeholder="New password"
         value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          setPassword(e.target.value)
+        }
         className={styles.input}
       />
       <input
         type="password"
         placeholder="Confirm password"
         value={newPassword}
-        onChange={(e) => setNewPassword(e.target.value)}
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          setNewPassword(e.target.value)
+        }
         className={styles.input}
       />
       {store.authMsg && <p className={styles.error}>{store.authMsg}</p>}
