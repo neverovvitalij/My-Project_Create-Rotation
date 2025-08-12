@@ -88,7 +88,7 @@ export default class Store implements IStore {
     return this.stations.filter((stn) => stn.status === true).length;
   }
 
-  get activeEmployeeByGroup(): Record<number, number> {
+  get activeEmployeeByGroup(): Record<string, number> {
     return this.employeeList.reduce<Record<number, number>>((acc, emp) => {
       const grp = emp.group;
       if (acc[grp] === undefined) acc[grp] = 0;
@@ -97,7 +97,7 @@ export default class Store implements IStore {
     }, {});
   }
 
-  get stationsByGroup(): Record<number, number> {
+  get stationsByGroup(): Record<string, number> {
     return this.stations.reduce<Record<number, number>>((acc, stn) => {
       const grp = stn.group;
       if (acc[grp] === undefined) acc[grp] = 0;
@@ -370,8 +370,8 @@ export default class Store implements IStore {
   }
 
   async getDailyRotation(
-    specialAssignments: ISpecialAssignment,
-    preassigned: IPreassignedEntry,
+    specialAssignments: ISpecialAssignment[] | null,
+    preassigned: IPreassignedEntry[] | null,
     cycles: number
   ): Promise<IRotation> {
     try {

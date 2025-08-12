@@ -8,6 +8,7 @@ export interface IUser {
   adminActivationLink?: string;
   shift: string;
   plant: string;
+  isActivated: boolean;
 }
 
 export interface IEmployee {
@@ -18,6 +19,7 @@ export interface IEmployee {
   stations: IStation[];
   group: number;
   status?: boolean;
+  _id: string;
 }
 
 export interface IStation {
@@ -28,6 +30,7 @@ export interface IStation {
   shift: string;
   plant: string;
   status?: boolean;
+  _id: string;
 }
 
 export interface INewStation {

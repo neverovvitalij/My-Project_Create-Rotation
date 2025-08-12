@@ -1,18 +1,27 @@
 import { observer } from 'mobx-react-lite';
 import { FaSpinner } from 'react-icons/fa';
-import { useContext, useMemo, useState, useRef } from 'react';
+import type { IconBaseProps } from 'react-icons';
+import { useContext, useMemo, useState, useRef, FC } from 'react';
 import { toJS } from 'mobx';
-import ExcelPreview from '../components/ExcelPreview';
+import ExcelPreview, { ExcelPreviewHandle } from '../components/ExcelPreview';
 import styles from '../styles/RotationPlan.module.css';
 import { Context } from '../index';
+import {
+  IEmployee,
+  IPreassignedEntry,
+  ISpecialAssignment,
+} from '../store/types';
 
-const RotationPlan = () => {
+const RotationPlan: FC = () => {
   const { store } = useContext(Context);
-  const previewRef = useRef(null);
+  const previewRef = useRef<ExcelPreviewHandle | null>(null);
+  const Spinner = FaSpinner as React.FC<IconBaseProps>;
 
-  const [preassigned, setPreassigned] = useState([]);
-  const [specialAssignments, setSpecialAssignments] = useState([]);
-  const [cycles, setCycles] = useState('5');
+  const [preassigned, setPreassigned] = useState<IPreassignedEntry[]>([]);
+  const [specialAssignments, setSpecialAssignments] = useState<
+    ISpecialAssignment[]
+  >([]);
+  const [cycles, setCycles] = useState<number>(5);
 
   const [confirmedRotation, setConfirmedRotation] = useState(false);
   const [rotationForDownload, setRotationForDownload] = useState(false);
@@ -30,16 +39,16 @@ const RotationPlan = () => {
       setRotationForDownload(false);
       setConfirmedRotation(false);
       await store.getDailyRotation(specialAssignments, preassigned, cycles);
-      await previewRef.current.loadPreview();
+      await previewRef.current?.loadPreview();
       setConfirmedRotation(true);
-    } catch (error) {
-      console.error('Failed to load rotation', error.message);
+    } catch (error: unknown) {
+      console.error('Failed to load rotation', error);
     } finally {
       setLoader(false);
     }
   };
 
-  const handleStationChange = (workerName, newStation) => {
+  const handleStationChange = (workerName: string, newStation: string) => {
     setPreassigned((prev) => prev.filter((item) => item.worker !== workerName));
     setSpecialAssignments((prev) =>
       prev.filter((item) => item.worker !== workerName)
@@ -59,7 +68,7 @@ const RotationPlan = () => {
   };
 
   // -- Logic for entering "job" for sonder --
-  const handleSonderJobChange = (workerName, newJob) => {
+  const handleSonderJobChange = (workerName: string, newJob: string) => {
     setSpecialAssignments((prev) =>
       prev.map((item) =>
         item.worker === workerName ? { ...item, job: newJob } : item
@@ -68,7 +77,7 @@ const RotationPlan = () => {
   };
 
   // -- Get what has been selected for this employee (station or 'sonder') --
-  const getCurrentStationForWorker = (workerName) => {
+  const getCurrentStationForWorker = (workerName: string) => {
     const sonderItem = specialAssignments.find((s) => s.worker === workerName);
     if (sonderItem) {
       return 'sonder';
@@ -78,7 +87,7 @@ const RotationPlan = () => {
   };
 
   // -- The current job for this employee, if they are in sonder --
-  const getSonderJobForWorker = (workerName) => {
+  const getSonderJobForWorker = (workerName: string) => {
     const sonderItem = specialAssignments.find((s) => s.worker === workerName);
     return sonderItem ? sonderItem.job : '';
   };
@@ -101,7 +110,7 @@ const RotationPlan = () => {
         setRotationForDownload(true);
       }
     } catch (error) {
-      console.error('Error confirming rotation:', error.message || error);
+      console.error('Error confirming rotation:', error);
       setRotationForDownload(false);
     } finally {
       setLoader(false);
@@ -112,11 +121,11 @@ const RotationPlan = () => {
     try {
       await store.downloadLatestConfirmedRotation();
     } catch (error) {
-      console.error('Error downloading file:', error.message || error);
+      console.error('Error downloading file:', error);
     }
   };
 
-  const handleCheck = async (worker) => {
+  const handleCheck = async (worker: IEmployee) => {
     const newStatus = !worker.status;
     await store.changeWorkerStatus(worker.name, newStatus);
     setPreassigned((prev) =>
@@ -127,11 +136,12 @@ const RotationPlan = () => {
     );
   };
 
-  const groupedEmployees = useMemo(() => {
-    return employees.reduce((acc, emp) => {
-      const grp = emp.group;
-      if (!acc[grp]) acc[grp] = [];
-      acc[grp].push(emp);
+  type GroupedEmployees = Record<string, IEmployee[]>;
+
+  const groupedEmployees = useMemo<GroupedEmployees>(() => {
+    return employees.reduce<GroupedEmployees>((acc, emp) => {
+      const key = String(emp.group);
+      (acc[key] ??= []).push(emp);
       return acc;
     }, {});
   }, [employees]);
@@ -151,17 +161,19 @@ const RotationPlan = () => {
           Rotation laden
         </button>
         <select
-          placeholder="Cycles"
           className={styles.cyclesDropdown}
           value={cycles}
-          onChange={(e) => setCycles(e.target.value)}
+          onChange={(e) => setCycles(Number(e.target.value))}
           required
         >
-          <option value="5">5</option>
-          <option value="4">4</option>
-          <option value="3">3</option>
-          <option value="2">2</option>
-          <option value="1">1</option>
+          <option value="" disabled>
+            Runde wählen
+          </option>
+          <option value={5}>5</option>
+          <option value={4}>4</option>
+          <option value={3}>3</option>
+          <option value={2}>2</option>
+          <option value={1}>1</option>
         </select>
         {confirmedRotation ? (
           <button
@@ -178,7 +190,7 @@ const RotationPlan = () => {
           </button>
         )}
       </div>
-      {loader && <FaSpinner className={styles.spinner} />}
+      {loader && <Spinner className={styles.spinner} />}
       {msg && <p className={styles.success}>{msg}</p>}
       {store.errorMsg && <p className={styles.error}>{store.errorMsg}</p>}
 

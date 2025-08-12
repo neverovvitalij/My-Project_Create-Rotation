@@ -16,8 +16,8 @@ export default class RotationPlanService {
   }
 
   static async rotationData(
-    specialAssignments: ISpecialAssignment,
-    preassigned: IPreassignedEntry,
+    specialAssignments: ISpecialAssignment[] | null,
+    preassigned: IPreassignedEntry[] | null,
     cycles: number
   ): Promise<AxiosResponse<IRotation>> {
     return api.post<IRotation>('/rotation-data', {
