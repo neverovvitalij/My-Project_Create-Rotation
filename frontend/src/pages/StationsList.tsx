@@ -1,16 +1,25 @@
 import { observer } from 'mobx-react-lite';
-import { useState, useContext, useRef } from 'react';
+import {
+  useState,
+  useContext,
+  useRef,
+  FC,
+  FormEvent,
+  useMemo,
+  ChangeEvent,
+} from 'react';
 import { Context } from '../index';
 import SingleStation from '../components/SingleStation';
 import styles from '../styles/StationsList.module.css';
+import { INewStation, IStation, IStore } from '../store/types';
 
-const StationsList = () => {
-  const [stationName, setStationName] = useState('');
-  const [stationPriority, setStationPriority] = useState('');
-  const [stationGroup, setStationGroup] = useState('');
-  const { store } = useContext(Context);
-  const [showAddStationForm, setShowAddStationForm] = useState(false);
-  const addStationFormRef = useRef(null);
+const StationsList: FC = () => {
+  const [stationName, setStationName] = useState<string>('');
+  const [stationPriority, setStationPriority] = useState<number>(1);
+  const [stationGroup, setStationGroup] = useState<number>(1);
+  const { store } = useContext(Context) as { store: IStore };
+  const [showAddStationForm, setShowAddStationForm] = useState<boolean>(false);
+  const addStationFormRef = useRef<HTMLDivElement | null>(null);
 
   const toggleAddStationForm = () => {
     store.setErrorMsg('');
@@ -26,7 +35,7 @@ const StationsList = () => {
     }
   };
 
-  const handleFormSubmit = async (event) => {
+  const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     store.setErrorMsg('');
 
@@ -34,44 +43,43 @@ const StationsList = () => {
       store.setErrorMsg('Please enter the station name.');
       return;
     }
-    if (
-      !stationPriority.trim() ||
-      isNaN(stationPriority) ||
-      stationPriority <= 0
-    ) {
+    if (!stationPriority || stationPriority <= 0) {
       store.setErrorMsg('Please enter a valid priority (number > 0).');
       return;
     }
 
     try {
-      const newStation = {
+      const newStation: INewStation = {
         name: stationName,
-        priority: parseInt(stationPriority, 10),
-        group: parseInt(stationGroup, 10),
+        priority: stationPriority,
+        group: stationGroup,
       };
       await store.addNewStation(newStation);
-    } catch (error) {
-      if (error.respons && error.respons.status === 400) {
-        console.error('Station already exists', error.respons.data.message);
+    } catch (error: unknown) {
+      if (error === 'string') {
+        console.error(error);
         alert(`Station ${stationName} already exists`);
       } else {
-        console.error('Error adding station', error);
+        console.error('Error adding station');
       }
     }
     setStationName('');
-    setStationPriority('');
-    setStationGroup('');
+    setStationPriority(1);
+    setStationGroup(1);
   };
 
   // Dynamic group display
-  const groupedStations = store.stations.reduce((groups, station) => {
-    const group = station.group || 'Suporters';
-    if (!groups[group]) {
-      groups[group] = [];
+  const groupedStations = useMemo(() => {
+    const groups: Record<string, IStation[]> = {};
+    for (const station of store.stations) {
+      const key = String(station.group ?? 'Supporters');
+      (groups[key] ||= []).push(station);
     }
-    groups[group].push(station);
+    Object.values(groups).forEach((list) =>
+      list.sort((a, b) => a.name.localeCompare(b.name))
+    );
     return groups;
-  }, {});
+  }, [store.stations]);
 
   return (
     <div className={styles.container}>
@@ -107,12 +115,16 @@ const StationsList = () => {
               value={stationName}
               type="text"
               required
-              onChange={(e) => setStationName(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setStationName(e.target.value)
+              }
             />
             <select
               className={styles.addStationInput}
               value={stationPriority}
-              onChange={(e) => setStationPriority(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                setStationPriority(Number(e.target.value))
+              }
             >
               <option value="" disabled>
                 Priorität
@@ -124,7 +136,9 @@ const StationsList = () => {
             <select
               className={styles.addStationInput}
               value={stationGroup}
-              onChange={(e) => setStationGroup(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                setStationGroup(Number(e.target.value))
+              }
             >
               <option value="" disabled>
                 Gruppe

@@ -1,15 +1,16 @@
 import { observer } from 'mobx-react-lite';
-import { useState, useContext, useRef } from 'react';
+import { useState, useContext, useRef, FC, useMemo } from 'react';
 import { Context } from '../index';
 import SingleWorker from '../components/SingleWorker';
 import AddNewWorker from '../components/AddNewWorker';
 import styles from '../styles/WorkersList.module.css';
+import { IEmployee, IStore } from '../store/types';
 
-const WorkersList = () => {
-  const { store } = useContext(Context);
-  const [showAddWorkerForm, setShowAddWorkerForm] = useState(false);
-  const [activeWorker, setActiveWorker] = useState(null);
-  const addWorkerFromRef = useRef(null);
+const WorkersList: FC = () => {
+  const { store } = useContext(Context) as { store: IStore };
+  const [showAddWorkerForm, setShowAddWorkerForm] = useState<boolean>(false);
+  const [activeWorker, setActiveWorker] = useState<boolean>(false);
+  const addWorkerFromRef = useRef<HTMLDivElement | null>(null);
 
   const toggleAddWorkerFrom = () => {
     store.setErrorMsg('');
@@ -25,21 +26,21 @@ const WorkersList = () => {
     }
   };
 
-  const groupedEmploees = store.employeeList.reduce((groups, worker) => {
-    const group = worker.group;
-    if (!groups[group]) {
-      groups[group] = [];
-    }
-    groups[group].push(worker);
-    return groups;
-  }, {});
+  const groupedEmployees = useMemo(
+    () =>
+      store.employeeList.reduce<Record<number, IEmployee[]>>((acc, worker) => {
+        (acc[worker.group] ??= []).push(worker);
+        return acc;
+      }, {}),
+    [store.employeeList]
+  );
 
   return (
     <div className={styles.container}>
       <h2 className={styles.header}>Mitarbeiterliste</h2>
       <div className={styles.workersGrid}>
         {store.employeeList.length > 0 ? (
-          Object.entries(groupedEmploees).map(([group, workers]) => (
+          Object.entries(groupedEmployees).map(([group, workers]) => (
             <div className={styles.groupColumn} key={group}>
               <h3>Gruppe {group}</h3>
               {workers
