@@ -1,113 +1,122 @@
 .container {
   width: 95%;
-  margin: 0 auto;
+  max-width: 1200px;
+  margin: 24px auto;
   padding: 20px;
-  background-color: var(--bg-form);
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  background: var(--bg-form);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  box-shadow: var(--shadow-elev);
+  backdrop-filter: blur(6px);
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 24px;
 }
 
 .header {
-  font-size: 28px;
-  font-weight: bold;
-  color: var(--text-primary);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
   text-align: center;
-  margin-bottom: 20px;
+  color: var(--text-primary);
 }
 
 .workersGrid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: center;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 18px;
+  align-items: start;
 }
 
 .noWorkersMessage {
-  font-size: 18px;
-  color: #aaaaaa;
-  margin: 20px 0;
   text-align: center;
+  font-size: 16px;
+  color: #b7c0cc;
+  margin: 12px 0 4px;
 }
 
 .groupColumn {
-  background-color: var(--bg-secondary);
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  flex: 1 1 280px;
-  max-width: 20%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: transform 0.18s ease, box-shadow 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.groupColumn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.28);
 }
 
 .groupColumn h3 {
-  color: var(--text-primary);
+  margin: 2px 0 10px;
+  font-size: 18px;
+  font-weight: 700;
   text-align: center;
-  margin-bottom: 15px;
-  font-size: 20px;
-  font-weight: bold;
+  color: var(--text-primary);
+  opacity: 0.95;
 }
 
 .toggleButton {
-  background-color: var(--color-accent);
-  color: #2b2b3d;
-  border: none;
-  border-radius: 5px;
-  padding: 12px 24px;
-  font-size: 18px;
-  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 8px auto 0;
+  padding: 12px 22px;
+  border: 0;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0b0c10;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  margin: 0 auto;
+  background: linear-gradient(135deg, var(--color-accent), #ffc637);
+  box-shadow: 0 10px 18px rgba(255, 210, 63, 0.22);
+  transition: transform 0.08s ease, filter 0.2s ease, box-shadow 0.2s ease;
 }
 
 .toggleButton:hover {
-  background-color: var(--color-accent-hover);
-  transform: scale(1.05);
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+  filter: brightness(1.03);
+  box-shadow: 0 12px 22px rgba(255, 210, 63, 0.28);
 }
 
 .toggleButton:active {
-  transform: scale(0.95);
-  background-color: #c5b200;
+  transform: translateY(1px);
 }
+
 .toggleButton:disabled {
-  background-color: #ccc;
   cursor: not-allowed;
-  opacity: 0.6;
+  filter: grayscale(0.5) opacity(0.8);
+  box-shadow: none;
 }
 
 .addNewWorkerContainer {
-  background-color: var(--bg-secondary);
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
+.toggleButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.4), 0 0 0 6px rgba(255, 210, 63, 0.35);
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .container {
-    margin: 0px;
-    padding: 5px;
+    margin: 10px;
+    padding: 14px;
   }
 
   .header {
     font-size: 22px;
-  }
-
-  .groupColumn {
-    max-width: 100%;
-    margin-bottom: 20px;
-  }
-
-  .workersGrid {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-
-  .toggleButton {
-    width: 60%;
   }
 }

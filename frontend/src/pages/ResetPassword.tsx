@@ -1,14 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  useContext,
-  useState,
-  useEffect,
-  useRef,
-  FC,
-  FormEvent,
-  ChangeEvent,
-} from 'react';
+import { useContext, useState, useEffect, useRef, FC, FormEvent } from 'react';
 import { Context } from '../index';
 import styles from '../styles/ResetPassword.module.css';
 
@@ -53,32 +45,51 @@ const ResetPassword: FC = () => {
   };
 
   return (
-    <form className={styles.container} onSubmit={handleSubmitResetPassword}>
-      <h2 className={styles.title}>Enter new password</h2>
-      <input
-        type="password"
-        placeholder="New password"
-        value={password}
-        onChange={(e: ChangeEvent<HTMLInputElement>) =>
-          setPassword(e.target.value)
-        }
-        className={styles.input}
-      />
-      <input
-        type="password"
-        placeholder="Confirm password"
-        value={newPassword}
-        onChange={(e: ChangeEvent<HTMLInputElement>) =>
-          setNewPassword(e.target.value)
-        }
-        className={styles.input}
-      />
-      {store.authMsg && <p className={styles.error}>{store.authMsg}</p>}
-      {successMsg && <p className={styles.success}>{successMsg}</p>}
-      <button type="submit" className={styles.button}>
-        Change password
-      </button>
-    </form>
+    <div className={styles.wrapper}>
+      <form className={styles.card} onSubmit={handleSubmitResetPassword}>
+        <h2 className={styles.title}>Enter new password</h2>
+        <p className={styles.subtitle}>
+          Set a strong password you won’t forget
+        </p>
+
+        <div className={styles.field}>
+          <input
+            id="newpass"
+            type="password"
+            placeholder=" "
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={styles.input}
+            required
+          />
+          <label htmlFor="newpass" className={styles.label}>
+            New password
+          </label>
+        </div>
+
+        <div className={styles.field}>
+          <input
+            id="confirm"
+            type="password"
+            placeholder=" "
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            className={styles.input}
+            required
+          />
+          <label htmlFor="confirm" className={styles.label}>
+            Confirm password
+          </label>
+        </div>
+
+        <button type="submit" className={styles.submit}>
+          Change password
+        </button>
+
+        {store.authMsg && <p className={styles.error}>{store.authMsg}</p>}
+        {successMsg && <p className={styles.success}>{successMsg}</p>}
+      </form>
+    </div>
   );
 };
 

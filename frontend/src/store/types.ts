@@ -72,6 +72,8 @@ export interface IStore {
   user: Partial<IUser>;
   newStation: INewStation;
   isInitializing: boolean;
+  setErrorMsg(msg: string): void;
+  addNewStation(newStation: INewStation): Promise<void>;
 }
 
 export interface IPromiseResponse {

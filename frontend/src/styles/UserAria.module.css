@@ -1,102 +1,128 @@
+/* ===== UserAria.module.css (unified with App/Login) ===== */
+
 .container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 16px auto 12px;
+  padding: 14px 16px;
+
+  background: var(--bg-form);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: var(--shadow-elev);
+
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  width: 95%;
-  max-width: 1200px;
-  margin: 20px;
-  background-color: var(--bg-secondary);
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  margin-bottom: 15px;
+  gap: 12px;
 }
 
 .header {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: flex-start;
-  width: 95%;
-  color: var(--text-primary);
+  gap: 12px;
 }
 
 .userInfo {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-  padding-top: 10px;
+  align-items: center;
+  gap: 10px 14px;
+  flex-wrap: wrap;
 }
 
-.logoutButton {
-  width: 5rem;
-  height: 2rem;
-  padding: 0.25rem;
-  font-size: 1.25rem;
-  border-width: 1.5px;
-  border-radius: 0.4rem;
-  cursor: pointer;
-  background-color: var(--color-error);
-  color: white;
+/* email + статус как компактный “чип” */
+.userInfo h3 {
+  margin: 0;
   font-size: 14px;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-color);
 }
 
-.logoutButton:hover {
-  background-color: #cc3333;
-  transform: scale(1.05);
-}
-
+/* иконки статуса */
 .greenicon,
 .redicon {
-  font-size: 24px;
+  font-size: 18px;
   vertical-align: middle;
+  line-height: 1;
 }
 
 .greenicon {
   color: var(--color-success);
 }
-
 .redicon {
   color: var(--color-error);
 }
 
+/* кнопка выхода — danger */
+.logoutButton {
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: var(--color-error);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.08s ease;
+}
+.logoutButton:hover {
+  filter: brightness(1.03);
+}
+.logoutButton:active {
+  transform: translateY(1px);
+}
+
+/* переключатель темы — нейтральная кнопка */
 .themeToggle {
-  width: 2rem;
-  height: 2rem;
-  padding: 0.25rem;
-  font-size: 1.25rem;
-  border-width: 1.5px;
-  border-radius: 0.4rem;
-  display: flex;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.08s ease;
+}
+.themeToggle:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.themeToggle:active {
+  transform: translateY(1px);
 }
 
-.button:active {
-  transform: scale(0.95);
-}
-
+/* ===== Responsive ===== */
 @media (max-width: 768px) {
   .container {
-    padding: 5px;
+    margin: 12px auto 10px;
+    padding: 10px 12px;
   }
 
   .header {
     flex-direction: column;
-    align-items: center;
-    padding: 5px;
-    margin: 0px;
-  }
-
-  .logoutButton {
-    align-self: center;
+    align-items: stretch;
+    gap: 10px;
   }
 
   .userInfo {
-    flex-direction: column;
-    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logoutButton {
+    width: 100%;
+    order: 2;
   }
 }

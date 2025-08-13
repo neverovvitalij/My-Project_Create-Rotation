@@ -1,7 +1,8 @@
 import { NavLink } from 'react-router-dom';
 import styles from '../styles/Menu.module.css';
+import { FC } from 'react';
 
-const Menu = () => {
+const Menu: FC = () => {
   return (
     <nav className={styles.container}>
       <NavLink

@@ -1,41 +1,89 @@
-.App {
+.app {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: radial-gradient(
+      1200px 600px at 80% -10%,
+      rgba(34, 211, 238, 0.25),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 500px at 10% 110%,
+      rgba(255, 210, 63, 0.2),
+      transparent 60%
+    ),
+    linear-gradient(180deg, #0b0c10, #0f1117 60%, #0b0c10);
+  color: var(--text);
+}
+
+/* Top bar */
+.headerBar {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  min-height: 100vh;
-  background-color: var(--bg-primary);
-  color: #ffffff;
-  font-family: Arial, sans-serif;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px clamp(16px, 4vw, 28px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 17, 23, 0.8),
+    rgba(15, 17, 23, 0.4)
+  );
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--card-border);
 }
 
-.header {
-  font-size: 28px;
-  margin-top: 20px;
-  margin-bottom: 20px;
-  color: var(--text-primary);
+.title {
+  font-size: clamp(18px, 2.2vw, 26px);
+  font-weight: 800;
+  margin: auto;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 0.3px;
+}
+
+/* Page content */
+.main {
+  width: min(1200px, 92%);
+  margin: 0 auto;
+  padding: clamp(16px, 3vw, 28px);
+}
+
+/* Loader */
+.loaderWrap {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(
+      1200px 600px at 80% -10%,
+      rgba(34, 211, 238, 0.25),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 500px at 10% 110%,
+      rgba(255, 210, 63, 0.2),
+      transparent 60%
+    ),
+    linear-gradient(180deg, #0b0c10, #0f1117 60%, #0b0c10);
 }
 
 .spinner {
-  animation: spin 1s linear infinite;
+  width: 26px;
+  height: 26px;
+  display: inline-block;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
+  to {
     transform: rotate(360deg);
-  }
-}
-
-@media (max-width: 768px) {
-  .App {
-    max-width: 768px;
-  }
-  .header {
-    font-size: 22px;
-    margin-top: 10px;
-    margin-bottom: 10px;
   }
 }

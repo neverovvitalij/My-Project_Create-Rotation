@@ -151,6 +151,7 @@ const RotationPlan: FC = () => {
 
   return (
     <div className={styles.container}>
+      <h2>Rotationsplan</h2>
       {/* Button panel */}
       <div className={styles.buttonPanel}>
         <button
@@ -199,7 +200,6 @@ const RotationPlan: FC = () => {
           Bitte prüfen Sie die Anzahl der Mitarbeiter und Stationen.
         </p>
       )}
-      <h2>Rotationsplan</h2>
       <ExcelPreview
         ref={previewRef}
         preassigned={toJS(preassigned)}

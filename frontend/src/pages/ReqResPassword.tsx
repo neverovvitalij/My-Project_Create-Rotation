@@ -35,52 +35,64 @@ const ReqResPassword: FC = () => {
     store.setAuthMsg('');
     setServerResponse(true);
 
-    const response = await store.requestResetPassword(email);
+    const res = await store.requestResetPassword(email);
 
-    if (response.success) {
+    if (res.success) {
       setEmail('');
       setSuccessMsg('An email has been sent. Please check your mailbox.');
     } else {
-      store.setAuthMsg(response.message || 'Unknown error');
+      store.setAuthMsg(res.message || 'Unknown error');
     }
     setServerResponse(false);
   };
 
-  const handleGoToDashboard = () => {
-    navigate('/');
-  };
-
   return (
-    <form className={styles.container} onSubmit={handleSubmitReqChangePass}>
-      <h2 className={styles.title}>Change Password</h2>
-      <input
-        value={email}
-        type="email"
-        onChange={(e: ChangeEvent<HTMLInputElement>) =>
-          setEmail(e.target.value)
-        }
-        className={styles.input}
-      />
-      <div className={styles.buttonContainer}>
+    <div className={styles.wrapper}>
+      <form className={styles.card} onSubmit={handleSubmitReqChangePass}>
+        <h2 className={styles.title}>Change Password</h2>
+        <p className={styles.subtitle}>Request a password reset link</p>
+
+        <div className={styles.field}>
+          <input
+            id="email"
+            value={email}
+            type="email"
+            placeholder=" "
+            autoComplete="email"
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setEmail(e.target.value)
+            }
+            className={styles.input}
+            required
+          />
+          <label htmlFor="email" className={styles.label}>
+            Email
+          </label>
+        </div>
+
         <button
           type="submit"
           disabled={serverResponse}
-          className={`${styles.baseButton} ${styles.primaryButton}`}
+          className={styles.submit}
         >
-          Send Email
+          {serverResponse ? 'Sending…' : 'Send Email'}
         </button>
-      </div>
-      <button
-        type="button"
-        onClick={handleGoToDashboard}
-        className={`${styles.baseButton} ${styles.secondaryButton}`}
-      >
-        Home
-      </button>
-      {serverResponse && <Spinner className={styles.spinner} />}
-      {store.authMsg && <p className={styles.error}>{store.authMsg}</p>}
-      {successMsg && <p className={styles.success}>{successMsg}</p>}
-    </form>
+
+        <div className={styles.actions}>
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className={styles.linkBtn}
+          >
+            Home
+          </button>
+          {serverResponse && <Spinner className={styles.spinner} />}
+        </div>
+
+        {store.authMsg && <p className={styles.error}>{store.authMsg}</p>}
+        {successMsg && <p className={styles.success}>{successMsg}</p>}
+      </form>
+    </div>
   );
 };
 

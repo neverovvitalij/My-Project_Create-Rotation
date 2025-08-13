@@ -1,58 +1,67 @@
-* {
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
-    'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  color: white;
-  background-color: #1e1e2d;
-}
-
-/*global styles for Dark/Light Theme */
+/* ===== Theme tokens (унификация под стиль Login) ===== */
 :root {
-  --bg-primary: #1e1e2d;
-  --color-accent: #f7e500;
-  --bg-secondary: #2b2b3d;
-  --bg-form: #3a3a4f;
-  --text-primary: #fff;
+  /* Новая палитра из Login */
+  --bg: #0b0c10;
+  --card: rgba(255, 255, 255, 0.06);
+  --card-border: rgba(255, 255, 255, 0.15);
+  --text: #eaf0f6;
+  --muted: #9aa4b2;
+  --accent: #ffd23f;
+  --accent-2: #22d3ee;
+  --danger: #ff6b6b;
+  --ring: rgba(255, 210, 63, 0.3);
+
+  /* Совместимость со старыми переменными (алиасы) */
+  --bg-primary: var(--bg);
+  --bg-secondary: #0f1117; /* чуть светлее бэкграунд */
+  --bg-form: var(--card);
+  --text-primary: var(--text);
+  --color-accent: var(--accent);
+  --color-accent-hover: #ffc637; /* hover из кнопки submit */
+  --color-error: var(--danger);
   --color-success: #4caf50;
-  --navlink-bg: #2f80f2;
-  --navlink-text: #ffffff;
-  --navlink-text-active: #2b2b3d;
-  --navlink-bg-active: #f7e500;
-  --color-error: #ff4444;
-  --color-accent: #f7e500;
-  --color-accent-hover: #d6c400;
-}
-[data-theme='light'] {
-  --bg-primary: #ffecba;
-  --color-accent: #33425b;
-  --bg-secondary: #e1d0a4;
-  --bg-form: #c8b992;
-  --text-primary: #2c2c42;
-  --color-success: #2b2b3d;
-  --navlink-bg: #d6b678;
-  --navlink-text: #2b2b3d;
-  --navlink-bg-active: #d8ae5a;
-  --color-error: #2b2b3d;
-  --color-accent: #d6b678;
-  --color-accent-hover: #d8ae5a;
+
+  --border-color: var(--card-border);
+  --shadow-elev: 0 10px 30px rgba(0, 0, 0, 0.35);
+
+  /* Линки/навигация в общем стиле */
+  --navlink-bg: var(--card);
+  --navlink-text: var(--text);
+  --navlink-bg-active: var(--accent);
+  --navlink-text-active: #0b0c10;
 }
 
-/*global styles for Excel-preview */
+/* Фон страницы в стиле Login.wrapper */
+body {
+  background: radial-gradient(
+      1200px 600px at 80% -10%,
+      rgba(34, 211, 238, 0.25),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 500px at 10% 110%,
+      rgba(255, 210, 63, 0.2),
+      transparent 60%
+    ),
+    linear-gradient(180deg, #0b0c10, #0f1117 60%, #0b0c10);
+  color: var(--text-primary);
+}
+
+/* (остальной reset/глобальные стили — без изменений) */
+
+/* ===== Excel preview (в том же стиле) ===== */
 #preview-table {
   border-collapse: separate !important;
   border-spacing: 0 8px !important;
   width: max-content;
   font-size: 0.9rem;
+  box-shadow: var(--shadow-elev);
 }
 
 #preview-table th,
 #preview-table td {
   padding: 6px 12px;
-  border: 1px solid #444;
+  border: 1px solid var(--border-color);
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
 }
@@ -60,7 +69,7 @@ body {
 #preview-table tr:first-child td,
 #preview-table thead th {
   background: var(--navlink-bg) !important;
-  color: var(--text-primary) !important;
+  color: var(--navlink-text) !important;
   font-weight: bold;
 }
 
@@ -78,10 +87,11 @@ body {
   height: 12px;
 }
 
+/* ===== Responsive ===== */
 @media (max-width: 768px) {
   #preview-table {
     width: 100% !important;
-    font-size: 0.8rem !important;
+    font-size: 0.85rem !important;
     table-layout: auto !important;
     display: block;
     overflow-x: auto;

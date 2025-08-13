@@ -5,91 +5,116 @@ import {
   useEffect,
   useRef,
   FormEvent,
-  FC,
   ChangeEvent,
+  FC,
 } from 'react';
 import { Context } from '../index';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/LoginForm.module.css';
 
 const LoginForm: FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const { store } = useContext(Context);
   const navigate = useNavigate();
   const storeRef = useRef(store);
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPw, setShowPw] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     storeRef.current.setAuthMsg('');
   }, []);
 
-  const handleChangeSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSubmitting(true);
     try {
       await store.login(email, password);
     } catch (error) {
       store.setAuthMsg('Incorrect data');
       console.error('Login failed:', error);
     } finally {
+      setSubmitting(false);
       setEmail('');
       setPassword('');
     }
   };
 
-  const handleGoToRegister = () => {
-    navigate('/registration');
-  };
-
-  const handleRequestResetPassword = () => {
-    navigate('/reset-password');
-  };
+  const goRegister = () => navigate('/registration');
+  const goReset = () => navigate('/reset-password');
 
   return (
-    <form className={styles.container} onSubmit={handleChangeSubmit}>
-      <h2 className={styles.title}>Login</h2>
-      <input
-        placeholder="Email"
-        value={email}
-        type="text"
-        onChange={(e: ChangeEvent<HTMLInputElement>) =>
-          setEmail(e.target.value)
-        }
-        className={styles.input}
-      />
-      <input
-        placeholder="Password"
-        value={password}
-        type="password"
-        onChange={(e: ChangeEvent<HTMLInputElement>) =>
-          setPassword(e.target.value)
-        }
-        className={styles.input}
-      />
-      <div className={styles.buttonContainer}>
+    <div className={styles.wrapper}>
+      <form className={styles.card} onSubmit={handleSubmit}>
+        <h2 className={styles.title}>Welcome back</h2>
+        <p className={styles.subtitle}>Sign in to your account</p>
+
+        <div className={styles.field}>
+          <input
+            id="email"
+            placeholder=" "
+            value={email}
+            type="email"
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setEmail(e.target.value)
+            }
+            className={styles.input}
+            autoComplete="email"
+            required
+          />
+          <label htmlFor="email" className={styles.label}>
+            Email
+          </label>
+        </div>
+
+        <div className={styles.field}>
+          <input
+            id="password"
+            placeholder=" "
+            value={password}
+            type={showPw ? 'text' : 'password'}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setPassword(e.target.value)
+            }
+            className={styles.input}
+            autoComplete="current-password"
+            required
+          />
+          <label htmlFor="password" className={styles.label}>
+            Password
+          </label>
+          <button
+            type="button"
+            className={styles.eye}
+            onClick={() => setShowPw((s) => !s)}
+            aria-label={showPw ? 'Hide password' : 'Show password'}
+          >
+            {showPw ? '🙈' : '👁️'}
+          </button>
+        </div>
+
+        {store.authMsg && <p className={styles.error}>{store.authMsg}</p>}
+
         <button
           type="submit"
-          className={`${styles.baseButton} ${styles.primaryButton}`}
+          className={styles.submit}
+          disabled={submitting || !email || !password}
         >
-          Login
+          {submitting ? <span className={styles.spinner} /> : 'Login'}
         </button>
-      </div>
-      {store.authMsg && <p className={styles.error}>{store.authMsg}</p>}
-      <button
-        type="button"
-        className={`${styles.baseButton} ${styles.secondaryButton}`}
-        onClick={handleRequestResetPassword}
-      >
-        Forgot password?
-      </button>
-      <button
-        type="button"
-        className={`${styles.baseButton} ${styles.secondaryButton}`}
-        onClick={handleGoToRegister}
-      >
-        Go to registration
-      </button>
-    </form>
+
+        <div className={styles.actions}>
+          <button type="button" className={styles.linkBtn} onClick={goReset}>
+            Forgot password?
+          </button>
+          <span className={styles.dot} />
+          <button type="button" className={styles.linkBtn} onClick={goRegister}>
+            Create account
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 
