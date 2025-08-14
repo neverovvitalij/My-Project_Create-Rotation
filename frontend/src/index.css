@@ -1,6 +1,6 @@
 /* ===== Theme tokens (унификация под стиль Login) ===== */
+
 :root {
-  /* Новая палитра из Login */
   --bg: #0b0c10;
   --card: rgba(255, 255, 255, 0.06);
   --card-border: rgba(255, 255, 255, 0.15);
@@ -11,28 +11,25 @@
   --danger: #ff6b6b;
   --ring: rgba(255, 210, 63, 0.3);
 
-  /* Совместимость со старыми переменными (алиасы) */
   --bg-primary: var(--bg);
-  --bg-secondary: #0f1117; /* чуть светлее бэкграунд */
+  --bg-secondary: #0f1117;
   --bg-form: var(--card);
   --text-primary: var(--text);
   --color-accent: var(--accent);
-  --color-accent-hover: #ffc637; /* hover из кнопки submit */
+  --color-accent-hover: #ffc637;
   --color-error: var(--danger);
   --color-success: #4caf50;
 
   --border-color: var(--card-border);
   --shadow-elev: 0 10px 30px rgba(0, 0, 0, 0.35);
 
-  /* Линки/навигация в общем стиле */
   --navlink-bg: var(--card);
   --navlink-text: var(--text);
   --navlink-bg-active: var(--accent);
   --navlink-text-active: #0b0c10;
 }
 
-/* Фон страницы в стиле Login.wrapper */
-body {
+html:not([data-theme='light']) body {
   background: radial-gradient(
       1200px 600px at 80% -10%,
       rgba(34, 211, 238, 0.25),
@@ -47,9 +44,56 @@ body {
   color: var(--text-primary);
 }
 
-/* (остальной reset/глобальные стили — без изменений) */
+/* --- Light Theme --- */
+:root[data-theme='light'] {
+  /* base tokens */
+  --bg: #f8fafc;
+  --card: rgba(255, 255, 255, 0.72);
+  --card-border: rgba(17, 24, 39, 0.08);
+  --text: #0f172a;
+  --muted: #64748b;
 
-/* ===== Excel preview (в том же стиле) ===== */
+  --accent: #facc15;
+  --accent-2: #22d3ee;
+  --danger: #e11d48;
+  --ring: rgba(250, 204, 21, 0.22);
+
+  --bg-primary: var(--bg);
+  --bg-secondary: #ffffff;
+  --bg-form: var(--card);
+  --text-primary: var(--text);
+  --color-accent: var(--accent);
+  --color-accent-hover: #f4c20d;
+  --color-error: var(--danger);
+  --color-success: #16a34a;
+
+  --border-color: var(--card-border);
+  --shadow-elev: 0 12px 30px rgba(2, 6, 23, 0.06);
+
+  --navlink-bg: #eef2ff;
+  --navlink-text: #0f172a;
+  --navlink-bg-active: var(--accent);
+  --navlink-text-active: #0b0c10;
+}
+
+html,
+body,
+a,
+button,
+input,
+select,
+textarea {
+  transition: background-color 0.25s ease, color 0.25s ease,
+    border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+[data-theme='light'] .card,
+[data-theme='light'] .container,
+[data-theme='light'] .wrapper {
+  backdrop-filter: saturate(1.15) blur(6px);
+}
+
+/* ===== Excel preview ===== */
 #preview-table {
   border-collapse: separate !important;
   border-spacing: 0 8px !important;

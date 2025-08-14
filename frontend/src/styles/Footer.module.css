@@ -43,11 +43,11 @@
 @media (max-width: 768px) {
   .inner {
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
     gap: 12px;
     text-align: center;
   }
   .link {
-    width: 100%;
+    width: 50%;
   }
 }

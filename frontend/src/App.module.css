@@ -2,18 +2,8 @@
   min-height: 100dvh;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  background: radial-gradient(
-      1200px 600px at 80% -10%,
-      rgba(34, 211, 238, 0.25),
-      transparent 60%
-    ),
-    radial-gradient(
-      900px 500px at 10% 110%,
-      rgba(255, 210, 63, 0.2),
-      transparent 60%
-    ),
-    linear-gradient(180deg, #0b0c10, #0f1117 60%, #0b0c10);
-  color: var(--text);
+  background: transparent;
+  color: var(--text-primary);
 }
 
 /* Top bar */
@@ -85,5 +75,11 @@
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .app {
+    width: 95%;
   }
 }

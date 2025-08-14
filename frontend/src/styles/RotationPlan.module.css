@@ -208,7 +208,7 @@ h2 {
     gap: 10px;
   }
   .empItem {
-    grid-template-columns: 1fr;
+    width: 85%;
   }
   .stationDropdown,
   .cyclesDropdown {
