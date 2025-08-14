@@ -1,15 +1,16 @@
 import { observer } from 'mobx-react-lite';
-import { useContext, useState } from 'react';
+import { FC, FormEvent, useContext, useState } from 'react';
 import { Context } from '../index';
 import styles from '../styles/AddNewWorker.module.css';
+import { ICandidate, IStore } from '../store/types';
 
-const AddNewWorker = () => {
-  const [candidateName, setCandidateName] = useState('');
-  const [group, setGroup] = useState('');
-  const [selectedStations, setSelectedStations] = useState([]);
-  const { store } = useContext(Context);
+const AddNewWorker: FC = () => {
+  const [candidateName, setCandidateName] = useState<string>('');
+  const [group, setGroup] = useState<number>(1);
+  const [selectedStations, setSelectedStations] = useState<string[]>([]);
+  const { store } = useContext(Context) as { store: IStore };
 
-  const handleChangeSubmit = async (event) => {
+  const handleChangeSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const stations =
       selectedStations.map((station) => ({
@@ -24,19 +25,19 @@ const AddNewWorker = () => {
       return store.setErrorMsg('Employee group is missing');
     }
 
-    const candidate = {
+    const candidate: ICandidate = {
       name: candidateName,
       stations,
-      group: parseInt(group, 10),
+      group,
     };
     await store.addWorker(candidate);
 
     setCandidateName('');
-    setGroup('');
+    setGroup(1);
     setSelectedStations([]);
   };
 
-  const handleStationChange = (stationName) => {
+  const handleStationChange = (stationName: string) => {
     setSelectedStations((prevSelectedStation) => {
       if (prevSelectedStation.includes(stationName)) {
         return prevSelectedStation.filter((s) => s !== stationName);
@@ -58,24 +59,23 @@ const AddNewWorker = () => {
     <div className={styles.container}>
       <form onSubmit={handleChangeSubmit} className={styles.form}>
         <div className={styles.inputRow}>
-          <div className={styles.inputGroup}>
-            <input
-              htmlFor="name"
-              id="name"
-              value={candidateName}
-              type="text"
-              onChange={(e) => setCandidateName(e.target.value)}
-              className={styles.inputField}
-              placeholder="Mitarbeiternamen eingeben"
-            />
-          </div>
+          <input
+            id="name"
+            value={candidateName}
+            type="text"
+            onChange={(e) => setCandidateName(e.target.value)}
+            className={`${styles.inputField} ${styles.inputText}`}
+            placeholder="Mitarbeiternamen eingeben"
+          />
+
           <select
-            className={styles.inputField}
+            className={`${styles.inputField} ${styles.selectField} ${styles.selectNarrow}`}
             value={group}
-            onChange={(e) => setGroup(e.target.value)}
+            onChange={(e) => setGroup(Number(e.target.value))}
+            aria-label="Gruppe wählen"
           >
             <option value="" disabled>
-              Grupe wählen
+              Gruppe wählen
             </option>
             <option value={1}>1</option>
             <option value={2}>2</option>

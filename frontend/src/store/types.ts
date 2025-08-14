@@ -11,15 +11,21 @@ export interface IUser {
   isActivated: boolean;
 }
 
+export interface IStationByEmployee {
+  name: string;
+  isActive: boolean;
+  _id?: string;
+}
+
 export interface IEmployee {
   name: string;
   costCenter: string;
   shift: string;
   plant: string;
-  stations: IStation[];
+  stations: IStationByEmployee[];
   group: number;
   status?: boolean;
-  _id: string;
+  _id?: string;
 }
 
 export interface IStation {
@@ -74,6 +80,7 @@ export interface IStore {
   isInitializing: boolean;
   setErrorMsg(msg: string): void;
   addNewStation(newStation: INewStation): Promise<void>;
+  addWorker(candidate: ICandidate): Promise<void>;
 }
 
 export interface IPromiseResponse {
@@ -83,7 +90,7 @@ export interface IPromiseResponse {
 
 export interface ICandidate {
   name: string;
-  stations: IStation[];
+  stations: IStationByEmployee[];
   group: number;
 }
 
