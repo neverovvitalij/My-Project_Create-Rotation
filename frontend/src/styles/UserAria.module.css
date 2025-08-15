@@ -1,41 +1,52 @@
-/* ===== UserAria.module.css (unified with App/Login) ===== */
+/* ===== UserAria.module.css (modern glass style) ===== */
 
 .container {
-  width: 100%;
-  max-width: 1100px;
+  width: 95%;
+  max-width: 1200px;
   margin: 16px auto 12px;
   padding: 14px 16px;
 
   background: var(--bg-form);
   color: var(--text-primary);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border);
   border-radius: 16px;
   box-shadow: var(--shadow-elev);
 
   display: flex;
   flex-direction: column;
   gap: 12px;
+
+  /* лёгкое “стекло” в светлой теме */
+  backdrop-filter: saturate(1.05) blur(6px);
 }
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
 }
 
+/* страхуемся от переполнения меню */
+.header > :first-child {
+  min-width: 0;
+}
+
+/* правая часть (email + кнопки) */
 .userInfo {
   display: flex;
   align-items: center;
-  gap: 10px 14px;
+  gap: 12px;
+  flex: 0 0 auto;
   flex-wrap: wrap;
 }
 
-/* email + статус как компактный “чип” */
+/* email + статус как компактный чип */
 .userInfo h3 {
   margin: 0;
   font-size: 14px;
   font-weight: 600;
+
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -43,17 +54,16 @@
   padding: 6px 10px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border);
 }
 
 /* иконки статуса */
 .greenicon,
 .redicon {
   font-size: 18px;
-  vertical-align: middle;
   line-height: 1;
+  vertical-align: middle;
 }
-
 .greenicon {
   color: var(--color-success);
 }
@@ -61,7 +71,7 @@
   color: var(--color-error);
 }
 
-/* кнопка выхода — danger */
+/* кнопка выхода (аккуратный danger) */
 .logoutButton {
   padding: 8px 12px;
   border: 1px solid transparent;
@@ -71,16 +81,16 @@
   font-weight: 700;
   font-size: 14px;
   cursor: pointer;
-  transition: filter 0.2s ease, transform 0.08s ease;
+  transition: filter 0.2s ease, transform 0.08s ease, box-shadow 0.2s ease;
 }
 .logoutButton:hover {
-  filter: brightness(1.03);
+  filter: brightness(1.04);
 }
 .logoutButton:active {
   transform: translateY(1px);
 }
 
-/* переключатель темы — нейтральная кнопка */
+/* переключатель темы — нейтральная кнопка-иконка */
 .themeToggle {
   width: 36px;
   height: 36px;
@@ -88,43 +98,50 @@
   align-items: center;
   justify-content: center;
 
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--card-border);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
   cursor: pointer;
 
   transition: background 0.2s ease, border-color 0.2s ease, transform 0.08s ease;
 }
 .themeToggle:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 .themeToggle:active {
   transform: translateY(1px);
 }
 
 /* ===== Responsive ===== */
+@media (max-width: 920px) {
+  .header {
+    gap: 12px;
+  }
+}
+
 @media (max-width: 768px) {
   .container {
+    width: 90%;
     margin: 12px auto 10px;
     padding: 10px 12px;
+    border-radius: 14px;
   }
 
   .header {
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     gap: 10px;
   }
 
   .userInfo {
     flex-direction: column;
-    align-items: center;
+    justify-content: space-between;
     gap: 10px;
   }
 
   .logoutButton {
-    width: 100%;
     order: 2;
   }
 }

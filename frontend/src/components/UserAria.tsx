@@ -1,17 +1,23 @@
 import { MdDarkMode, MdLightMode } from 'react-icons/md';
+import type { IconBaseProps } from 'react-icons';
 import { observer } from 'mobx-react-lite';
 import {
   AiOutlineDownSquare,
   AiOutlineExclamationCircle,
 } from 'react-icons/ai';
-import { useContext, useEffect, useState } from 'react';
+import { FC, useContext, useEffect, useState } from 'react';
 import { Context } from '../index';
 import Menu from './Menu';
 import styles from '../styles/UserAria.module.css';
+import { IStore } from '../store/types';
 
-const UserAria = () => {
-  const { store } = useContext(Context);
-  const [theme, setTheme] = useState('dark');
+const UserAria: FC = () => {
+  const { store } = useContext(Context) as { store: IStore };
+  const [theme, setTheme] = useState<string>('dark');
+  const DarkMode = MdDarkMode as React.FC<IconBaseProps>;
+  const LightMode = MdLightMode as React.FC<IconBaseProps>;
+  const OkIcon = AiOutlineDownSquare as React.FC<IconBaseProps>;
+  const WarnIcon = AiOutlineExclamationCircle as React.FC<IconBaseProps>;
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -29,15 +35,12 @@ const UserAria = () => {
           {store.isAuth && store.user.isActivated ? (
             <h3>
               {store.user.email}{' '}
-              <AiOutlineDownSquare
-                title="Email confirmed"
-                className={styles.greenicon}
-              />{' '}
+              <OkIcon title="Email confirmed" className={styles.greenicon} />{' '}
             </h3>
           ) : (
             <h3>
               {store.user.email}{' '}
-              <AiOutlineExclamationCircle
+              <WarnIcon
                 title="Bitte bestätige deine E-Mail-Adresse"
                 className={styles.redicon}
               />{' '}
@@ -51,7 +54,7 @@ const UserAria = () => {
             Abmelden
           </button>
           <button className={styles.themeToggle} onClick={toggleTheme}>
-            {theme === 'dark' ? <MdLightMode /> : <MdDarkMode />}
+            {theme === 'dark' ? <LightMode /> : <DarkMode />}
           </button>
         </div>
       </div>

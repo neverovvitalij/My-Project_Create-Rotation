@@ -1,13 +1,12 @@
 .footer {
-  width: 100%;
   background-color: var(--bg-form);
   border-top: 1px solid var(--border-color);
-  box-shadow: var(--shadow-elev); /* лёгкая тень, как у карточек */
-  margin-top: 24px;
+  box-shadow: var(--shadow-elev);
+  margin-top: auto;
 }
 
 .inner {
-  max-width: 1100px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 18px 24px;
   display: flex;
@@ -44,10 +43,6 @@
   .inner {
     flex-direction: column;
     align-items: center;
-    gap: 12px;
     text-align: center;
-  }
-  .link {
-    width: 50%;
   }
 }

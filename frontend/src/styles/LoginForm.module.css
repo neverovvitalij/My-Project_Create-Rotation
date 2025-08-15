@@ -1,4 +1,5 @@
 .wrapper {
+  width: 100%;
   min-height: 60dvh;
   display: grid;
   place-items: center;
@@ -198,10 +199,8 @@
 }
 
 @media (max-width: 420px) {
-  .card {
-    padding: 22px 18px 26px;
-  }
   .wrapper {
+    width: 80%;
     min-height: 50dvh;
   }
 }

@@ -204,7 +204,8 @@
 }
 
 @media (max-width: 420px) {
-  .card {
-    padding: 22px 18px 26px;
+  .wrapper {
+    width: 80%;
+    min-height: 50dvh;
   }
 }

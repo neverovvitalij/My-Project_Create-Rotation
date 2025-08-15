@@ -34,5 +34,6 @@
     margin: 12px auto;
     width: calc(100% - 16px);
     gap: 16px;
+    width: 90%;
   }
 }

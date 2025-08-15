@@ -81,6 +81,7 @@ export interface IStore {
   setErrorMsg(msg: string): void;
   addNewStation(newStation: INewStation): Promise<void>;
   addWorker(candidate: ICandidate): Promise<void>;
+  logout(): Promise<void>;
 }
 
 export interface IPromiseResponse {
