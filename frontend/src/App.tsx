@@ -116,9 +116,7 @@ const App: FC = () => {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
-        <footer className={styles.footerBar}>
-          <Footer />
-        </footer>
+        <Footer />
       </div>
     </BrowserRouter>
   );

@@ -1,6 +1,5 @@
 .wrapper {
-  width: 100%;
-  min-height: 60dvh;
+  min-height: 50dvh;
   display: grid;
   place-items: center;
   padding: 24px;
@@ -8,8 +7,8 @@
 
 .card {
   width: 100%;
-  max-width: 440px;
-  padding: 28px 28px 32px;
+  max-width: 480px;
+  padding: 28px 28px 30px;
   border-radius: 20px;
   background: var(--card);
   border: 1px solid var(--card-border);
@@ -198,9 +197,14 @@
   }
 }
 
-@media (max-width: 420px) {
+/* @media (max-width: 768px) {
   .wrapper {
-    width: 80%;
-    min-height: 50dvh;
+    width: 100%;
+    padding: 8px;
   }
-}
+
+  .card {
+    width: 95%;
+    padding: 8px;
+  }
+} */

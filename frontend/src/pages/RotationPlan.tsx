@@ -31,6 +31,7 @@ const RotationPlan: FC = () => {
   const rotations = toJS(store.rotation);
   const employees = toJS(store.employeeList);
 
+  store.setErrorMsg('');
   const onClickPreview = async () => {
     store.setErrorMsg('');
     setLoader(true);
