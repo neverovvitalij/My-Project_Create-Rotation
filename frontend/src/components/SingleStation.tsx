@@ -1,16 +1,23 @@
 import { MdDelete } from 'react-icons/md';
+import type { IconBaseProps } from 'react-icons';
 import { observer } from 'mobx-react-lite';
-import { useContext } from 'react';
+import { FC, useContext } from 'react';
 import { Context } from '../index';
 import styles from '../styles/SingleStation.module.css';
+import { IStore, IStation } from '../store/types';
 
-const SingleStation = ({ station }) => {
-  const { store } = useContext(Context);
+type SingleStationProps = {
+  station: IStation;
+};
+
+const SingleStation: FC<SingleStationProps> = ({ station }) => {
+  const { store } = useContext(Context) as { store: IStore };
   const { name, priority, status } = station;
+  const Delete = MdDelete as React.FC<IconBaseProps>;
 
-  const generateStars = (count) => '★'.repeat(count);
+  const generateStars = (count: number) => '★'.repeat(count);
 
-  const deleteStation = async (name) => {
+  const deleteStation = async (name: string) => {
     const confirmDelete = window.confirm(
       `Are you sure you want to delete the station "${name}"?`
     );
@@ -33,7 +40,7 @@ const SingleStation = ({ station }) => {
     <div className={styles.stationCard}>
       <span className={styles.stationName}>{name}</span>
       <p className={styles.stationPriority}>{generateStars(priority)}</p>
-      <MdDelete
+      <Delete
         className={styles.deleteIcon}
         title="Delete station"
         onClick={() => deleteStation(name)}

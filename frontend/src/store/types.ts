@@ -82,6 +82,8 @@ export interface IStore {
   addNewStation(newStation: INewStation): Promise<void>;
   addWorker(candidate: ICandidate): Promise<void>;
   logout(): Promise<void>;
+  deleteStation(station: string): Promise<void>;
+  changeStationStatus(name: string, newStatus: boolean): Promise<void>;
 }
 
 export interface IPromiseResponse {
