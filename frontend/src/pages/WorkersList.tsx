@@ -9,7 +9,9 @@ import { IEmployee, IStore } from '../store/types';
 const WorkersList: FC = () => {
   const { store } = useContext(Context) as { store: IStore };
   const [showAddWorkerForm, setShowAddWorkerForm] = useState<boolean>(false);
-  const [activeWorker, setActiveWorker] = useState<boolean>(false);
+  const [activeWorker, setActiveWorker] = useState<IEmployee['_id'] | null>(
+    null
+  );
   const addWorkerFromRef = useRef<HTMLDivElement | null>(null);
 
   const toggleAddWorkerFrom = () => {

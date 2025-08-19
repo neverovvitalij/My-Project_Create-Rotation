@@ -19,14 +19,14 @@ const ExcelPreview = forwardRef<ExcelPreviewHandle, ExcelPreviewProps>(
   ({ preassigned, specialAssignments }, ref) => {
     const [html, setHtml] = useState('');
     const { store } = useContext(Context) as { store: IStore };
-    const {
-      specialRotation,
-      highPriorityRotation,
-      cycleRotations,
-      allWorkers,
-    } = store.rotation as IRotation;
 
     const loadPreview = async () => {
+      const {
+        specialRotation,
+        highPriorityRotation,
+        cycleRotations,
+        allWorkers,
+      } = store.rotation as IRotation;
       // 1) Fetch the file as a Blob
       try {
         const response = await RotationPlanService.previewExcel({
@@ -48,12 +48,10 @@ const ExcelPreview = forwardRef<ExcelPreviewHandle, ExcelPreviewProps>(
           id: 'preview-table',
           editable: false,
           header: '',
-          // className: 'excel-preview',
         });
 
         setHtml(htmlTable);
       } catch (error) {
-        // store.setErrorMsg('Failed preview Excel');
         console.error('Failed preview Excel', error);
       }
     };
@@ -66,9 +64,6 @@ const ExcelPreview = forwardRef<ExcelPreviewHandle, ExcelPreviewProps>(
             className={styles.previewContainer}
             dangerouslySetInnerHTML={{ __html: html }}
           />
-        )}
-        {store.errorMsg && (
-          <p className={styles.errorMessage}>{store.errorMsg}</p>
         )}
       </>
     );

@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react-lite';
 import { FaSpinner } from 'react-icons/fa';
 import type { IconBaseProps } from 'react-icons';
-import { useContext, useMemo, useState, useRef, FC } from 'react';
+import { useContext, useMemo, useState, useRef, FC, useEffect } from 'react';
 import { toJS } from 'mobx';
 import ExcelPreview, { ExcelPreviewHandle } from '../components/ExcelPreview';
 import styles from '../styles/RotationPlan.module.css';
@@ -31,7 +31,10 @@ const RotationPlan: FC = () => {
   const rotations = toJS(store.rotation);
   const employees = toJS(store.employeeList);
 
-  store.setErrorMsg('');
+  useEffect(() => {
+    store.setErrorMsg('');
+  }, [store]);
+
   const onClickPreview = async () => {
     store.setErrorMsg('');
     setLoader(true);
@@ -196,20 +199,20 @@ const RotationPlan: FC = () => {
       {msg && <p className={styles.success}>{msg}</p>}
       {store.errorMsg && <p className={styles.error}>{store.errorMsg}</p>}
 
-      {isFullyAssigned && (
-        <p className={styles.error}>
-          Bitte prüfen Sie die Anzahl der Mitarbeiter und Stationen.
-        </p>
-      )}
       <ExcelPreview
         ref={previewRef}
         preassigned={toJS(preassigned)}
         specialAssignments={toJS(specialAssignments)}
       />
       {/* List of employees */}
-      <h3
-        className={styles.groupHeader}
-      >{`Verfügbare Mitarbeiter (gesamt) ${store.activeEmployee} | Benötigt ${store.activeStations}`}</h3>
+      <h3 className={styles.groupHeader}>
+        {`Verfügbare Mitarbeiter (gesamt) ${store.activeEmployee} | Benötigt ${store.activeStations}`}{' '}
+        {isFullyAssigned && (
+          <p className={styles.error}>
+            Bitte prüfen Sie die Anzahl der Mitarbeiter und Stationen.
+          </p>
+        )}
+      </h3>
       {Object.entries(groupedEmployees).map(([groupName, groupEmps]) => (
         <section key={groupName} className={styles.groupSection}>
           <h3 className={styles.groupHeader}>Gruppe {groupName}</h3>
@@ -222,7 +225,7 @@ const RotationPlan: FC = () => {
               const sonderJob = getSonderJobForWorker(emp.name);
               return (
                 <li key={emp._id} className={styles.empItem}>
-                  <span>{emp.name}</span>
+                  <span className={styles.empName}>{emp.name}</span>
                   <input
                     type="checkbox"
                     className={styles.inputCheckbox}

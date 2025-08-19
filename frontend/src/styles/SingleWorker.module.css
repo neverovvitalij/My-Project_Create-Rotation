@@ -1,97 +1,168 @@
 .workerCard {
   position: relative;
-  padding: 5px;
-  margin: 5px;
-  font-size: 1.1em;
-  background-color: var(--bg-form);
-  border-radius: 10px;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
   align-items: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-  min-height: 40px;
+  gap: 12px;
+  padding: 12px 14px;
+  margin: 6px 0;
+  background: var(--bg-form);
   color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  box-shadow: var(--shadow-elev);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .workerCard:hover {
-  background-color: var(--bg-form);
-  transform: scale(1.02);
-  transition: transform 0.2s ease, background-color 0.2s ease;
-  z-index: 2;
+  transform: none;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.workerCard.open,
+.workerCard.open:hover {
+  transform: none;
 }
 
 .stationsList {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 8px);
   left: 0;
-  z-index: 3;
-  width: 200px;
-  max-height: 150px;
+  z-index: 30;
+
+  width: min(220px, 92vw);
+  max-height: 50vh;
   overflow-y: auto;
-  background-color: var(--bg-secondary);
-  border: 1px solid #505068;
-  border-radius: 8px;
-  padding: 20px;
-  display: none;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  box-shadow: var(--shadow-elev);
+
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
 }
 
 .stationsList.active {
-  display: block;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
 .stationItem {
-  font-size: 14px;
-  color: var(--navlink-text);
-  padding: 5px;
-  margin-left: 8px;
-  border-bottom: 1px solid #4a4a5d;
-}
-
-.stationItem:last-child {
-  border-bottom: none;
-}
-
-.deleteIcon {
-  font-size: 20px;
-  color: var(--color-error);
-  transition: color 0.2s ease;
-}
-
-.deleteIcon2 {
-  font-size: 14px;
-  color: var(--color-error);
-  transition: color 0.2s ease;
-}
-
-.deleteIcon2:hover,
-.deleteIcon:hover {
-  color: #ff1a1a;
-}
-
-.updateIcon {
-  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  margin: 6px 0;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
   color: var(--text-primary);
-  transition: color 0.2s ease;
-  margin-left: auto;
-}
-
-.updateIcon:hover {
-  color: #d6c400;
 }
 
 .addButton {
+  width: 100%;
   margin-top: 10px;
-  padding: 5px 10px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 5px;
+
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 12px;
+
+  background: linear-gradient(135deg, var(--accent), var(--color-accent-hover));
+  color: #0b0c10;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.2px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+
+  box-shadow: 0 8px 16px rgba(250, 204, 21, 0.22);
+  transition: transform 0.08s ease, filter 0.2s ease, box-shadow 0.2s ease;
+}
+.addButton:hover {
+  filter: brightness(1.03);
+}
+.addButton:active {
+  transform: translateY(1px);
 }
 
-.addButton:hover {
-  background-color: #45a049;
+.iconBtn,
+.iconBtnSm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.08s ease,
+    box-shadow 0.2s ease;
+}
+
+.iconBtn {
+  width: 36px;
+  height: 36px;
+}
+
+.iconBtnSm {
+  width: 28px;
+  height: 28px;
+}
+
+.iconBtnNeutral {
+  color: var(--text-primary);
+}
+
+.iconBtnDanger {
+  color: var(--text-primary);
+}
+
+.iconBtn:hover,
+.iconBtnSm:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.iconBtnDanger:hover,
+.iconBtnSm.iconBtnDanger:hover {
+  border-color: rgba(225, 29, 72, 0.35);
+  color: var(--color-error);
+}
+
+.iconBtn:focus-visible,
+.iconBtnSm:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 6px var(--ring);
+}
+
+.iconBtn:active,
+.iconBtnSm:active {
+  transform: translateY(1px);
+}
+
+.iconBtn > svg {
+  width: 18px;
+  height: 18px;
+}
+
+.iconBtnSm > svg {
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 768px) {
+  .stationsList {
+    width: 210px;
+    max-height: 60vh;
+  }
 }

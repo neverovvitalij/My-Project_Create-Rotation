@@ -46,9 +46,7 @@ html:not([data-theme='light']) body {
   color: var(--text-primary);
 }
 
-/* --- Light Theme --- */
 :root[data-theme='light'] {
-  /* base tokens */
   --bg: #f8fafc;
   --card: rgba(255, 255, 255, 0.72);
   --card-border: rgba(17, 24, 39, 0.08);
@@ -57,7 +55,7 @@ html:not([data-theme='light']) body {
 
   --accent: #facc15;
   --accent-2: #22d3ee;
-  --danger: #e11d48;
+  --danger: #ff6b6b;
   --ring: rgba(250, 204, 21, 0.22);
 
   --bg-primary: var(--bg);

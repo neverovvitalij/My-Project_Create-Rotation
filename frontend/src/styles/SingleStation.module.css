@@ -1,46 +1,102 @@
 .stationCard {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
   align-items: center;
-  padding: 10px 15px;
-  margin: 5px;
-  background-color: var(--bg-form);
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s ease, background-color 0.2s ease;
-  cursor: pointer;
+  gap: 12px;
+
+  padding: 12px 14px;
+  margin: 6px 0;
+
+  background: var(--bg-form);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  box-shadow: var(--shadow-elev);
+
+  transition: transform 0.12s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
 .stationCard:hover {
-  background-color: var(--bg-form);
-  transform: scale(1.02);
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+:root[data-theme='light'] .stationCard:hover {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(17, 24, 39, 0.12);
 }
 
 .stationName {
-  font-size: 16px;
-  font-weight: bold;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 600;
   color: var(--text-primary);
+
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.deleteIcon {
-  font-size: 20px;
-  color: var(--color-error);
-  transition: color 0.2s ease;
-}
-
-.deleteIcon:hover {
-  color: #ff1a1a;
-}
-
 .stationPriority {
-  font-size: 16px;
-  color: var(--text-primary);
-  margin-left: auto;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+
+  user-select: none;
 }
 
 .inputCheckbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
   cursor: pointer;
+}
+
+.deleteIcon {
+  width: 24px;
+  height: 24px;
+  padding: 6px;
+  border-radius: 10px;
+  cursor: pointer;
+
+  color: var(--text-primary);
+  background: transparent;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.08s ease;
+}
+
+.deleteIcon:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-error);
+}
+
+.deleteIcon:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+@media (max-width: 768px) {
+  .stationCard {
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+  }
+
+  .stationPriority {
+    order: 3;
+    font-size: 13px;
+  }
+
+  .stationName {
+    font-size: 14px;
+  }
+
+  .deleteIcon {
+    width: 22px;
+    height: 22px;
+    padding: 5px;
+  }
 }

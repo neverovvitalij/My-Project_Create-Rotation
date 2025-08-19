@@ -1,18 +1,37 @@
 import { observer } from 'mobx-react-lite';
 import { MdDelete, MdUpdate } from 'react-icons/md';
-import { useContext, useState } from 'react';
+import type { IconBaseProps } from 'react-icons';
+import { FC, useContext, useState } from 'react';
 import { Context } from '../index';
 import styles from '../styles/SingleWorker.module.css';
+import { IEmployee, IStore } from '../store/types';
 
-const SingleWorker = ({ worker, activeWorker, setActiveWorker }) => {
-  const { store } = useContext(Context);
-  const [selectedStation, setSelectedStation] = useState('');
-  const [complete, setComplete] = useState('');
+type WorkerId = IEmployee['_id'];
+
+type SingleEmployeeProps = {
+  worker: IEmployee;
+  activeWorker: WorkerId | null;
+  setActiveWorker: React.Dispatch<React.SetStateAction<WorkerId | null>>;
+};
+const SingleWorker: FC<SingleEmployeeProps> = ({
+  worker,
+  activeWorker,
+  setActiveWorker,
+}) => {
+  const { store } = useContext(Context) as { store: IStore };
+  const [selectedStation, setSelectedStation] = useState<string>('');
+  const [complete, setComplete] = useState<boolean>(false);
+  const Delete = MdDelete as React.FC<IconBaseProps>;
+  const Update = MdUpdate as React.FC<IconBaseProps>;
+
   const toggleStationVisibility = () => {
     setActiveWorker((prev) => (prev === worker._id ? null : worker._id));
   };
 
-  const removeStationFromWorker = async (name, stationToRemove) => {
+  const removeStationFromWorker = async (
+    name: string,
+    stationToRemove: string
+  ) => {
     const confirmDelete = window.confirm(
       `Are you sure you want to remove station "${stationToRemove}"?`
     );
@@ -26,7 +45,7 @@ const SingleWorker = ({ worker, activeWorker, setActiveWorker }) => {
     }
   };
 
-  const deleteWorker = async (name) => {
+  const deleteWorker = async (name: string) => {
     const confirmDelete = window.confirm(
       `Are you sure you want to delete employee "${name}"?`
     );
@@ -34,15 +53,15 @@ const SingleWorker = ({ worker, activeWorker, setActiveWorker }) => {
       try {
         await store.deleteWorker(name);
       } catch (error) {
-        console.error('Could not delete employee', error.message);
+        console.error('Could not delete employee', error);
         alert('Could not delete employee');
       }
     }
   };
 
-  const handleAddStation = (stationName) => {
+  const handleAddStation = (stationName: string) => {
     setSelectedStation(stationName);
-    setComplete('');
+    setComplete(false);
   };
 
   const handleSubmitAddStation = async () => {
@@ -53,7 +72,7 @@ const SingleWorker = ({ worker, activeWorker, setActiveWorker }) => {
       setSelectedStation('');
       setComplete(true);
     } catch (error) {
-      console.error('Could not add station', error.message);
+      console.error('Could not add station', error);
       alert('Could not add station');
     }
   };
@@ -61,16 +80,29 @@ const SingleWorker = ({ worker, activeWorker, setActiveWorker }) => {
   const stationsVisible = activeWorker === worker._id;
 
   return (
-    <li className={styles.workerCard}>
+    <li
+      className={`${styles.workerCard} ${stationsVisible ? styles.open : ''}`}
+    >
       <div>{worker.name}</div>
-      <MdUpdate
-        className={styles.updateIcon}
+
+      <button
+        type="button"
+        className={`${styles.iconBtn} ${styles.iconBtnNeutral}`}
         onClick={toggleStationVisibility}
-      />
-      <MdDelete
-        className={styles.deleteIcon}
+        aria-label="Show stations"
+      >
+        <Update />
+      </button>
+
+      <button
+        type="button"
+        className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
         onClick={() => deleteWorker(worker.name)}
-      />
+        aria-label="Delete worker"
+      >
+        <Delete />
+      </button>
+
       <ol
         className={`${styles.stationsList} ${
           stationsVisible ? styles.active : ''
@@ -82,15 +114,20 @@ const SingleWorker = ({ worker, activeWorker, setActiveWorker }) => {
           .map((station, index) => (
             <li key={index} className={styles.stationItem}>
               {station.name}
-              <MdDelete
-                className={styles.deleteIcon2}
+              <button
+                type="button"
+                className={`${styles.iconBtnSm} ${styles.iconBtnDanger}`}
                 onClick={() =>
                   removeStationFromWorker(worker.name, station.name)
                 }
-              />
+                aria-label={`Remove ${station.name}`}
+              >
+                <Delete />
+              </button>
             </li>
           ))}
         <select
+          className={styles.stationSelect}
           value={selectedStation}
           onChange={(e) => handleAddStation(e.target.value)}
         >

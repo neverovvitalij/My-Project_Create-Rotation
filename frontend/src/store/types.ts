@@ -84,6 +84,15 @@ export interface IStore {
   logout(): Promise<void>;
   deleteStation(station: string): Promise<void>;
   changeStationStatus(name: string, newStatus: boolean): Promise<void>;
+  removeStationFromWorker(
+    name: string,
+    stationToRemove: string
+  ): Promise<IPromiseResponse>;
+  addStationToWorker(
+    name: string,
+    stationToAdd: string
+  ): Promise<IPromiseResponse>;
+  deleteWorker(name: string): Promise<void>;
 }
 
 export interface IPromiseResponse {

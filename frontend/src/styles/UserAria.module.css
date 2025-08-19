@@ -1,5 +1,3 @@
-/* ===== UserAria.module.css (modern glass style) ===== */
-
 .container {
   width: 95%;
   max-width: 1200px;
@@ -16,7 +14,6 @@
   flex-direction: column;
   gap: 12px;
 
-  /* лёгкое “стекло” в светлой теме */
   backdrop-filter: saturate(1.05) blur(6px);
 }
 
@@ -27,12 +24,10 @@
   gap: 16px;
 }
 
-/* страхуемся от переполнения меню */
 .header > :first-child {
   min-width: 0;
 }
 
-/* правая часть (email + кнопки) */
 .userInfo {
   display: flex;
   align-items: center;
@@ -41,7 +36,6 @@
   flex-wrap: wrap;
 }
 
-/* email + статус как компактный чип */
 .userInfo h3 {
   margin: 0;
   font-size: 14px;
@@ -57,7 +51,6 @@
   border: 1px solid var(--card-border);
 }
 
-/* иконки статуса */
 .greenicon,
 .redicon {
   font-size: 18px;
@@ -71,7 +64,6 @@
   color: var(--color-error);
 }
 
-/* кнопка выхода (аккуратный danger) */
 .logoutButton {
   padding: 8px 12px;
   border: 1px solid transparent;
@@ -90,7 +82,6 @@
   transform: translateY(1px);
 }
 
-/* переключатель темы — нейтральная кнопка-иконка */
 .themeToggle {
   width: 36px;
   height: 36px;
@@ -112,13 +103,6 @@
 }
 .themeToggle:active {
   transform: translateY(1px);
-}
-
-/* ===== Responsive ===== */
-@media (max-width: 920px) {
-  .header {
-    gap: 12px;
-  }
 }
 
 @media (max-width: 768px) {
