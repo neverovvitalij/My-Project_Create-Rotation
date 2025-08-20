@@ -83,7 +83,7 @@ const SingleWorker: FC<SingleEmployeeProps> = ({
     <li
       className={`${styles.workerCard} ${stationsVisible ? styles.open : ''}`}
     >
-      <div>{worker.name}</div>
+      <span>{worker.name}</span>
 
       <button
         type="button"

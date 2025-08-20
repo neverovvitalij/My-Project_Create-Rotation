@@ -47,8 +47,9 @@ html:not([data-theme='light']) body {
 }
 
 :root[data-theme='light'] {
+  background-color: rgba(228, 227, 227, 0.72);
   --bg: #f8fafc;
-  --card: rgba(255, 255, 255, 0.72);
+  --card: rgba(228, 227, 227, 0.72);
   --card-border: rgba(17, 24, 39, 0.08);
   --text: #0f172a;
   --muted: #64748b;

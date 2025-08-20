@@ -30,10 +30,10 @@
 
 @media (max-width: 768px) {
   .container {
-    padding: 12px;
+    padding: 5px;
     margin: 12px auto;
     width: calc(100% - 16px);
     gap: 16px;
-    width: 90%;
+    width: 95%;
   }
 }

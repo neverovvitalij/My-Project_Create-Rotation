@@ -6,7 +6,7 @@
 }
 
 .card {
-  width: 100%;
+  width: 95%;
   max-width: 480px;
   padding: 28px 28px 30px;
   border-radius: 20px;
@@ -197,14 +197,15 @@
   }
 }
 
-/* @media (max-width: 768px) {
+@media (max-width: 768px) {
   .wrapper {
-    width: 100%;
-    padding: 8px;
+    width: 95%;
+    margin: 20px auto;
+    padding: 5px;
   }
 
   .card {
     width: 95%;
-    padding: 8px;
+    padding: 5px;
   }
-} */
+}

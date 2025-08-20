@@ -1,4 +1,5 @@
 .wrapper {
+  max-width: 95%;
   min-height: 50dvh;
   display: grid;
   place-items: center;
@@ -6,7 +7,7 @@
 }
 
 .card {
-  width: 100%;
+  width: 95%;
   max-width: 480px;
   padding: 28px 28px 30px;
   border-radius: 20px;
@@ -30,7 +31,7 @@
     rgba(255, 210, 63, 0.6),
     rgba(34, 211, 238, 0.6)
   );
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
@@ -203,9 +204,13 @@
   font-size: 13px;
 }
 
-@media (max-width: 420px) {
+@media (max-width: 768px) {
   .wrapper {
-    width: 80%;
     min-height: 50dvh;
+    margin: 1px auto;
+    padding: 5px;
+  }
+  .card {
+    padding: 5px;
   }
 }

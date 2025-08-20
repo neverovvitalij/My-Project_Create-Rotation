@@ -1,13 +1,13 @@
 .container {
   width: 95%;
   max-width: 1200px;
-  margin: 24px auto;
-  padding: 20px;
+  margin: 20px auto;
+  padding: 24px;
 
   background: var(--bg-form);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
-  border-radius: 14px;
+  border-radius: 20px;
   box-shadow: var(--shadow-elev);
   backdrop-filter: blur(6px);
 
@@ -248,9 +248,9 @@ h2 {
 
 @media (max-width: 768px) {
   .container {
-    width: 90%;
+    width: 95%;
     margin: 12px auto;
-    padding: 16px;
+    padding: 5px;
   }
 
   .groupHeader {
