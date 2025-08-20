@@ -18,6 +18,7 @@ const UserAria: FC = () => {
   const LightMode = MdLightMode as React.FC<IconBaseProps>;
   const OkIcon = AiOutlineDownSquare as React.FC<IconBaseProps>;
   const WarnIcon = AiOutlineExclamationCircle as React.FC<IconBaseProps>;
+  const [showActions, setShowActions] = useState<boolean>(false);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -29,33 +30,48 @@ const UserAria: FC = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <Menu />
-        <div className={styles.userInfo}>
-          {store.isAuth && store.user.isActivated ? (
-            <h3>
-              {store.user.email}{' '}
-              <OkIcon title="Email confirmed" className={styles.greenicon} />{' '}
-            </h3>
-          ) : (
-            <h3>
-              {store.user.email}{' '}
-              <WarnIcon
-                title="Bitte bestätige deine E-Mail-Adresse"
-                className={styles.redicon}
-              />{' '}
-              bestätige deine E-Mail
-            </h3>
-          )}
-          <button
-            className={styles.logoutButton}
-            onClick={() => store.logout()}
-          >
-            Abmelden
-          </button>
-          <button className={styles.themeToggle} onClick={toggleTheme}>
-            {theme === 'dark' ? <LightMode /> : <DarkMode />}
-          </button>
+      <button
+        type="button"
+        className={styles.actionsToggle}
+        onClick={() => setShowActions((v) => !v)}
+        aria-expanded={showActions}
+        aria-controls="actions-panel"
+      >
+        Aktionen
+        <span className={styles.caret} />
+      </button>
+      <div
+        id="actions-panel"
+        className={`${styles.buttonPanel} ${showActions ? styles.open : ''}`}
+      >
+        <div className={styles.header}>
+          <Menu />
+          <div className={styles.userInfo}>
+            {store.isAuth && store.user.isActivated ? (
+              <h3>
+                {store.user.email}{' '}
+                <OkIcon title="Email confirmed" className={styles.greenicon} />{' '}
+              </h3>
+            ) : (
+              <h3>
+                {store.user.email}{' '}
+                <WarnIcon
+                  title="Bitte bestätige deine E-Mail-Adresse"
+                  className={styles.redicon}
+                />{' '}
+                bestätige deine E-Mail
+              </h3>
+            )}
+            <button
+              className={styles.logoutButton}
+              onClick={() => store.logout()}
+            >
+              Abmelden
+            </button>
+            <button className={styles.themeToggle} onClick={toggleTheme}>
+              {theme === 'dark' ? <LightMode /> : <DarkMode />}
+            </button>
+          </div>
         </div>
       </div>
     </div>

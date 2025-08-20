@@ -78,12 +78,38 @@ export interface IStore {
   user: Partial<IUser>;
   newStation: INewStation;
   isInitializing: boolean;
+  setUser(user: Partial<IUser>): void;
+  setAuth(isAuth: boolean): void;
+  setIsLoading(isLoading: boolean): void;
+  setIsInitializing(isInitializing: boolean): void;
   setErrorMsg(msg: string): void;
-  addNewStation(newStation: INewStation): Promise<void>;
-  addWorker(candidate: ICandidate): Promise<void>;
+  setAuthMsg(authMsg: string): void;
+  setEmployeeList(employeeList: IEmployee[]): void;
+  setStations(stations: IStation[]): void;
+  setNewStation(newStation: INewStation): void;
+  setDailyRotation(rotation: IRotation): void;
+  get activeEmployee(): number;
+  get activeStations(): number;
+  get activeEmployeeByGroup(): Record<string, number>;
+  get stationsByGroup(): Record<string, number>;
+  loadData(): Promise<void>;
+  login(email: string, password: string): Promise<void>;
+  registration(
+    email: string,
+    password: string,
+    role: string,
+    costCenter: string,
+    shift: string,
+    plant: string
+  ): Promise<void>;
   logout(): Promise<void>;
+  checkAuth(): Promise<void>;
+  requestResetPassword(email: string): Promise<IPromiseResponse>;
+  resetPassword(token: string, newPassword: string): Promise<IPromiseResponse>;
+  addWorker(candidate: ICandidate): Promise<void>;
+  addNewStation(newStation: INewStation): Promise<void>;
   deleteStation(station: string): Promise<void>;
-  changeStationStatus(name: string, newStatus: boolean): Promise<void>;
+  deleteWorker(name: string): Promise<void>;
   removeStationFromWorker(
     name: string,
     stationToRemove: string
@@ -92,7 +118,15 @@ export interface IStore {
     name: string,
     stationToAdd: string
   ): Promise<IPromiseResponse>;
-  deleteWorker(name: string): Promise<void>;
+  getDailyRotation(
+    specialAssignments: ISpecialAssignment[] | null,
+    preassigned: IPreassignedEntry[] | null,
+    cycles: number
+  ): Promise<IRotation>;
+  confirmRotation(): Promise<IPromiseResponse>;
+  downloadLatestConfirmedRotation(): Promise<void>;
+  changeWorkerStatus(name: string, newStatus: boolean): Promise<void>;
+  changeStationStatus(name: string, newStatus: boolean): Promise<void>;
 }
 
 export interface IPromiseResponse {

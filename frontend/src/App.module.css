@@ -76,6 +76,7 @@
 
 @media (max-width: 768px) {
   .app {
+    display: contents;
     overflow-x: hidden;
   }
   .headerBar {
