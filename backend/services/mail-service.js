@@ -58,8 +58,7 @@ class MailService {
         .request({ Messages: messages });
       console.log('Activation emails sent via Mailjet');
     } catch (e) {
-      console.error('Mailjet activation email error:', e?.response?.data || e);
-      throw e;
+      console.warn('Admin notify failed:', e?.response?.data || e.message);
     }
   }
 

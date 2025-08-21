@@ -8,10 +8,9 @@ import {
   FormEvent,
   ChangeEvent,
 } from 'react';
-import { FaSpinner } from 'react-icons/fa';
-import type { IconBaseProps } from 'react-icons';
 import { useNavigate } from 'react-router-dom';
 import { Context } from '../index';
+import Loader from '../components/Loader';
 import styles from '../styles/ReqResPassword.module.css';
 
 const ReqResPassword: FC = () => {
@@ -21,7 +20,6 @@ const ReqResPassword: FC = () => {
   const [serverResponse, setServerResponse] = useState(false);
   const navigate = useNavigate();
   const storeRef = useRef(store);
-  const Spinner = FaSpinner as React.FC<IconBaseProps>;
 
   useEffect(() => {
     storeRef.current.setAuthMsg('');
@@ -86,7 +84,9 @@ const ReqResPassword: FC = () => {
           >
             Home
           </button>
-          {serverResponse && <Spinner className={styles.spinner} />}
+          {serverResponse && (
+            <Loader fullscreen label="Daten werden geladen…" />
+          )}
         </div>
 
         {store.authMsg && <p className={styles.error}>{store.authMsg}</p>}

@@ -218,24 +218,6 @@ h2 {
   color: rgba(255, 210, 63, 0.6);
 }
 
-.spinner {
-  width: 18px;
-  height: 18px;
-  margin-left: 50%;
-  display: inline-block;
-  border: 2px solid rgba(0, 0, 0, 0.25);
-  border-top-color: rgba(0, 0, 0, 0.85);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  vertical-align: -3px;
-  color: var(--text-primary);
-}
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .error {
   color: var(--color-error);
   font-size: 18px;

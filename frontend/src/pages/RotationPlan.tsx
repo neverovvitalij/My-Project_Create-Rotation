@@ -1,11 +1,10 @@
 import { observer } from 'mobx-react-lite';
-import { FaSpinner } from 'react-icons/fa';
-import type { IconBaseProps } from 'react-icons';
 import { useContext, useMemo, useState, useRef, FC, useEffect } from 'react';
 import { toJS } from 'mobx';
 import ExcelPreview, { ExcelPreviewHandle } from '../components/ExcelPreview';
 import styles from '../styles/RotationPlan.module.css';
 import { Context } from '../index';
+import Loader from '../components/Loader';
 import {
   IEmployee,
   IPreassignedEntry,
@@ -15,7 +14,6 @@ import {
 const RotationPlan: FC = () => {
   const { store } = useContext(Context);
   const previewRef = useRef<ExcelPreviewHandle | null>(null);
-  const Spinner = FaSpinner as React.FC<IconBaseProps>;
 
   const [preassigned, setPreassigned] = useState<IPreassignedEntry[]>([]);
   const [specialAssignments, setSpecialAssignments] = useState<
@@ -195,7 +193,7 @@ const RotationPlan: FC = () => {
           </button>
         )}
       </div>
-      {loader && <Spinner className={styles.spinner} />}
+      {loader && <Loader fullscreen label="Daten werden geladen…" />}
       {msg && <p className={styles.success}>{msg}</p>}
       {store.errorMsg && <p className={styles.error}>{store.errorMsg}</p>}
 

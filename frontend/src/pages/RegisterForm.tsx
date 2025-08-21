@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Context } from '../index';
+import Loader from '../components/Loader';
 import styles from '../styles/RegisterForm.module.css';
 
 const RegisterForm: FC = () => {
@@ -177,6 +178,7 @@ const RegisterForm: FC = () => {
           <button type="submit" className={styles.submit} disabled={submitting}>
             {submitting ? 'Registering…' : 'Register'}
           </button>
+          {submitting && <Loader fullscreen label="Daten werden geladen…" />}
 
           <div className={styles.actions}>
             <button
