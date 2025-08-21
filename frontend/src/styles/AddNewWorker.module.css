@@ -1,4 +1,3 @@
-/* ===== Карточка формы ===== */
 .container {
   width: 95%;
   background-color: var(--bg-form);
@@ -16,15 +15,13 @@
   gap: 16px;
 }
 
-/* ===== Поля: имя + группа в одну строку ===== */
 .inputRow {
   display: grid;
-  grid-template-columns: 0.5fr max-content; /* input растёт, select — по содержимому */
+  grid-template-columns: 0.5fr max-content;
   gap: 34px;
   align-items: stretch;
 }
 
-/* Базовый стиль для input и select (единая высота/радиус/бордер) */
 .inputField {
   height: 44px;
   padding: 0 12px;
@@ -49,12 +46,10 @@
   background: rgba(255, 255, 255, 0.04);
 }
 
-/* Текстовое поле растягивается */
 .inputText {
   width: 100%;
 }
 
-/* Селект — общий стиль + аккуратная стрелка */
 .selectField {
   appearance: none;
   -webkit-appearance: none;
@@ -68,23 +63,20 @@
   background-position: calc(100% - 18px) 19px, calc(100% - 12px) 19px;
   background-size: 6px 6px, 6px 6px;
   background-repeat: no-repeat;
-  padding-right: 36px; /* место под стрелку */
+  padding-right: 36px;
 }
 
-/* Узкий селект — чтобы была видна цифра */
 .selectNarrow {
   width: 6ch;
   min-width: 64px;
   text-align-last: center;
 }
 
-/* ===== Блок выбора станций ===== */
 .stationSelection {
   margin-top: 8px;
   margin-bottom: 16px;
 }
 
-/* Кнопка «выбрать/снять все» */
 .toggleStationsButton {
   background-color: var(--color-accent);
   color: #2b2b3d;
@@ -108,14 +100,12 @@
   transform: translateY(1px);
 }
 
-/* Сетка станций */
 .stationsList {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
-/* Плитка станции */
 .stationItem {
   display: flex;
   align-items: center;
@@ -147,14 +137,12 @@
   cursor: pointer;
 }
 
-/* Выбранная станция */
 .selected {
   background-color: rgba(247, 229, 0, 0.14);
   border-color: var(--color-accent);
   color: var(--text-primary);
 }
 
-/* Пустой список */
 .noStations {
   color: rgba(255, 255, 255, 0.6);
   font-size: 14px;
@@ -162,7 +150,6 @@
   padding: 6px 2px;
 }
 
-/* ===== Сабмит ===== */
 .submitButton {
   background-color: var(--color-accent);
   color: #2b2b3d;
@@ -187,7 +174,6 @@
   transform: translateY(1px);
 }
 
-/* Ошибки */
 .errorMsg {
   color: var(--color-error);
   font-size: 14px;
@@ -196,17 +182,15 @@
   margin-top: 8px;
 }
 
-/* ===== Адаптив ===== */
 @media (max-width: 768px) {
   .container {
     width: 90%;
     padding: 8px;
     border-radius: 14px;
-    /* margin: 12px; */
   }
 
   .inputRow {
-    grid-template-columns: 0.8fr; /* в столбик */
+    grid-template-columns: 0.8fr;
     gap: 10px;
   }
 

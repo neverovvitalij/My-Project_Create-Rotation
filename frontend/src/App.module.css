@@ -76,7 +76,6 @@
 
 @media (max-width: 768px) {
   .app {
-    display: contents;
     overflow-x: hidden;
   }
   .headerBar {
@@ -95,7 +94,6 @@
   .main {
     width: 95%;
     padding: 5px;
-    min-height: 75vh;
   }
 
   .spinner {

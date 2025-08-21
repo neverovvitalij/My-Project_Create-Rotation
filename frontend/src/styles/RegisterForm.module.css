@@ -1,6 +1,5 @@
 .wrapper {
   max-width: 95%;
-  min-height: 50dvh;
   display: grid;
   place-items: center;
   padding: 24px;
@@ -206,7 +205,6 @@
 
 @media (max-width: 768px) {
   .wrapper {
-    min-height: 50dvh;
     margin: 1px auto;
     padding: 5px;
   }

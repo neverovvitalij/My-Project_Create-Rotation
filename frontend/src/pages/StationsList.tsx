@@ -19,7 +19,7 @@ const StationsList: FC = () => {
   const [stationGroup, setStationGroup] = useState<number>(1);
   const { store } = useContext(Context) as { store: IStore };
   const [showAddStationForm, setShowAddStationForm] = useState<boolean>(false);
-  const addStationFormRef = useRef<HTMLDivElement | null>(null);
+  const addStationFormRef = useRef<HTMLFormElement | null>(null);
 
   const toggleAddStationForm = () => {
     store.setErrorMsg('');
@@ -107,56 +107,60 @@ const StationsList: FC = () => {
         {showAddStationForm ? 'Formular ausblenden' : 'Station hinzufügen'}
       </button>
       {showAddStationForm && (
-        <div className={styles.addNewStationContainer} ref={addStationFormRef}>
-          <form onSubmit={handleFormSubmit} className={styles.addStationForm}>
-            <input
-              className={styles.addStationInput}
-              placeholder="New station"
-              value={stationName}
-              type="text"
-              required
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setStationName(e.target.value)
-              }
-            />
-            <select
-              className={styles.addStationInput}
-              value={stationPriority}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-                setStationPriority(Number(e.target.value))
-              }
-            >
-              <option value="" disabled>
-                Priorität
-              </option>
-              <option value={1}>1</option>
-              <option value={2}>2</option>
-              <option value={3}>3</option>
-            </select>
-            <select
-              className={styles.addStationInput}
-              value={stationGroup}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-                setStationGroup(Number(e.target.value))
-              }
-            >
-              <option value="" disabled>
-                Gruppe
-              </option>
-              <option value={1}>1</option>
-              <option value={2}>2</option>
-              <option value={3}>3</option>
-              <option value={4}>4</option>
-              <option value={5}>5</option>
-            </select>
-            <button className={styles.addStationButton} type="submit">
-              Station hinzufügen
-            </button>
-            {store.errorMsg && (
-              <p className={styles.errorMessage}>{store.errorMsg}</p>
-            )}
-          </form>
-        </div>
+        <form
+          onSubmit={handleFormSubmit}
+          className={styles.addNewStationContainer}
+          ref={addStationFormRef}
+        >
+          {/* <form onSubmit={handleFormSubmit} className={styles.addStationForm} > */}
+          <input
+            className={styles.addStationInput}
+            placeholder="New station"
+            value={stationName}
+            type="text"
+            required
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setStationName(e.target.value)
+            }
+          />
+          <select
+            // className={styles.addStationInput}
+            value={stationPriority}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+              setStationPriority(Number(e.target.value))
+            }
+          >
+            <option value="" disabled>
+              Priorität
+            </option>
+            <option value={1}>1</option>
+            <option value={2}>2</option>
+            <option value={3}>3</option>
+          </select>
+          <select
+            // className={styles.addStationInput}
+            value={stationGroup}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+              setStationGroup(Number(e.target.value))
+            }
+          >
+            <option value="" disabled>
+              Gruppe
+            </option>
+            <option value={1}>1</option>
+            <option value={2}>2</option>
+            <option value={3}>3</option>
+            <option value={4}>4</option>
+            <option value={5}>5</option>
+          </select>
+          <button className={styles.addStationButton} type="submit">
+            Station hinzufügen
+          </button>
+          {store.errorMsg && (
+            <p className={styles.errorMessage}>{store.errorMsg}</p>
+          )}
+          {/* </form> */}
+        </form>
       )}
     </div>
   );
