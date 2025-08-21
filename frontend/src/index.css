@@ -134,13 +134,12 @@ textarea {
 
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
-  .previewContainer {
-    overflow-x: auto;
-  }
   #preview-table {
-    table-layout: fixed !important;
-    font-size: 0.82rem !important;
-    transform-origin: left top;
+    width: 100% !important;
+    font-size: 0.85rem !important;
+    table-layout: auto !important;
+    display: block;
+    overflow-x: auto;
   }
 
   #preview-table th,

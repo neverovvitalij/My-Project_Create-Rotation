@@ -193,7 +193,7 @@ const RotationPlan: FC = () => {
           </button>
         )}
       </div>
-      {loader && <Loader fullscreen label="Daten werden geladen…" />}
+      {loader && <Loader compact label="Lade Daten…" />}
       {msg && <p className={styles.success}>{msg}</p>}
       {store.errorMsg && <p className={styles.error}>{store.errorMsg}</p>}
 

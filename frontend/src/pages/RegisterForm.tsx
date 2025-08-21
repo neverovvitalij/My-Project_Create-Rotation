@@ -178,7 +178,7 @@ const RegisterForm: FC = () => {
           <button type="submit" className={styles.submit} disabled={submitting}>
             {submitting ? 'Registering…' : 'Register'}
           </button>
-          {submitting && <Loader fullscreen label="Daten werden geladen…" />}
+          {submitting && <Loader compact label="Lade Daten…" />}
 
           <div className={styles.actions}>
             <button

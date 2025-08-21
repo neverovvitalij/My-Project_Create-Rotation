@@ -84,9 +84,7 @@ const ReqResPassword: FC = () => {
           >
             Home
           </button>
-          {serverResponse && (
-            <Loader fullscreen label="Daten werden geladen…" />
-          )}
+          {serverResponse && <Loader compact label="Lade Daten…" />}
         </div>
 
         {store.authMsg && <p className={styles.error}>{store.authMsg}</p>}
