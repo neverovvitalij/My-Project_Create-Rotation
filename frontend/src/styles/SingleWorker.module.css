@@ -38,7 +38,7 @@
   -webkit-overflow-scrolling: touch;
 
   padding: 12px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--accent);
   border-radius: 12px;
   background: var(--bg-secondary);
   box-shadow: var(--shadow-elev);
@@ -71,7 +71,6 @@
 }
 
 .addButton {
-  width: 100%;
   margin-top: 10px;
 
   padding: 10px 12px;
@@ -164,5 +163,9 @@
   .stationsList {
     width: 210px;
     max-height: 60vh;
+  }
+
+  .addButton {
+    padding: 5px;
   }
 }

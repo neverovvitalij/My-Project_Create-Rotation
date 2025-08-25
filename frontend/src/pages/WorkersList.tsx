@@ -13,6 +13,14 @@ const WorkersList: FC = () => {
     null
   );
   const addWorkerFromRef = useRef<HTMLDivElement | null>(null);
+  const [showGroup, setShowGroup] = useState<Set<string>>(new Set());
+  const isOpen = (grp: string) => showGroup.has(grp);
+  const toggleGroup = (grp: string) =>
+    setShowGroup((prev) => {
+      const next = new Set(prev);
+      next.has(grp) ? next.delete(grp) : next.add(grp);
+      return next;
+    });
 
   const toggleAddWorkerFrom = () => {
     store.setErrorMsg('');
@@ -42,22 +50,43 @@ const WorkersList: FC = () => {
       <h2 className={styles.header}>Mitarbeiterliste</h2>
       <div className={styles.workersGrid}>
         {store.employeeList.length > 0 ? (
-          Object.entries(groupedEmployees).map(([group, workers]) => (
-            <div className={styles.groupColumn} key={group}>
-              <h3>Gruppe {group}</h3>
-              {workers
-                .slice()
-                .sort((a, b) => a.name.localeCompare(b.name))
-                .map((worker) => (
-                  <SingleWorker
-                    worker={worker}
-                    key={worker._id}
-                    activeWorker={activeWorker}
-                    setActiveWorker={setActiveWorker}
-                  />
-                ))}
-            </div>
-          ))
+          Object.entries(groupedEmployees).map(([group, workers]) => {
+            const grp = String(group);
+            const panelId = `actions-panel-${grp}`;
+            return (
+              <div className={styles.groupColumn} key={group}>
+                <h3>Gruppe {group}</h3>
+                <button
+                  type="button"
+                  className={styles.actionsToggle}
+                  onClick={() => toggleGroup(grp)}
+                  aria-expanded={isOpen(grp)}
+                  aria-controls={panelId}
+                >
+                  {isOpen(grp) ? 'Gruppe ausblenden' : 'Gruppe zeigen'}
+                  <span className={styles.caret} />
+                </button>
+                <div
+                  id="actions-panel"
+                  className={`${styles.buttonPanel} ${
+                    isOpen(grp) ? styles.open : ''
+                  }`}
+                >
+                  {workers
+                    .slice()
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((worker) => (
+                      <SingleWorker
+                        worker={worker}
+                        key={worker._id}
+                        activeWorker={activeWorker}
+                        setActiveWorker={setActiveWorker}
+                      />
+                    ))}
+                </div>
+              </div>
+            );
+          })
         ) : (
           <p className={styles.noWorkersMessage}>
             Keine Mitarbeiter gefunden. Bitte füge neue hinzu
