@@ -20,6 +20,14 @@ const StationsList: FC = () => {
   const { store } = useContext(Context) as { store: IStore };
   const [showAddStationForm, setShowAddStationForm] = useState<boolean>(false);
   const addStationFormRef = useRef<HTMLFormElement | null>(null);
+  const [showGroup, setShowGroup] = useState<Set<string>>(new Set());
+  const isOpen = (grp: string) => showGroup.has(grp);
+  const toggleGroup = (grp: string) =>
+    setShowGroup((prev) => {
+      const next = new Set(prev);
+      next.has(grp) ? next.delete(grp) : next.add(grp);
+      return next;
+    });
 
   const toggleAddStationForm = () => {
     store.setErrorMsg('');
@@ -87,17 +95,39 @@ const StationsList: FC = () => {
 
       {/* Dynamic group display */}
       <div className={styles.stationGroups}>
-        {Object.entries(groupedStations).map(([group, stations]) => (
-          <div key={group} className={styles.groupColumn}>
-            <h3>Gruppe {group}</h3>
-            {stations
-              .slice()
-              .sort((a, b) => a.name.localeCompare(b.name))
-              .map((station) => (
-                <SingleStation station={station} key={station._id} />
-              ))}
-          </div>
-        ))}
+        {Object.entries(groupedStations).map(([group, stations]) => {
+          const grp = String(group);
+          const panelId = `actions-panel-${grp}`;
+
+          return (
+            <div key={group} className={styles.groupColumn}>
+              <h3>Gruppe {group}</h3>
+              <button
+                type="button"
+                className={styles.actionsToggle}
+                onClick={() => toggleGroup(grp)}
+                aria-expanded={isOpen(grp)}
+                aria-controls={panelId}
+              >
+                {isOpen(grp) ? 'Gruppe ausblenden' : 'Gruppe zeigen'}
+                <span className={styles.caret} />
+              </button>
+              <div
+                id="actions-panel"
+                className={`${styles.buttonPanel} ${
+                  isOpen(grp) ? styles.open : ''
+                }`}
+              >
+                {stations
+                  .slice()
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((station) => (
+                    <SingleStation station={station} key={station._id} />
+                  ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
       <button
         disabled={!store.user.isActivated}
