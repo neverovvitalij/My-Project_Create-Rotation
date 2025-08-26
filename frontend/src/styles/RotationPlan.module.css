@@ -16,13 +16,12 @@
   gap: 22px;
 }
 
-h2 {
+.header {
   font-size: 26px;
   font-weight: 800;
   letter-spacing: 0.2px;
   text-align: center;
   color: var(--text-primary);
-  margin: 0;
 }
 
 .buttonPanel {

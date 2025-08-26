@@ -153,7 +153,7 @@ const RotationPlan: FC = () => {
 
   return (
     <div className={styles.container}>
-      <h2>Rotationsplan</h2>
+      <h2 className={styles.header}>Rotationsplan</h2>
       {/* Button panel */}
       <div className={styles.buttonPanel}>
         <button

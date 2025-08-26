@@ -120,10 +120,6 @@
     padding: 5px;
   }
 
-  .header {
-    font-size: 22px;
-  }
-
   .actionsToggle {
     display: inline-flex;
     align-items: center;
