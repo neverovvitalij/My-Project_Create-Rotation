@@ -1,8 +1,9 @@
 import { observer } from 'mobx-react-lite';
-import { useState, useContext, useRef, FC, useMemo } from 'react';
+import { useState, useEffect, useContext, useRef, FC, useMemo } from 'react';
 import { Context } from '../index';
 import SingleWorker from '../components/SingleWorker';
 import AddNewWorker from '../components/AddNewWorker';
+import { usePersistentSet } from '../hooks/usePersistentSet';
 import styles from '../styles/WorkersList.module.css';
 import { IEmployee, IStore } from '../store/types';
 
@@ -13,14 +14,13 @@ const WorkersList: FC = () => {
     null
   );
   const addWorkerFromRef = useRef<HTMLDivElement | null>(null);
-  const [showGroup, setShowGroup] = useState<Set<string>>(new Set());
-  const isOpen = (grp: string) => showGroup.has(grp);
-  const toggleGroup = (grp: string) =>
-    setShowGroup((prev) => {
-      const next = new Set(prev);
-      next.has(grp) ? next.delete(grp) : next.add(grp);
-      return next;
-    });
+
+  const storageKey = `openGroups:employee:${store.user?.id ?? 'anon'}`;
+  const {
+    has: isOpen,
+    toggle: toggleGroup,
+    setSet,
+  } = usePersistentSet(storageKey);
 
   const toggleAddWorkerFrom = () => {
     store.setErrorMsg('');
@@ -45,6 +45,11 @@ const WorkersList: FC = () => {
     [store.employeeList]
   );
 
+  useEffect(() => {
+    const existing = new Set(Object.keys(groupedEmployees));
+    setSet((prev) => new Set([...prev].filter((g) => existing.has(g))));
+  }, [groupedEmployees, setSet]);
+
   return (
     <div className={styles.container}>
       <h2 className={styles.header}>Mitarbeiterliste</h2>
@@ -67,7 +72,7 @@ const WorkersList: FC = () => {
                   <span className={styles.caret} />
                 </button>
                 <div
-                  id="actions-panel"
+                  id={panelId}
                   className={`${styles.buttonPanel} ${
                     isOpen(grp) ? styles.open : ''
                   }`}

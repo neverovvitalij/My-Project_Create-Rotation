@@ -2,6 +2,7 @@ import { observer } from 'mobx-react-lite';
 import {
   useState,
   useContext,
+  useEffect,
   useRef,
   FC,
   FormEvent,
@@ -12,6 +13,7 @@ import { Context } from '../index';
 import SingleStation from '../components/SingleStation';
 import styles from '../styles/StationsList.module.css';
 import { INewStation, IStation, IStore } from '../store/types';
+import { usePersistentSet } from '../hooks/usePersistentSet';
 
 const StationsList: FC = () => {
   const [stationName, setStationName] = useState<string>('');
@@ -20,14 +22,13 @@ const StationsList: FC = () => {
   const { store } = useContext(Context) as { store: IStore };
   const [showAddStationForm, setShowAddStationForm] = useState<boolean>(false);
   const addStationFormRef = useRef<HTMLFormElement | null>(null);
-  const [showGroup, setShowGroup] = useState<Set<string>>(new Set());
-  const isOpen = (grp: string) => showGroup.has(grp);
-  const toggleGroup = (grp: string) =>
-    setShowGroup((prev) => {
-      const next = new Set(prev);
-      next.has(grp) ? next.delete(grp) : next.add(grp);
-      return next;
-    });
+
+  const storageKey = `openGroups:stations:${store.user?.id ?? 'anon'}`;
+  const {
+    has: isOpen,
+    toggle: toggleGroup,
+    setSet,
+  } = usePersistentSet(storageKey);
 
   const toggleAddStationForm = () => {
     store.setErrorMsg('');
@@ -89,6 +90,11 @@ const StationsList: FC = () => {
     return groups;
   }, [store.stations]);
 
+  useEffect(() => {
+    const existing = new Set(Object.keys(groupedStations));
+    setSet((prev) => new Set([...prev].filter((g) => existing.has(g))));
+  }, [groupedStations, setSet]);
+
   return (
     <div className={styles.container}>
       <h2 className={styles.header}>Stationenliste</h2>
@@ -113,7 +119,7 @@ const StationsList: FC = () => {
                 <span className={styles.caret} />
               </button>
               <div
-                id="actions-panel"
+                id={panelId}
                 className={`${styles.buttonPanel} ${
                   isOpen(grp) ? styles.open : ''
                 }`}
@@ -142,7 +148,6 @@ const StationsList: FC = () => {
           className={styles.addNewStationContainer}
           ref={addStationFormRef}
         >
-          {/* <form onSubmit={handleFormSubmit} className={styles.addStationForm} > */}
           <input
             className={styles.addStationInput}
             placeholder="New station"
@@ -154,7 +159,6 @@ const StationsList: FC = () => {
             }
           />
           <select
-            // className={styles.addStationInput}
             value={stationPriority}
             onChange={(e: ChangeEvent<HTMLSelectElement>) =>
               setStationPriority(Number(e.target.value))
@@ -168,7 +172,6 @@ const StationsList: FC = () => {
             <option value={3}>3</option>
           </select>
           <select
-            // className={styles.addStationInput}
             value={stationGroup}
             onChange={(e: ChangeEvent<HTMLSelectElement>) =>
               setStationGroup(Number(e.target.value))
@@ -189,7 +192,6 @@ const StationsList: FC = () => {
           {store.errorMsg && (
             <p className={styles.errorMessage}>{store.errorMsg}</p>
           )}
-          {/* </form> */}
         </form>
       )}
     </div>
