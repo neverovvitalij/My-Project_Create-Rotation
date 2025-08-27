@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-export const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
+export const VITE_API_URL = import.meta.env.VITE_API_URL as string;
 
 const api = axios.create({
   withCredentials: true,
-  baseURL: REACT_APP_API_URL,
+  baseURL: VITE_API_URL,
 });
 
 api.interceptors.request.use((config) => {
@@ -25,7 +25,7 @@ api.interceptors.response.use(
     ) {
       originalRequest._isRetry = true;
       try {
-        const response = await axios.get(`${REACT_APP_API_URL}/refresh`, {
+        const response = await axios.get(`${VITE_API_URL}/refresh`, {
           withCredentials: true,
         });
         localStorage.setItem('token', response.data.accessToken);

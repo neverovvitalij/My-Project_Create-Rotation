@@ -72,19 +72,6 @@ Project Structure
 │ └── public/
 └── README.md
 
-PORT=8080
-DB_URL=mongodb+srv
-JWT_ACCESS_SECRET=your_jwt_secret
-JWT_REFRESH_SECRET=your_jwt_secret
-JWT_RESET_PASSWORD_SECRET=your_jwt_secret
-API_URL=http://localhost:8080
-CLIENT_URL=http://localhost:3000
-ADMIN_EMAIL=admin@yourdomain.com
-MAILJET_API_KEY=your_mailjet_key
-MAILJET_API_SECRET=your_mailjet_apikey
-MAILJET_SENDER_EMAIL=no-reply@yourdomain.com
-MAILJET_SENDER_NAME=no-reply@yourdomain.com
-
 This project is private. Source code access is restricted. For inquiries, contact the repository owner.
 
 For support, contact: vitalij.neverov@gmail.com

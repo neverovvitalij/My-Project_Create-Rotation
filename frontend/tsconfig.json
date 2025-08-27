@@ -9,11 +9,19 @@
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
     "checkJs": false,
-    "outDir": "build",
     "rootDir": "src",
     "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "types": [
+      "vite/client"
+    ]
   },
-  "include": ["src/**/*", "src/custom.d.ts"],
-  "exclude": ["node_modules", "build"]
+  "include": [
+    "src/**/*",
+    "src/custom.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "build"
+  ]
 }
