@@ -33,7 +33,7 @@ export default class AuthService {
   }
 
   static async refresh(): Promise<AxiosResponse<IAuthResponse>> {
-    return api.get<IAuthResponse>('/refresh');
+    return api.post<IAuthResponse>('/refresh');
   }
 
   static async requestResetPassword(

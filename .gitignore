@@ -1,10 +1,12 @@
 # зависимости
 node_modules/
+dist/
 
 # секреты
 .env
 
 # prodatcion files
 prodaction/
+
 
 .DS_Store
