@@ -112,8 +112,8 @@ class StationService {
 
       // Remove this station from all workers station lists
       const result = await WorkerModel.updateMany(
-        { 'stations.name': name },
-        { $pull: { stations: { name, costCenter, shift, plant } } }
+        { 'stations.name': name, costCenter, shift, plant },
+        { $pull: { stations: { name } } }
       );
 
       if (result.modifiedCount > 0) {

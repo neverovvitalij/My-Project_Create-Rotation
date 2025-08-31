@@ -57,7 +57,11 @@ const RegisterForm: FC = () => {
       <form className={styles.card} onSubmit={handleChangeSubmit}>
         <h2 className={styles.title}>Create account</h2>
         <p className={styles.subtitle}>Sign up to start planning rotations</p>
-
+        {store.authMsg && (
+          <p className={msgType ? styles.success : styles.error}>
+            {store.authMsg}
+          </p>
+        )}
         <fieldset className={styles.fields} disabled={submitting || msgType}>
           {/* Email */}
           <div className={styles.field}>
@@ -192,12 +196,6 @@ const RegisterForm: FC = () => {
             <span className={styles.hint}>Have an account already?</span>
           </div>
         </fieldset>
-
-        {store.authMsg && (
-          <p className={msgType ? styles.success : styles.error}>
-            {store.authMsg}
-          </p>
-        )}
       </form>
     </div>
   );

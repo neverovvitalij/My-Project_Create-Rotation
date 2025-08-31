@@ -61,7 +61,7 @@ class RotationPlanService {
         status: true,
       });
     } catch (error) {
-      console.error('Error fetch all active workers:', err.message);
+      console.error('Error fetch all active workers:', error.message);
       throw new Error('Failed to fetch all active workers');
     }
     // (2) load queues and
@@ -122,7 +122,7 @@ class RotationPlanService {
       console.error(
         `Fehler bei der Überprüfung der Priority-Stationen: ${err.message}`
       );
-      throw err;
+      throw new Error(err.message);
     }
 
     try {
@@ -263,7 +263,7 @@ class RotationPlanService {
         console.error(
           `Fehler bei der Überprüfung der Zyklus-Stationen: ${err.message}`
         );
-        throw err.message;
+        throw new Error(err.message);
       }
 
       for (let cycle = 0; cycle < cycles; cycle++) {
