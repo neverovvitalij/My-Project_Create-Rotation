@@ -79,7 +79,12 @@ const WorkersList: FC = () => {
                 >
                   {workers
                     .slice()
-                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .sort((a, b) =>
+                      a.name.localeCompare(b.name, undefined, {
+                        numeric: true,
+                        sensitivity: 'base',
+                      })
+                    )
                     .map((worker) => (
                       <SingleWorker
                         worker={worker}
