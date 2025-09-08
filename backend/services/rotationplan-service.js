@@ -52,13 +52,34 @@ class RotationPlanService {
     }
 
     // Fetch all active workers for the given costCenter/shift/plant
-    let availableWorkers;
+    let availableWorkers = [];
     try {
-      availableWorkers = await WorkerModel.find({
+      let availableWorkersFromDB = await WorkerModel.find({
         costCenter,
         shift,
         plant,
         status: true,
+      });
+
+      const hasWorkerName = new Set(
+        [...preassigned, ...specialAssignments].map(({ worker }) => worker)
+      );
+      const hasStationName = new Set(
+        [...activeStations]
+          .filter((stn) => stn.priority > 1)
+          .map((stn) => stn.name)
+      );
+
+      availableWorkersFromDB.forEach((obj) => {
+        if (
+          obj.stations.length === 1 &&
+          !hasWorkerName.has(obj.name) &&
+          !hasStationName.has(obj.stations[0].name)
+        ) {
+          preassigned.push({ worker: obj.name, station: obj.stations[0].name });
+        } else {
+          availableWorkers.push(obj);
+        }
       });
     } catch (error) {
       console.error('Error fetch all active workers:', error.message);
@@ -70,6 +91,38 @@ class RotationPlanService {
     } catch (err) {
       console.error('Error initializing/loading rotation queues:', err.message);
       throw new Error('Failed to initialize rotation queues');
+    }
+
+    // === Check available workers for priority stations ===
+    try {
+      const hasStationName = new Set(
+        [...activeStations]
+          .filter((stn) => stn.priority > 1 && stn.status)
+          .map((stn) => stn.name)
+      );
+
+      const availableWorkersForPriority = availableWorkers.filter((w) =>
+        w.stations.some((s) => hasStationName.has(s.name))
+      );
+
+      for (const stn of hasStationName) {
+        const indx = availableWorkersForPriority.findIndex((worker) =>
+          worker.stations.some((s) => s.name === stn)
+        );
+
+        if (indx === -1) {
+          throw new Error(
+            `Stationen mit Priorität 2/3 können nicht abgedeckt werden.`
+          );
+        }
+
+        availableWorkersForPriority.splice(indx, 1);
+      }
+    } catch (error) {
+      console.error(
+        `Fehler bei der Überprüfung der Priority-Stationen: ${error.message}`
+      );
+      throw new Error(error.message);
     }
 
     // Auto-preassigning single-station workers
@@ -86,45 +139,32 @@ class RotationPlanService {
       skills.forEach((st) => removedStations.add(st));
     });
 
+    const hasStationName = new Set(
+      [...activeStations]
+        .filter((stn) => stn.priority > 1)
+        .map((stn) => stn.name)
+    );
+
+    const hasPreasinedStations = new Set(
+      [...preassigned].map(({ station }) => station)
+    );
+
     for (const w of schedulable) {
-      const skills = w.stations.filter((s) => s.isActive).map((s) => s.name);
+      const skills = w.stations
+        .filter(
+          (s) =>
+            s.isActive &&
+            !hasStationName.has(s.name) &&
+            !hasPreasinedStations.has(s.name) &&
+            hasPreasinedStations.add(s?.name)
+        )
+        .map((s) => s.name);
       workerSchedules[w.name] = Array.from(
         { length: cycles },
         (_, i) => skills[i % skills.length]
       );
       availableWorkers = availableWorkers.filter((x) => x.name !== w.name);
     }
-
-    // === Check available workers for priority stations ===
-    try {
-      const priorityStations = activeStations
-        .filter((stn) => stn.priority > 1 && stn.status)
-        .map((stn) => {
-          const queue = this.rotationQueues.get(stn.name) || [];
-          const cnt = queue.filter((w) => w.status).length;
-          return { ...stn, cnt };
-        })
-        .sort((a, b) => a.cnt - b.cnt || b.priority - a.priority);
-      for (const station of priorityStations) {
-        const idx = availableWorkers.findIndex((worker) =>
-          worker.stations.some((s) => s.name === station.name && s.isActive)
-        );
-
-        if (idx === -1) {
-          throw new Error(
-            `Stationen mit Priorität ${station.priority} können nicht abgedeckt werden.`
-          );
-        }
-
-        availableWorkers.splice(idx, 1);
-      }
-    } catch (err) {
-      console.error(
-        `Fehler bei der Überprüfung der Priority-Stationen: ${err.message}`
-      );
-      throw new Error(err.message);
-    }
-
     try {
       // Initialize result containers
       const specialRotation = new Map();
