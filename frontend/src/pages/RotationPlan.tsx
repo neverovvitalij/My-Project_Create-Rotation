@@ -148,8 +148,12 @@ const RotationPlan: FC = () => {
     }, {});
   }, [employees]);
 
+  const assignedForQuali = specialAssignments.filter((obj) =>
+    store.activeEmployeeForQuali.has(obj.worker)
+  ).length;
   const isFullyAssigned =
-    store.activeEmployee !== store.activeStations + specialAssignments.length;
+    store.activeEmployee + assignedForQuali !==
+    store.activeStations + specialAssignments.length;
 
   return (
     <div className={styles.container}>
@@ -213,7 +217,8 @@ const RotationPlan: FC = () => {
       </h3>
       {Object.entries(groupedEmployees).map(([groupName, groupEmps]) => (
         <section key={groupName} className={styles.groupSection}>
-          <h3 className={styles.groupHeader}>Gruppe {groupName}</h3>
+          <h3 className={styles.groupHeader}>Gruppe {groupName} </h3>
+          <br />
           <h3
             className={styles.groupHeader}
           >{`Verfügbare Mitarbeiter ${store.activeEmployeeByGroup[groupName]} | Benötigt ${store.stationsByGroup[groupName]}`}</h3>
@@ -222,8 +227,25 @@ const RotationPlan: FC = () => {
               const stationValue = getCurrentStationForWorker(emp.name);
               const sonderJob = getSonderJobForWorker(emp.name);
               return (
-                <li key={emp._id} className={styles.empItem}>
-                  <span className={styles.empName}>{emp.name}</span>
+                <li
+                  key={emp._id}
+                  className={styles.empItem}
+                  style={{
+                    backgroundColor: store.activeEmployeeForQuali.has(emp.name)
+                      ? 'rgba(255, 193, 7, 0.12)'
+                      : undefined,
+                  }}
+                >
+                  <span className={styles.empName}>
+                    {store.activeEmployeeForQuali.has(emp.name) ? (
+                      <>
+                        {emp.name}
+                        <br /> ⚠️ Qualifizierungsbedarf
+                      </>
+                    ) : (
+                      emp.name
+                    )}
+                  </span>
                   <input
                     type="checkbox"
                     className={styles.inputCheckbox}

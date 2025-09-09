@@ -81,7 +81,17 @@ export default class Store implements IStore {
 
   //Getters
   get activeEmployee(): number {
-    return this.employeeList.filter((emp) => emp.status === true).length;
+    return this.employeeList.filter(
+      (emp) => emp.status === true && emp.stations.length > 0
+    ).length;
+  }
+
+  get activeEmployeeForQuali(): Set<string> {
+    return new Set(
+      this.employeeList
+        .filter((emp) => emp.status === true && emp.stations.length === 0)
+        .map((emp) => emp.name)
+    );
   }
 
   get activeStations(): number {

@@ -91,6 +91,7 @@ export interface IStore {
   get activeEmployee(): number;
   get activeStations(): number;
   get activeEmployeeByGroup(): Record<string, number>;
+  get activeEmployeeForQuali(): Set<string>;
   get stationsByGroup(): Record<string, number>;
   loadData(): Promise<void>;
   login(email: string, password: string): Promise<void>;
