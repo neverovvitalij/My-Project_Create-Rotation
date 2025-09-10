@@ -98,41 +98,135 @@ class RotationPlanService {
 
     const workerSchedules = {};
     const removedStations = new Set();
+
+    // workers who are "schedulable": have at least 1 active skill and fewer skills than cycles
     const schedulable = availableWorkers.filter((w) => {
       const skills = w.stations.filter((s) => s.isActive).map((s) => s.name);
       return skills.length > 0 && skills.length < cycles;
     });
 
+    // per-worker skill set (to check competency fast)
+    const skillSetByWorker = new Map();
+    availableWorkers.forEach((w) => {
+      const activeSkills = w.stations
+        .filter((s) => s.isActive)
+        .map((s) => s.name);
+      skillSetByWorker.set(w.name, new Set(activeSkills));
+    });
+
+    // collect all stations from schedulable workers (used later as a mask)
     schedulable.forEach((w) => {
       const skills = w.stations.filter((s) => s.isActive).map((s) => s.name);
       skills.forEach((st) => removedStations.add(st));
     });
 
     const hasStationName = new Set(
-      [...activeStations]
-        .filter((stn) => stn.priority > 1)
-        .map((stn) => stn.name)
+      activeStations.filter((stn) => stn.priority > 1).map((stn) => stn.name)
     );
-
     const hasPreasinedStations = new Set(
-      [...preassigned].map(({ station }) => station)
+      preassigned.map(({ station }) => station)
     );
 
+    // 1) allowed stations per worker
+    const skillsByWorker = new Map();
     for (const w of schedulable) {
       const skills = w.stations
         .filter(
           (s) =>
             s.isActive &&
             !hasStationName.has(s.name) &&
-            !hasPreasinedStations.has(s.name)
+            !hasPreasinedStations.has(s.name) &&
+            removedStations.has(s.name)
         )
         .map((s) => s.name);
-      workerSchedules[w.name] = Array.from(
-        { length: cycles },
-        (_, i) => skills[i % skills.length]
-      );
-      availableWorkers = availableWorkers.filter((x) => x.name !== w.name);
+      if (skills.length > 0) skillsByWorker.set(w.name, skills);
     }
+
+    // 2) round-robin assignment per cycle without same-station clashes in a round,
+    //    and only assign stations the worker is competent for
+    const names = Array.from(skillsByWorker.keys());
+    for (const name of names) {
+      workerSchedules[name] = Array.from({ length: cycles }, () => '');
+    }
+
+    for (let c = 0; c < cycles; c++) {
+      const used = new Set(); // stations already taken in this cycle
+
+      names.forEach((name, i) => {
+        const skills = skillsByWorker.get(name);
+        const skillSet = skillSetByWorker.get(name) || new Set();
+        let chosen;
+
+        // pick the first not-yet-used station from the worker's skills
+        for (let t = 0; t < skills.length; t++) {
+          const candidate = skills[(i + c + t) % skills.length];
+          if (!used.has(candidate) && skillSet.has(candidate)) {
+            chosen = candidate;
+            break;
+          }
+        }
+
+        // optional fallback: if none found, try base offset (still must be in skills and not used)
+        if (!chosen) {
+          const candidate = skills[(i + c) % skills.length];
+          if (!used.has(candidate) && skillSet.has(candidate)) {
+            chosen = candidate;
+          }
+        }
+
+        // assign only if a suitable option exists
+        if (chosen) {
+          workerSchedules[name][c] = chosen;
+          used.add(chosen);
+        }
+        // if no suitable option — keep empty string (no competency/slot available)
+      });
+    }
+
+    // 3) remove scheduled workers from availableWorkers
+    const scheduledNames = new Set(names);
+    availableWorkers = availableWorkers.filter(
+      (x) => !scheduledNames.has(x.name)
+    );
+
+    // const workerSchedules = {};
+    // const removedStations = new Set();
+    // const schedulable = availableWorkers.filter((w) => {
+    //   const skills = w.stations.filter((s) => s.isActive).map((s) => s.name);
+    //   return skills.length > 0 && skills.length < cycles;
+    // });
+
+    // schedulable.forEach((w) => {
+    //   const skills = w.stations.filter((s) => s.isActive).map((s) => s.name);
+    //   skills.forEach((st) => removedStations.add(st));
+    // });
+
+    // const hasStationName = new Set(
+    //   [...activeStations]
+    //     .filter((stn) => stn.priority > 1)
+    //     .map((stn) => stn.name)
+    // );
+
+    // const hasPreasinedStations = new Set(
+    //   [...preassigned].map(({ station }) => station)
+    // );
+
+    // for (const w of schedulable) {
+    //   const skills = w.stations
+    //     .filter(
+    //       (s) =>
+    //         s.isActive &&
+    //         !hasStationName.has(s.name) &&
+    //         !hasPreasinedStations.has(s.name) &&
+    //         removedStations.has(s.name)
+    //     )
+    //     .map((s) => s.name);
+    //   workerSchedules[w.name] = Array.from(
+    //     { length: cycles },
+    //     (_, i) => skills[i % skills.length]
+    //   );
+    //   availableWorkers = availableWorkers.filter((x) => x.name !== w.name);
+    // }
 
     // === Check available workers for priority stations ===
     try {
