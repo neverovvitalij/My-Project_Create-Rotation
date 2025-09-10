@@ -1,6 +1,7 @@
 const ApiError = require('../exceptions/api-error');
 const ConfirmedRotation = require('../models/confirmedrotation-model');
 const RotationPlanService = require('../services/rotationplan-service');
+const ExcelBufferService = require('../services/excelbuffer-service');
 
 class RotationPlanController {
   constructor() {
@@ -46,7 +47,7 @@ class RotationPlanController {
         allWorkers,
       } = req.body;
 
-      const service = new RotationPlanService();
+      const service = new ExcelBufferService();
       const { buffer, fileName } = await service.buildExcelBuffer(
         specialRotation,
         highPriorityRotation,
@@ -139,8 +140,8 @@ class RotationPlanController {
         cycleRotations,
         allWorkers,
       } = confirmedRotation.rotation;
-      const rotationService = new RotationPlanService();
-      const { buffer, fileName } = await rotationService.buildExcelBuffer(
+      const excelBufferService = new ExcelBufferService();
+      const { buffer, fileName } = await excelBufferService.buildExcelBuffer(
         specialRotation,
         highPriorityRotation,
         cycleRotations,
