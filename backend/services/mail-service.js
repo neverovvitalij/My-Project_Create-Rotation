@@ -1,4 +1,3 @@
-// services/mail-service.js
 const Mailjet = require('node-mailjet');
 
 class MailService {
