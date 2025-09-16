@@ -8,7 +8,7 @@ const refreshCookieOpts = {
   secure: isProd,
   sameSite: 'lax',
   path: '/',
-  maxAge: 30 * 24 * 60 * 1000,
+  maxAge: 30 * 24 * 60 * 60 * 1000,
 };
 class UserController {
   async registration(req, res, next) {
