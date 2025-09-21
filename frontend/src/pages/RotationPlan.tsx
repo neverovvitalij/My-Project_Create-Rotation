@@ -144,6 +144,15 @@ const RotationPlan: FC = () => {
     return employees.reduce<GroupedEmployees>((acc, emp) => {
       const key = String(emp.group);
       (acc[key] ??= []).push(emp);
+
+      Object.values(acc).forEach((list) =>
+        list.sort((a, b) =>
+          a.name.localeCompare(b.name, undefined, {
+            numeric: true,
+            sensitivity: 'base',
+          })
+        )
+      );
       return acc;
     }, {});
   }, [employees]);
