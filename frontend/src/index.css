@@ -149,7 +149,8 @@ textarea {
 }
 
 select,
-option {
+option,
+input {
   color: var(--text-primary) !important;
   background-color: var(--bg-form) !important;
 }
