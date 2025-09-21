@@ -147,3 +147,19 @@ textarea {
     padding: 4px 6px !important;
   }
 }
+
+select,
+option {
+  color: var(--text-primary) !important;
+  background-color: var(--bg-form) !important;
+}
+
+@media (forced-colors: active) {
+  select,
+  option {
+    forced-color-adjust: none;
+    background: Canvas;
+    color: CanvasText;
+    border-color: GrayText;
+  }
+}
