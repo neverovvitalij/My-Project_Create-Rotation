@@ -27,7 +27,8 @@ class UserController {
         plant
       );
       res.cookie('refreshToken', userData.refreshToken, refreshCookieOpts);
-      return res.json(userData);
+      const { refreshToken, ...safe } = userData;
+      return res.json(safe);
     } catch (error) {
       next(error);
     }
@@ -38,7 +39,8 @@ class UserController {
       const { email, password } = req.body;
       const userData = await userService.login(email, password);
       res.cookie('refreshToken', userData.refreshToken, refreshCookieOpts);
-      return res.json(userData);
+      const { refreshToken, ...safe } = userData;
+      return res.json(safe);
     } catch (error) {
       next(error);
     }
@@ -70,11 +72,45 @@ class UserController {
 
   async refresh(req, res, next) {
     try {
-      const { refreshToken } = req.cookies;
-      const userData = await userService.refresh(refreshToken);
-      res.cookie('refreshToken', userData.refreshToken, refreshCookieOpts);
-      return res.json(userData);
+      if (process.env.NODE_ENV === 'production') {
+        const rawAllow = (
+          process.env.CORS_ALLOWED_ORIGINS ||
+          process.env.CLIENT_URL ||
+          ''
+        ).split(',');
+        const allowed = new Set(
+          rawAllow.map((s) => s.trim().replace(/\/+$/, ''))
+        );
+
+        const origin = (req.get('origin') || '').replace(/\/+$/, '');
+        const referer = req.get('referer') || '';
+        const refOrigin = (() => {
+          try {
+            return new URL(referer).origin.replace(/\/+$/, '');
+          } catch {
+            return '';
+          }
+        })();
+
+        const hasHeaders = origin || refOrigin;
+        const ok = allowed.has(origin) || allowed.has(refOrigin);
+
+        if (hasHeaders && !ok) {
+          return res.status(403).json({ message: 'Forbidden' });
+        }
+      }
+
+      const { refreshToken: incoming } = req.cookies;
+      const userData = await userService.refresh(incoming);
+
+      const { refreshToken: newRefresh, ...safe } = userData;
+      res.cookie('refreshToken', newRefresh, refreshCookieOpts);
+      return res.json(safe);
     } catch (error) {
+      res.clearCookie('refreshToken', {
+        ...refreshCookieOpts,
+        maxAge: undefined,
+      });
       next(error);
     }
   }

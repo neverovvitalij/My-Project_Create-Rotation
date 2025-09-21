@@ -154,6 +154,7 @@ const RegisterForm: FC = () => {
               </option>
               <option value="395.5">395.5</option>
               <option value="385.5">385.5</option>
+              <option value="368.5">368.5</option>
               <option value="311.5">311.5</option>
             </select>
           </div>

@@ -10,6 +10,9 @@ const StationSchema = new mongoose.Schema({
   plant: { type: String, required: true },
 });
 
-StationSchema.index({ name: 1, costCenter: 1, shift: 1 }, { unique: true });
+StationSchema.index(
+  { name: 1, costCenter: 1, shift: 1, plant: 1 },
+  { unique: true }
+);
 
 module.exports = mongoose.model('StationModel', StationSchema);

@@ -7,5 +7,5 @@ module.exports = function (err, req, res, next) {
       .json({ message: err.message, errors: err.errors });
   }
   console.error('Unhandled error:', err);
-  return res.status(500).json({ message: 'Unauthorized error ' });
+  return res.status(500).json({ message: 'Server error' });
 };
