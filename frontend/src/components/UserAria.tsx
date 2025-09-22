@@ -37,7 +37,6 @@ const UserAria: FC = () => {
         aria-expanded={showActions}
         aria-controls="actions-panel"
       >
-        Aktionen
         <span className={styles.caret} />
       </button>
       <div
