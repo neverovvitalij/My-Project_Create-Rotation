@@ -199,8 +199,12 @@
 }
 
 .groupSection {
+  background: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 16px;
   margin-bottom: 24px;
 }
+
 .groupHeader {
   display: inline-flex;
   align-items: center;
