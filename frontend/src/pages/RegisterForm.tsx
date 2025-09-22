@@ -101,9 +101,7 @@ const RegisterForm: FC = () => {
             </label>
           </div>
 
-          {/* Role */}
           <div className={styles.field}>
-            <label className={styles.labelStatic}>Role</label>
             <select
               className={styles.select}
               value={role}
@@ -113,16 +111,14 @@ const RegisterForm: FC = () => {
               required
             >
               <option value="" disabled>
-                Select role
+                Role
               </option>
               <option value="GV">GV</option>
               <option value="MEISTER">Meister</option>
             </select>
           </div>
 
-          {/* Plant */}
           <div className={styles.field}>
-            <label className={styles.labelStatic}>Werk</label>
             <select
               className={styles.select}
               value={plant}
@@ -132,15 +128,13 @@ const RegisterForm: FC = () => {
               required
             >
               <option value="" disabled>
-                Select plant
+                Werk
               </option>
               <option value="054">054</option>
             </select>
           </div>
 
-          {/* Cost Center */}
           <div className={styles.field}>
-            <label className={styles.labelStatic}>Kostenstelle</label>
             <select
               className={styles.select}
               value={costCenter}
@@ -150,7 +144,7 @@ const RegisterForm: FC = () => {
               required
             >
               <option value="" disabled>
-                Select cost center
+                Kostenstelle
               </option>
               <option value="395.5">395.5</option>
               <option value="385.5">385.5</option>
@@ -159,9 +153,7 @@ const RegisterForm: FC = () => {
             </select>
           </div>
 
-          {/* Shift */}
           <div className={styles.field}>
-            <label className={styles.labelStatic}>Schicht</label>
             <select
               className={styles.select}
               value={shift}
@@ -171,7 +163,7 @@ const RegisterForm: FC = () => {
               required
             >
               <option value="" disabled>
-                Select shift
+                Schicht
               </option>
               <option value="A">A</option>
               <option value="B">B</option>
