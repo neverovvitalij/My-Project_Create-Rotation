@@ -138,11 +138,11 @@ class WorkerService {
         { new: true }
       );
       if (!updatedWorker) {
-        return res.status(404).json({ message: 'Worker not found' });
+        throw new Error({ message: 'Worker not found' });
       }
       return updatedWorker;
     } catch (error) {
-      console.log('Error during status update', error.message);
+      console.error('Error during status update', error.message);
       throw error;
     }
   }
@@ -195,7 +195,6 @@ class WorkerService {
           `Worker "${name}" was not present in the queue for "${stationToRemove}".`
         );
       } else {
-        // 4) Обновляем timestamp и сохраняем
         rotationQueue.updatedAt = Date.now();
         await rotationQueue.save();
         console.log(
@@ -234,7 +233,6 @@ class WorkerService {
         };
       }
 
-      // 2) Находим или создаём очередь для этой станции
       let rotationQueue = await RotationQueueModel.findOne({
         station: stationToAdd,
         costCenter: updatedWorker.costCenter,
@@ -286,6 +284,32 @@ class WorkerService {
         'Error adding station to worker',
         error.message
       );
+    }
+  }
+
+  async workerChangeStationStatus(
+    name,
+    newStatus,
+    stationName,
+    costCenter,
+    shift,
+    plant
+  ) {
+    try {
+      const updatedWorker = await WorkerModel.findOneAndUpdate(
+        { name, costCenter, shift, plant, 'stations.name': stationName },
+        { $set: { 'stations.$.isActive': newStatus } },
+        { new: true }
+      );
+
+      if (!updatedWorker) {
+        throw new Error({ message: 'Worker not found' });
+      }
+
+      return updatedWorker;
+    } catch (error) {
+      console.error('Error during status update', error.message);
+      throw error;
     }
   }
 }

@@ -526,6 +526,30 @@ export default class Store implements IStore {
     }
   }
 
+  async changeWorkerStationStatus(
+    name: string,
+    newStatus: boolean,
+    stationName: string
+  ): Promise<void> {
+    try {
+      await WorkerService.workerChangeStationStatus(
+        name,
+        newStatus,
+        stationName
+      );
+      this.setErrorMsg('');
+      await this.loadData();
+    } catch (error: unknown) {
+      if (isAxiosError<{ message?: string }>(error)) {
+        const msg = error.response?.data?.message ?? 'Status update error';
+        this.setErrorMsg(msg);
+      } else {
+        console.error('Unexpected error in updating status:', error);
+        this.setErrorMsg('Status update error');
+      }
+    }
+  }
+
   async changeStationStatus(name: string, newStatus: boolean): Promise<void> {
     try {
       await StationsService.stationChangeStatus(name, newStatus);

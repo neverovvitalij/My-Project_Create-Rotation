@@ -31,6 +31,11 @@ router.patch(
   workersController.workerChangeStatus
 );
 router.patch(
+  '/change-worker-station-status',
+  authMiddleware,
+  workersController.workerChangeStationStatus
+);
+router.patch(
   '/change-station-status',
   authMiddleware,
   stationsController.stationChangeStatus

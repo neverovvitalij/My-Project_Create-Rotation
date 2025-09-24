@@ -5,6 +5,7 @@ import { FC, useContext, useState } from 'react';
 import { Context } from '../index';
 import styles from '../styles/SingleWorker.module.css';
 import { IEmployee, IStore } from '../store/types';
+import { toJS } from 'mobx';
 
 type WorkerId = IEmployee['_id'];
 
@@ -67,13 +68,28 @@ const SingleWorker: FC<SingleEmployeeProps> = ({
   const handleSubmitAddStation = async () => {
     if (!selectedStation) return;
 
-    try {
-      await store.addStationToWorker(worker.name, selectedStation);
-      setSelectedStation('');
-      setComplete(true);
-    } catch (error) {
-      console.error('Could not add station', error);
-      alert('Could not add station');
+    if (selectedStation.toLowerCase().includes('gv')) {
+      const employeeList = store.employeeList;
+      const primaryOrFallback = employeeList.find((emp) =>
+        emp.stations.some((stn) => stn.name === selectedStation)
+      );
+
+      const newStatus = false;
+      try {
+        await store.addStationToWorker(worker.name, selectedStation);
+
+        primaryOrFallback &&
+          (await store.changeWorkerStationStatus(
+            worker.name,
+            newStatus,
+            selectedStation
+          ));
+        setSelectedStation('');
+        setComplete(true);
+      } catch (error) {
+        console.error('Could not add station', error);
+        alert('Could not add station');
+      }
     }
   };
 

@@ -117,6 +117,25 @@ class WorkerController {
       next(error);
     }
   }
+
+  async workerChangeStationStatus(req, res, next) {
+    try {
+      const { costCenter, shift, plant } = req.user ?? {};
+      const { name, newStatus, stationName } = req.body;
+      const updatedWorker = await workerService.workerChangeStationStatus(
+        name,
+        newStatus,
+        stationName,
+        costCenter,
+        shift,
+        plant
+      );
+
+      return res.json(updatedWorker);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new WorkerController();

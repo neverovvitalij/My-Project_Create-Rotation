@@ -128,6 +128,11 @@ export interface IStore {
   downloadLatestConfirmedRotation(): Promise<void>;
   changeWorkerStatus(name: string, newStatus: boolean): Promise<void>;
   changeStationStatus(name: string, newStatus: boolean): Promise<void>;
+  changeWorkerStationStatus(
+    name: string,
+    newStatus: boolean,
+    stationName: string
+  ): Promise<void>;
 }
 
 export interface IPromiseResponse {

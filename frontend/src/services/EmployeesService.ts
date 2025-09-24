@@ -43,4 +43,16 @@ export default class WorkerService {
       stationToAdd,
     });
   }
+
+  static async workerChangeStationStatus(
+    name: string,
+    newStatus: boolean,
+    stationName: string
+  ): Promise<AxiosResponse<IEmployee>> {
+    return api.patch<IEmployee>('/change-worker-station-status', {
+      name,
+      newStatus,
+      stationName,
+    });
+  }
 }
