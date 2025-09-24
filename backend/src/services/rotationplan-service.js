@@ -209,17 +209,17 @@ class RotationPlanService {
         )
         .sort((a, b) => {
           const countA = pool.filter((w) =>
-            w.stations.some((s) => s.name === a.name && s.isActive)
+            w.stations.some((s) => s.name === a.name)
           ).length;
           const countB = pool.filter((w) =>
-            w.stations.some((s) => s.name === b.name && s.isActive)
+            w.stations.some((s) => s.name === b.name)
           ).length;
           return countA - countB;
         });
 
       for (const station of cycleStations) {
         const idx = pool.findIndex((worker) =>
-          worker.stations.some((s) => s.name === station.name && s.isActive)
+          worker.stations.some((s) => s.name === station.name)
         );
 
         if (idx === -1) {
@@ -268,9 +268,42 @@ class RotationPlanService {
         }
       }
 
+      // Fill GV stations
+      const gvStations = activeStations.filter(
+        ({ name, priority, status }) =>
+          priority >= 2 && status && name.toLowerCase().includes('gv')
+      );
+
+      for (const station of gvStations) {
+        const queue = this.rotationQueues.get(station.name) || [];
+
+        const primary = queue.find(
+          (w) =>
+            !fixedAssignments[station.name] &&
+            w.status &&
+            w.stations.some((stn) => stn.name === station.name && stn.isActive)
+        );
+        const fallback = queue.find(
+          (w) =>
+            !fixedAssignments[station.name] &&
+            w.status &&
+            w.stations.some((stn) => stn.name === station.name)
+        );
+
+        const chosen = primary ?? fallback;
+
+        if (chosen) {
+          highPriorityRotation.set(station.name, chosen);
+          fixedAssignments[station.name] = chosen.name;
+        }
+      }
+
       // 2) Fill remaining high-priority stations by matching group or any available
       const priorityStations = activeStations
-        .filter(({ priority, status }) => priority >= 2 && status)
+        .filter(
+          ({ name, priority, status }) =>
+            priority >= 2 && status && !name.toLowerCase().includes('gv')
+        )
         .map((stn) => {
           const queue = this.rotationQueues.get(stn.name) || [];
           const availableCount = queue.filter((w) => w.status).length;
