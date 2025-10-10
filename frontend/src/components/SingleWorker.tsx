@@ -1,11 +1,11 @@
 import { observer } from 'mobx-react-lite';
 import { MdDelete, MdUpdate } from 'react-icons/md';
 import type { IconBaseProps } from 'react-icons';
-import { FC, useContext, useState } from 'react';
+import useClickOutside from '../hooks/useClickOutside';
+import { FC, useContext, useRef, useState } from 'react';
 import { Context } from '../index';
 import styles from '../styles/SingleWorker.module.css';
 import { IEmployee, IStore } from '../store/types';
-import { toJS } from 'mobx';
 
 type WorkerId = IEmployee['_id'];
 
@@ -68,32 +68,40 @@ const SingleWorker: FC<SingleEmployeeProps> = ({
   const handleSubmitAddStation = async () => {
     if (!selectedStation) return;
 
-    if (selectedStation.toLowerCase().includes('gv')) {
-      const employeeList = store.employeeList;
-      const primaryOrFallback = employeeList.find((emp) =>
+    const isGV = selectedStation.toLowerCase().includes('gv');
+    const hasChief =
+      isGV &&
+      store.employeeList.some((emp) =>
         emp.stations.some((stn) => stn.name === selectedStation)
       );
 
-      const newStatus = false;
-      try {
-        await store.addStationToWorker(worker.name, selectedStation);
+    try {
+      await store.addStationToWorker(worker.name, selectedStation);
 
-        primaryOrFallback &&
-          (await store.changeWorkerStationStatus(
-            worker.name,
-            newStatus,
-            selectedStation
-          ));
-        setSelectedStation('');
-        setComplete(true);
-      } catch (error) {
-        console.error('Could not add station', error);
-        alert('Could not add station');
+      if (isGV && hasChief) {
+        const newStatus = false;
+        await store.changeWorkerStationStatus(
+          worker.name,
+          newStatus,
+          selectedStation
+        );
       }
+      setSelectedStation('');
+      setComplete(true);
+    } catch (error) {
+      console.error('Could not add station', error);
+      alert('Could not add station');
     }
   };
 
   const stationsVisible = activeWorker === worker._id;
+
+  const listRef = useRef<HTMLOListElement | null>(null);
+  useClickOutside<HTMLOListElement>(
+    listRef,
+    () => setActiveWorker(null),
+    stationsVisible
+  );
 
   return (
     <li
@@ -120,6 +128,7 @@ const SingleWorker: FC<SingleEmployeeProps> = ({
       </button>
 
       <ol
+        ref={listRef}
         className={`${styles.stationsList} ${
           stationsVisible ? styles.active : ''
         }`}
@@ -127,8 +136,8 @@ const SingleWorker: FC<SingleEmployeeProps> = ({
         {worker.stations
           .slice()
           .sort((a, b) => a.name.localeCompare(b.name))
-          .map((station, index) => (
-            <li key={index} className={styles.stationItem}>
+          .map((station) => (
+            <li key={station._id} className={styles.stationItem}>
               {station.name}
               <button
                 type="button"
