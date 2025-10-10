@@ -1,77 +1,95 @@
-Rotation Plan Scheduler
+# Rotation Plan Scheduler
 
-A web application to generate and manage daily rotation schedules for production line workers. It automatically assigns employees to stations based on priorities, special assignments, and rotation cycles, and provides Excel previews and downloads.
+A web app to generate and manage daily rotation schedules for production workers. It auto-assigns employees to stations based on priorities, special assignments, and rotation cycles, shows a preview in the browser, and lets you download a formatted Excel file.
 
-Features
-• Automatic Rotation: Generates rotations considering high-priority stations, special tasks, and cycle assignments.
-• Priority Handling: Ensures stations with higher priority are staffed first.
-• Special Assignments: Supports manual pre-assignment for specific tasks.
-• Excel Export & Preview: Preview rotation in-browser and download as formatted Excel file.
-• MongoDB Persistence: Saves confirmed rotations with automatic expiration.
-• Support: Frontend written in React + JavaScript; backend in Node.js + Express + Mongoose.
-• TypeScript Migration
-Originally the frontend was written in JavaScript and is now being gradually rewritten to TypeScript (React + TypeScript); the backend remains in Node.js + Express + Mongoose, with TypeScript support planned.
+## Features
 
-Tech Stack
-• Frontend: React, MobX, JavaScript/TypeScript, CSS Modules
-• Backend: Node.js, Express, MongoDB, Mongoose, ExcelJS
-• API: RESTful endpoints for rotation generation, confirmation, and Excel export
-• Dev Tools: Webpack, Babel, ESLint, Prettier
+- **Automatic Rotation:** builds rotations for N cycles considering station priority and constraints.
+- **Priority Handling (incl. GV):** high-priority stations are staffed first. For **GV** (management) stations: **chief** is always first while present; only if chief is absent, the **deputy** takes the slot.
+- **Special & Pre-assigned:** support for day-specific special tasks and forced (pre) assignments.
+- **Excel Export & Preview:** in-browser preview and modern formatted Excel export.
+- **MongoDB Persistence:** confirmed rotations are saved; rotation queues are updated (worked person goes to queue tail).
+- **Auth:** httpOnly refresh cookie, `POST /api/refresh`, CORS with credentials.
 
-Installation 1. Clone repository:
+## Tech Stack
 
+- **Frontend:** React, Vite, TypeScript, MobX, CSS Modules
+- **Backend:** Node.js, Express, MongoDB, Mongoose, ExcelJS
+- **API:** REST endpoints for rotation preview/confirm and Excel export
+- **Dev Tools:** Vite (replaces CRA/Webpack), ESLint, Prettier, nodemon
+
+---
+
+## Installation
+
+### 1) Clone
+
+```bash
 git clone https://github.com/neverovvitalij/My-Project_Create-Rotation
 cd My-App
 
-    2.	Backend setup:
-
 cd backend
 npm install
-.env # configure MongoDB URI, JWT secrets, etc.
+
+# server
 PORT=8080
-DB_URL=mongodb+srv
-JWT_ACCESS_SECRET=your_jwt_secret
-JWT_REFRESH_SECRET=your_jwt_secret
-JWT_RESET_PASSWORD_SECRET=your_jwt_secret
 API_URL=http://localhost:8080
-CLIENT_URL=http://localhost:3000
+CLIENT_URL=http://localhost:5173
+
+# database & jwt
+DB_URL=mongodb+srv://<user>:<pass>@<cluster>/<db>?retryWrites=true&w=majority
+JWT_ACCESS_SECRET=your_access_secret
+JWT_REFRESH_SECRET=your_refresh_secret
+JWT_RESET_PASSWORD_SECRET=your_reset_secret
+
+# mail (Mailjet)
 ADMIN_EMAIL=admin@yourdomain.com
 MAILJET_API_KEY=your_mailjet_key
-MAILJET_API_SECRET=your_mailjet_apikey
+MAILJET_API_SECRET=your_mailjet_secret
 MAILJET_SENDER_EMAIL=no-reply@yourdomain.com
-MAILJET_SENDER_NAME=no-reply@yourdomain.com
+MAILJET_SENDER_NAME=Rotation Plan Service
 
 npm run dev
-
-    3.	Frontend setup:
+The backend code lives in backend/src/ (entry: src/index.js).
+Keep .env in the backend root (not inside src/).
 
 cd ../frontend
 npm install
-.env
-REACT_APP_API_URL=http://localhost:8080/api
 
-npm start
+VITE_API_URL=http://localhost:8080/api
 
-Frontend runs at http://localhost:3000 and backend at http://localhost:8080 by default.
+npm run dev
 
-Usage 1. Log in or register a user. 2. Create stations. 3. Add employees and assign their stations. 4. Configure special assignments and pre-assigned stations. 5. Select number of rotation cycles and generate daily schedule. 6. Preview the schedule in-browser. 7. Confirm rotation to save it in the database. 8. Download the schedule as an Excel file.
+Usage (end-to-end)
+	1.	Register a user, specifying Plant / Shift / Cost Center.
+	2.	Activate via the email link; Admin approval finalizes activation.
+	3.	Login (access token in response; refresh token in httpOnly cookie).
+	4.	(Optional) Add Special and Pre-assigned items.
+	5.	Choose number of cycles and Generate preview.
+	6.	Confirm the rotation to persist it and rotate queues.
+	7.	Download Excel (rotationsplan_DD-MM-YYYY.xlsx) with a modern layout:
+	    •	Left: groups with up to 5 cycles,
+	    •	Right: Tagesrotation (high priority), Sondertätigkeiten, Abwesend
 
-Project Structure
+    Project Structure
+    backend/
+        src/
+            controllers/
+            services/
+            models/
+            routes/
+            middlewares/
+            lib/
+             index.js
+    .env
+    frontend/
+        index.html
+        src/
+            components/
+            store/
+            services/
+            styles/
+README.md
 
-├── backend/ # Express API and services
-│ ├── controllers/ # Request handlers
-│ ├── services/ # Business logic (rotation generation, Excel)
-│ ├── models/ # Mongoose schemas
-│ └── routes/ # API endpoints
-├── frontend/ # React + TypeScript app
-│ ├── src/
-│ │ ├── components/ # UI components
-│ │ ├── store/ # MobX store and types
-│ │ ├── services/ # API service wrappers
-│ │ └── styles/ # CSS Modules
-│ └── public/
-└── README.md
-
-This project is private. Source code access is restricted. For inquiries, contact the repository owner.
-
-For support, contact: vitalij.neverov@gmail.com
+For inquiries/support: vitalij.neverov@gmail.com
+```
