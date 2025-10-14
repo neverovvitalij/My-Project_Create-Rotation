@@ -10,7 +10,7 @@ function useClickOutside<T extends HTMLElement>(
 
     const handler = (e: MouseEvent | TouchEvent) => {
       const el = ref.current;
-      if (!el || el.contains(e.target as Node)) return; // клик внутри — игнор
+      if (!el || el.contains(e.target as Node)) return;
       onOutside();
     };
     document.addEventListener('mousedown', handler, true);

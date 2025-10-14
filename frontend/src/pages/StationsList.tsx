@@ -14,6 +14,7 @@ import SingleStation from '../components/SingleStation';
 import styles from '../styles/StationsList.module.css';
 import { INewStation, IStation, IStore } from '../store/types';
 import { usePersistentSet } from '../hooks/usePersistentSet';
+import InfoTip from '../components/InfoTip';
 
 const StationsList: FC = () => {
   const [stationName, setStationName] = useState<string>('');
@@ -77,7 +78,6 @@ const StationsList: FC = () => {
     setStationGroup(1);
   };
 
-  // Dynamic group display
   const groupedStations = useMemo(() => {
     const groups: Record<string, IStation[]> = {};
     for (const station of store.stations) {
@@ -99,7 +99,6 @@ const StationsList: FC = () => {
     <div className={styles.container}>
       <h2 className={styles.header}>Stationenliste</h2>
 
-      {/* Dynamic group display */}
       <div className={styles.stationGroups}>
         {Object.entries(groupedStations).map(([group, stations]) => {
           const grp = String(group);
@@ -148,6 +147,25 @@ const StationsList: FC = () => {
           className={styles.addNewStationContainer}
           ref={addStationFormRef}
         >
+          <h3 className={styles.sectionHeader}>
+            <InfoTip label="How to assign stations">
+              <strong>Tips for assigning stations:</strong>
+              <ul style={{ margin: '6px 0 0 16px' }}>
+                <li>
+                  Alle Stationen der regulären Rotation haben Priorität 1.
+                </li>
+                <li>
+                  Alle Stationen, die ganztägig besetzt werden (z. B.
+                  Unterstützer), haben Priorität 2.
+                </li>
+                <li>
+                  Stationen, die ganztägig besetzt werden müssen und die nur
+                  sehr wenige Mitarbeitende beherrschen (z. B. B&B), haben
+                  Priorität 3.
+                </li>
+              </ul>
+            </InfoTip>
+          </h3>
           <input
             className={styles.addStationInput}
             placeholder="New station"
