@@ -25,7 +25,6 @@ class MailService {
     const brand = 'Rotation Plan Service';
 
     const messages = [
-      // ——— письмо пользователю ———
       {
         From: this.from,
         To: [{ Email: userEmail }],
@@ -56,7 +55,6 @@ class MailService {
         ].join('\n'),
       },
 
-      // ——— письмо администратору ———
       {
         From: this.from,
         To: [{ Email: adminEmail }],

@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react-lite';
 import { FC, FormEvent, useContext, useState } from 'react';
 import { Context } from '../index';
+import InfoTip from './InfoTip';
 import styles from '../styles/AddNewWorker.module.css';
 import { ICandidate, IStore } from '../store/types';
 
@@ -58,6 +59,17 @@ const AddNewWorker: FC = () => {
   return (
     <div className={styles.container}>
       <form onSubmit={handleChangeSubmit} className={styles.form}>
+        <InfoTip label="How to assign stations">
+          <strong>Tipps zum Hinzufügen von Mitarbeitern:</strong>
+          <ul style={{ margin: '6px 0 0 16px' }}>
+            <li>Geben Sie den Namen des Mitarbeiters ein.</li>
+            <li>Wählen Sie die passende Gruppe aus.</li>
+            <li>
+              Wählen Sie die Stationen aus, die der Mitarbeiter beherrscht.
+            </li>
+          </ul>
+        </InfoTip>
+
         <div className={styles.inputRow}>
           <input
             id="name"

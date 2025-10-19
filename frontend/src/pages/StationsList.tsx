@@ -147,25 +147,22 @@ const StationsList: FC = () => {
           className={styles.addNewStationContainer}
           ref={addStationFormRef}
         >
-          <h3 className={styles.sectionHeader}>
-            <InfoTip label="How to assign stations">
-              <strong>Tips for assigning stations:</strong>
-              <ul style={{ margin: '6px 0 0 16px' }}>
-                <li>
-                  Alle Stationen der regulären Rotation haben Priorität 1.
-                </li>
-                <li>
-                  Alle Stationen, die ganztägig besetzt werden (z. B.
-                  Unterstützer), haben Priorität 2.
-                </li>
-                <li>
-                  Stationen, die ganztägig besetzt werden müssen und die nur
-                  sehr wenige Mitarbeitende beherrschen (z. B. B&B), haben
-                  Priorität 3.
-                </li>
-              </ul>
-            </InfoTip>
-          </h3>
+          <InfoTip label="How to assign stations">
+            <strong>Tips für hinzufügen Stationen:</strong>
+            <ul style={{ margin: '6px 0 0 16px' }}>
+              <li>Alle Stationen der regulären Rotation haben Priorität 1.</li>
+              <li>
+                Alle Stationen, die ganztägig besetzt werden (z. B.
+                Unterstützer), haben Priorität 2.
+              </li>
+              <li>
+                Stationen, die ganztägig besetzt werden müssen und die nur sehr
+                wenige Mitarbeitende beherrschen (z. B. B&B oder GV), haben
+                Priorität 3.
+              </li>
+            </ul>
+          </InfoTip>
+
           <input
             className={styles.addStationInput}
             placeholder="New station"
