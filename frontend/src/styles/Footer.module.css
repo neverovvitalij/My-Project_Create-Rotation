@@ -1,5 +1,4 @@
 .footer {
-  position: relative;
   background-color: var(--bg-form);
   border-top: 1px solid var(--border-color);
   box-shadow: var(--shadow-elev);
