@@ -133,6 +133,7 @@ export interface IStore {
     newStatus: boolean,
     stationName: string
   ): Promise<void>;
+  addNewTaskAo(taskAo: ITaskAo): Promise<void>;
 }
 
 export interface IPromiseResponse {
@@ -166,4 +167,8 @@ export interface IRequestRotationData {
   specialAssignments: ISpecialAssignment[] | null;
   preassigned: IPreassignedEntry[] | null;
   cycles: number;
+}
+
+export interface ITaskAo {
+  taskAo: string;
 }

@@ -15,6 +15,7 @@ import {
   ICandidate,
   ISpecialAssignment,
   IPreassignedEntry,
+  ITaskAo,
 } from './types.js';
 
 export default class Store implements IStore {
@@ -33,6 +34,9 @@ export default class Store implements IStore {
   };
   newStation: INewStation = { name: '', priority: 1 };
   isInitializing = true;
+  taskAo: ITaskAo = {
+    taskAo: '',
+  };
 
   constructor() {
     makeAutoObservable(this);
@@ -77,6 +81,10 @@ export default class Store implements IStore {
 
   setDailyRotation(rotation: IRotation): void {
     this.rotation = rotation;
+  }
+
+  setTaskAo(taskAo: ITaskAo): void {
+    this.taskAo = taskAo;
   }
 
   //Getters
@@ -562,6 +570,22 @@ export default class Store implements IStore {
       } else {
         console.error('Unexpected error in updating status:', error);
         this.setErrorMsg('Status update error');
+      }
+    }
+  }
+
+  async addNewTaskAo(taskAo: ITaskAo): Promise<void> {
+    try {
+      await StationsService.addTaskAo(taskAo);
+      this.setErrorMsg('');
+      await this.loadData();
+    } catch (error: unknown) {
+      if (isAxiosError<{ message?: string }>(error)) {
+        const msg = error.response?.data?.message ?? 'Error adding AO';
+        this.setErrorMsg(msg);
+      } else {
+        console.error('Unexpected error in addNewTaskAo:', error);
+        this.setErrorMsg('Error adding AO');
       }
     }
   }

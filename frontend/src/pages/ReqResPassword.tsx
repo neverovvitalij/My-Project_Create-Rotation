@@ -10,7 +10,7 @@ import {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Context } from '../index';
-import Loader from '../components/Loader';
+import Loader from '../UI/Loader';
 import styles from '../styles/ReqResPassword.module.css';
 
 const ReqResPassword: FC = () => {

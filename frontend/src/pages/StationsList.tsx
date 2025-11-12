@@ -12,8 +12,9 @@ import {
 import { Context } from '../index';
 import SingleStation from '../components/SingleStation';
 import styles from '../styles/StationsList.module.css';
-import { INewStation, IStation, IStore } from '../store/types';
+import { INewStation, IStation, IStore, ITaskAo } from '../store/types';
 import { usePersistentSet } from '../hooks/usePersistentSet';
+import TwoWaySwitch from '../UI/TowWaySwitch';
 import InfoTip from '../components/InfoTip';
 
 const StationsList: FC = () => {
@@ -23,6 +24,8 @@ const StationsList: FC = () => {
   const { store } = useContext(Context) as { store: IStore };
   const [showAddStationForm, setShowAddStationForm] = useState<boolean>(false);
   const addStationFormRef = useRef<HTMLFormElement | null>(null);
+  const [aOName, setAoName] = useState<string>('');
+  const [mode, setMode] = useState<'left' | 'right'>('left');
 
   const storageKey = `openGroups:stations:${store.user?.id ?? 'anon'}`;
   const {
@@ -45,7 +48,32 @@ const StationsList: FC = () => {
     }
   };
 
-  const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleAoFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    store.setErrorMsg('');
+
+    if (!aOName.trim()) {
+      store.setErrorMsg('Please enter the station name.');
+      return;
+    }
+
+    try {
+      const newAoTask: ITaskAo = {
+        taskAo: aOName,
+      };
+
+      await store.addNewTaskAo(newAoTask);
+    } catch (error: unknown) {
+      if (error === 'string') {
+        console.error(error);
+        alert(`AO ${aOName} already exists`);
+      } else {
+        console.error('Error adding AO');
+      }
+    }
+  };
+
+  const handleStationFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     store.setErrorMsg('');
 
@@ -141,73 +169,116 @@ const StationsList: FC = () => {
       >
         {showAddStationForm ? 'Formular ausblenden' : 'Station hinzufügen'}
       </button>
-      {showAddStationForm && (
-        <form
-          onSubmit={handleFormSubmit}
-          className={styles.addNewStationContainer}
-          ref={addStationFormRef}
-        >
-          <InfoTip label="How to assign stations">
-            <strong>Tips für hinzufügen Stationen:</strong>
-            <ul style={{ margin: '6px 0 0 16px' }}>
-              <li>Alle Stationen der regulären Rotation haben Priorität 1.</li>
-              <li>
-                Alle Stationen, die ganztägig besetzt werden (z. B.
-                Unterstützer), haben Priorität 2.
-              </li>
-              <li>
-                Stationen, die ganztägig besetzt werden müssen und die nur sehr
-                wenige Mitarbeitende beherrschen (z. B. B&B oder GV), haben
-                Priorität 3.
-              </li>
-            </ul>
-          </InfoTip>
 
-          <input
-            className={styles.addStationInput}
-            placeholder="New station"
-            value={stationName}
-            type="text"
-            required
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setStationName(e.target.value)
-            }
+      {showAddStationForm && (
+        <>
+          <TwoWaySwitch
+            left="Station"
+            right="AO Tätigkeit"
+            value={mode}
+            onChange={setMode}
           />
-          <select
-            value={stationPriority}
-            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-              setStationPriority(Number(e.target.value))
-            }
-          >
-            <option value="" disabled>
-              Priorität
-            </option>
-            <option value={1}>1</option>
-            <option value={2}>2</option>
-            <option value={3}>3</option>
-          </select>
-          <select
-            value={stationGroup}
-            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-              setStationGroup(Number(e.target.value))
-            }
-          >
-            <option value="" disabled>
-              Gruppe
-            </option>
-            <option value={1}>1</option>
-            <option value={2}>2</option>
-            <option value={3}>3</option>
-            <option value={4}>4</option>
-            <option value={5}>5</option>
-          </select>
-          <button className={styles.addStationButton} type="submit">
-            Station hinzufügen
-          </button>
-          {store.errorMsg && (
-            <p className={styles.errorMessage}>{store.errorMsg}</p>
+          {mode === 'right' ? (
+            <form
+              onSubmit={handleAoFormSubmit}
+              className={styles.addNewStationContainer}
+              ref={addStationFormRef}
+            >
+              <InfoTip label="How to assign stations">
+                <strong>Tips für AO Tätigkeiten hinzufügen:</strong>
+                <ul style={{ margin: '6px 0 0 16px' }}>
+                  <li>Fügen Sie Bezeichnungen für AO Tätigkeiten</li>
+                </ul>
+              </InfoTip>
+              <input
+                className={styles.addStationInput}
+                placeholder="AO Tätigkeit"
+                type="text"
+                value={aOName}
+                required
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setAoName(e.target.value)
+                }
+              />
+              <button className={styles.addStationButton} type="submit">
+                AO hinzufügen
+              </button>
+              {store.errorMsg && (
+                <p className={styles.errorMessage}>{store.errorMsg}</p>
+              )}
+            </form>
+          ) : (
+            <form
+              onSubmit={handleStationFormSubmit}
+              className={styles.addNewStationContainer}
+              ref={addStationFormRef}
+            >
+              <InfoTip label="How to assign stations">
+                <strong>Tips für hinzufügen Stationen:</strong>
+                <ul style={{ margin: '6px 0 0 16px' }}>
+                  <li>
+                    Alle Stationen der regulären Rotation haben Priorität 1.
+                  </li>
+                  <li>
+                    Alle Stationen, die ganztägig besetzt werden (z. B.
+                    Unterstützer), haben Priorität 2.
+                  </li>
+                  <li>
+                    Stationen, die ganztägig besetzt werden müssen und die nur
+                    sehr wenige Mitarbeitende beherrschen (z. B. B&B oder GV),
+                    haben Priorität 3.
+                  </li>
+                </ul>
+              </InfoTip>
+
+              <input
+                className={styles.addStationInput}
+                placeholder="Neue Station"
+                value={stationName}
+                type="text"
+                required
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setStationName(e.target.value)
+                }
+              />
+
+              <select
+                value={stationPriority}
+                onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                  setStationPriority(Number(e.target.value))
+                }
+              >
+                <option value="" disabled>
+                  Priorität
+                </option>
+                <option value={1}>1</option>
+                <option value={2}>2</option>
+                <option value={3}>3</option>
+              </select>
+              <select
+                value={stationGroup}
+                onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                  setStationGroup(Number(e.target.value))
+                }
+              >
+                <option value="" disabled>
+                  Gruppe
+                </option>
+                <option value={1}>1</option>
+                <option value={2}>2</option>
+                <option value={3}>3</option>
+                <option value={4}>4</option>
+                <option value={5}>5</option>
+              </select>
+              <button className={styles.addStationButton} type="submit">
+                Station hinzufügen
+              </button>
+              {store.errorMsg && (
+                <p className={styles.errorMessage}>{store.errorMsg}</p>
+              )}
+            </form>
           )}
-        </form>
+        </>
       )}
     </div>
   );

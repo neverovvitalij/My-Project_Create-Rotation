@@ -32,7 +32,6 @@
   background: var(--bg-primary);
   color: var(--text-primary);
   outline: none;
-  cursor: pointer;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08) inset;
 }

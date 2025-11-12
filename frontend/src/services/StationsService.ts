@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios';
 import api from '../http/index';
-import { IStation, INewStation } from '../store/types';
+import { IStation, INewStation, ITaskAo } from '../store/types';
 
 export default class StationsService {
   static async addStation(
@@ -22,5 +22,9 @@ export default class StationsService {
     newStatus: boolean
   ): Promise<AxiosResponse<IStation>> {
     return api.patch<IStation>('/change-station-status', { name, newStatus });
+  }
+
+  static async addTaskAo(taskAo: ITaskAo): Promise<AxiosResponse<ITaskAo>> {
+    return api.post<ITaskAo>('/new-taskao', taskAo);
   }
 }

@@ -4,7 +4,7 @@ import { toJS } from 'mobx';
 import ExcelPreview, { ExcelPreviewHandle } from '../components/ExcelPreview';
 import styles from '../styles/RotationPlan.module.css';
 import { Context } from '../index';
-import Loader from '../components/Loader';
+import Loader from '../UI/Loader';
 import {
   IEmployee,
   IPreassignedEntry,
