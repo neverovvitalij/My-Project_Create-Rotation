@@ -67,6 +67,54 @@ export interface IConfirmedRotation {
   updatedAt: Date;
 }
 
+export interface IPromiseResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface ICandidate {
+  name: string;
+  stations: IStationByEmployee[];
+  group: number;
+}
+
+export interface IAuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: IUser;
+}
+
+export interface ISpecialAssignment {
+  worker: string;
+  job: string;
+}
+
+export interface IPreassignedEntry {
+  worker: string;
+  station: string;
+}
+
+export interface IRequestRotationData {
+  specialAssignments: ISpecialAssignment[] | null;
+  preassigned: IPreassignedEntry[] | null;
+  cycles: number;
+}
+
+export interface IAo {
+  name: string;
+  group: number;
+  costCenter: string;
+  shift: string;
+  plant: string;
+  status?: boolean;
+  _id: string;
+}
+
+export interface INewAo {
+  name: string;
+  group?: number;
+}
+
 export interface IStore {
   isAuth: boolean;
   isLoading: boolean;
@@ -78,6 +126,7 @@ export interface IStore {
   user: Partial<IUser>;
   newStation: INewStation;
   isInitializing: boolean;
+  aoList: IAo[];
   setUser(user: Partial<IUser>): void;
   setAuth(isAuth: boolean): void;
   setIsLoading(isLoading: boolean): void;
@@ -133,42 +182,11 @@ export interface IStore {
     newStatus: boolean,
     stationName: string
   ): Promise<void>;
-  addNewTaskAo(taskAo: ITaskAo): Promise<void>;
-}
-
-export interface IPromiseResponse {
-  success: boolean;
-  message: string;
-}
-
-export interface ICandidate {
-  name: string;
-  stations: IStationByEmployee[];
-  group: number;
-}
-
-export interface IAuthResponse {
-  accessToken: string;
-  refreshToken: string;
-  user: IUser;
-}
-
-export interface ISpecialAssignment {
-  worker: string;
-  job: string;
-}
-
-export interface IPreassignedEntry {
-  worker: string;
-  station: string;
-}
-
-export interface IRequestRotationData {
-  specialAssignments: ISpecialAssignment[] | null;
-  preassigned: IPreassignedEntry[] | null;
-  cycles: number;
-}
-
-export interface ITaskAo {
-  taskAo: string;
+  addNewAo(newAo: INewAo): Promise<void>;
+  deleteAo(name: string, group: number): Promise<void>;
+  changeStatusAoTask(
+    name: string,
+    newStatus: boolean,
+    group: number
+  ): Promise<void>;
 }

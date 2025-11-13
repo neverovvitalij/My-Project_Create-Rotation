@@ -5,6 +5,7 @@ const usersController = require('../controllers/users-controller');
 const rotationplanController = require('../controllers/rotationplan-controler');
 const stationsController = require('../controllers/stations-contoller');
 const workersController = require('../controllers/workers-controller');
+const aoControler = require('../controllers/ao-controler');
 
 const router = new Router();
 
@@ -79,5 +80,9 @@ router.delete(
   authMiddleware,
   stationsController.deleteStation
 );
+router.get('/ao-liste', authMiddleware, aoControler.getAo);
+router.post('/new-ao', authMiddleware, aoControler.addAo);
+router.delete('/delete-ao', authMiddleware, aoControler.deleteAo);
+router.patch('/change-ao-status', authMiddleware, aoControler.changeAostatus);
 
 module.exports = router;

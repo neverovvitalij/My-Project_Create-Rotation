@@ -4,6 +4,8 @@ import AuthService from '../services/AuthService';
 import WorkerService from '../services/EmployeesService';
 import StationsService from '../services/StationsService';
 import RotationPlanService from '../services/RotationPlanService';
+import AoService from '../services/AoService';
+
 import {
   IStore,
   IUser,
@@ -15,7 +17,8 @@ import {
   ICandidate,
   ISpecialAssignment,
   IPreassignedEntry,
-  ITaskAo,
+  INewAo,
+  IAo,
 } from './types.js';
 
 export default class Store implements IStore {
@@ -34,9 +37,7 @@ export default class Store implements IStore {
   };
   newStation: INewStation = { name: '', priority: 1 };
   isInitializing = true;
-  taskAo: ITaskAo = {
-    taskAo: '',
-  };
+  aoList: IAo[] = [];
 
   constructor() {
     makeAutoObservable(this);
@@ -83,8 +84,8 @@ export default class Store implements IStore {
     this.rotation = rotation;
   }
 
-  setTaskAo(taskAo: ITaskAo): void {
-    this.taskAo = taskAo;
+  setAoList(aoList: IAo[]): void {
+    this.aoList = aoList;
   }
 
   //Getters
@@ -129,8 +130,10 @@ export default class Store implements IStore {
     try {
       const employees = await WorkerService.fetchWorkers();
       const stations = await StationsService.getStations();
+      const aoList = await AoService.getAoListe();
       this.setEmployeeList(employees.data);
       this.setStations(stations.data);
+      this.setAoList(aoList.data);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       this.setErrorMsg('Error loading data');
@@ -574,9 +577,9 @@ export default class Store implements IStore {
     }
   }
 
-  async addNewTaskAo(taskAo: ITaskAo): Promise<void> {
+  async addNewAo(newAo: INewAo): Promise<void> {
     try {
-      await StationsService.addTaskAo(taskAo);
+      await AoService.addAo(newAo);
       this.setErrorMsg('');
       await this.loadData();
     } catch (error: unknown) {
@@ -584,8 +587,44 @@ export default class Store implements IStore {
         const msg = error.response?.data?.message ?? 'Error adding AO';
         this.setErrorMsg(msg);
       } else {
-        console.error('Unexpected error in addNewTaskAo:', error);
+        console.error('Unexpected error in addNewAO:', error);
         this.setErrorMsg('Error adding AO');
+      }
+    }
+  }
+
+  async deleteAo(name: string, group: number): Promise<void> {
+    try {
+      await AoService.deleteAo(name, group);
+      this.setErrorMsg('');
+      await this.loadData();
+    } catch (error: unknown) {
+      if (isAxiosError<{ message?: string }>(error)) {
+        const msg = error.response?.data?.message ?? 'Error deleting AO';
+        this.setErrorMsg(msg);
+      } else {
+        console.error('Unexpected error in deleting AO:', error);
+        this.setErrorMsg('Error deleting AO');
+      }
+    }
+  }
+
+  async changeStatusAoTask(
+    name: string,
+    newStatus: boolean,
+    group: number
+  ): Promise<void> {
+    try {
+      await AoService.changeStatusAoTask(name, newStatus, group);
+      this.setErrorMsg('');
+      await this.loadData();
+    } catch (error: unknown) {
+      if (isAxiosError<{ message?: string }>(error)) {
+        const msg = error.response?.data?.message ?? 'Status update error';
+        this.setErrorMsg(msg);
+      } else {
+        console.error('Unexpected error in updating status:', error);
+        this.setErrorMsg('Status update error');
       }
     }
   }

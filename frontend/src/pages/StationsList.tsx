@@ -12,10 +12,11 @@ import {
 import { Context } from '../index';
 import SingleStation from '../components/SingleStation';
 import styles from '../styles/StationsList.module.css';
-import { INewStation, IStation, IStore, ITaskAo } from '../store/types';
+import { IAo, INewAo, INewStation, IStation, IStore } from '../store/types';
 import { usePersistentSet } from '../hooks/usePersistentSet';
 import TwoWaySwitch from '../UI/TowWaySwitch';
 import InfoTip from '../components/InfoTip';
+import SingleAoTask from '../components/SingleAoTask';
 
 const StationsList: FC = () => {
   const [stationName, setStationName] = useState<string>('');
@@ -24,8 +25,14 @@ const StationsList: FC = () => {
   const { store } = useContext(Context) as { store: IStore };
   const [showAddStationForm, setShowAddStationForm] = useState<boolean>(false);
   const addStationFormRef = useRef<HTMLFormElement | null>(null);
-  const [aOName, setAoName] = useState<string>('');
+  const [newAoName, setNewAoName] = useState<string>('');
+  const [newAoGroup, setNewAoGroup] = useState<number>(1);
   const [mode, setMode] = useState<'left' | 'right'>('left');
+  const [aoTasksListe, setAoTasksListe] = useState<IAo[]>([]);
+
+  useEffect(() => {
+    setAoTasksListe(store.aoList);
+  }, [store.aoList, setAoTasksListe]);
 
   const storageKey = `openGroups:stations:${store.user?.id ?? 'anon'}`;
   const {
@@ -52,25 +59,27 @@ const StationsList: FC = () => {
     event.preventDefault();
     store.setErrorMsg('');
 
-    if (!aOName.trim()) {
-      store.setErrorMsg('Please enter the station name.');
+    if (!newAoName.trim()) {
+      store.setErrorMsg('Please enter the AO name.');
       return;
     }
 
     try {
-      const newAoTask: ITaskAo = {
-        taskAo: aOName,
+      const newAo: INewAo = {
+        name: newAoName,
+        group: newAoGroup,
       };
 
-      await store.addNewTaskAo(newAoTask);
+      await store.addNewAo(newAo);
     } catch (error: unknown) {
       if (error === 'string') {
         console.error(error);
-        alert(`AO ${aOName} already exists`);
+        alert(`AO ${newAoName} already exists`);
       } else {
         console.error('Error adding AO');
       }
     }
+    setNewAoName('');
   };
 
   const handleStationFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -102,8 +111,6 @@ const StationsList: FC = () => {
       }
     }
     setStationName('');
-    setStationPriority(1);
-    setStationGroup(1);
   };
 
   const groupedStations = useMemo(() => {
@@ -157,6 +164,17 @@ const StationsList: FC = () => {
                   .map((station) => (
                     <SingleStation station={station} key={station._id} />
                   ))}
+
+                <div className={styles.aoColumn}>
+                  <h3 style={{ paddingTop: '12px' }}>AO Tätigkeiten</h3>
+                  {aoTasksListe.map((ao) =>
+                    ao.group === Number(group) ? (
+                      <SingleAoTask aoTask={ao} key={ao._id} />
+                    ) : (
+                      ''
+                    )
+                  )}
+                </div>
               </div>
             </div>
           );
@@ -194,12 +212,27 @@ const StationsList: FC = () => {
                 className={styles.addStationInput}
                 placeholder="AO Tätigkeit"
                 type="text"
-                value={aOName}
+                value={newAoName}
                 required
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  setAoName(e.target.value)
+                  setNewAoName(e.target.value)
                 }
               />
+              <select
+                value={newAoGroup}
+                onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                  setNewAoGroup(Number(e.target.value))
+                }
+              >
+                <option value="" disabled>
+                  Gruppe
+                </option>
+                <option value={1}>1</option>
+                <option value={2}>2</option>
+                <option value={3}>3</option>
+                <option value={4}>4</option>
+                <option value={5}>5</option>
+              </select>
               <button className={styles.addStationButton} type="submit">
                 AO hinzufügen
               </button>

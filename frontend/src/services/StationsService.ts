@@ -1,16 +1,16 @@
 import { AxiosResponse } from 'axios';
 import api from '../http/index';
-import { IStation, INewStation, ITaskAo } from '../store/types';
+import { IStation, INewStation } from '../store/types';
 
 export default class StationsService {
+  static async getStations(): Promise<AxiosResponse<IStation[]>> {
+    return api.get<IStation[]>('/stations');
+  }
+
   static async addStation(
     newStation: INewStation
   ): Promise<AxiosResponse<IStation>> {
     return api.post<IStation>('/new-station', newStation);
-  }
-
-  static async getStations(): Promise<AxiosResponse<IStation[]>> {
-    return api.get<IStation[]>('/stations');
   }
 
   static async deleteStation(name: string): Promise<AxiosResponse<IStation>> {
@@ -22,9 +22,5 @@ export default class StationsService {
     newStatus: boolean
   ): Promise<AxiosResponse<IStation>> {
     return api.patch<IStation>('/change-station-status', { name, newStatus });
-  }
-
-  static async addTaskAo(taskAo: ITaskAo): Promise<AxiosResponse<ITaskAo>> {
-    return api.post<ITaskAo>('/new-taskao', taskAo);
   }
 }
