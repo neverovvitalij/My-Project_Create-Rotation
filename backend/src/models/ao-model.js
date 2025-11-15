@@ -9,9 +9,6 @@ const AoSchema = new mongoose.Schema({
   plant: { type: String, required: true },
 });
 
-AoSchema.index(
-  { name: 1, costCenter: 1, shift: 1, plant: 1 },
-  { unique: true }
-);
+AoSchema.index({ costCenter: 1, shift: 1, plant: 1 }, { unique: true });
 
 module.exports = mongoose.model('AoModel', AoSchema);

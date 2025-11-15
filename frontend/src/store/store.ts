@@ -34,6 +34,7 @@ export default class Store implements IStore {
     highPriorityRotation: new Map(),
     cycleRotations: [],
     allWorkers: [],
+    aoRotationQueue: new Map(),
   };
   newStation: INewStation = { name: '', priority: 1 };
   isInitializing = true;
@@ -401,6 +402,7 @@ export default class Store implements IStore {
         preassigned,
         cycles
       );
+
       this.setDailyRotation(response.data);
       return response.data;
     } catch (error: unknown) {
@@ -423,32 +425,52 @@ export default class Store implements IStore {
 
   async confirmRotation(): Promise<IPromiseResponse> {
     try {
-      const allWorkers = this.rotation.allWorkers;
+      const entriesOf = (x: any) =>
+        x instanceof Map ? Array.from(x.entries()) : Object.entries(x || {});
+
+      const pickName = (w: any) =>
+        typeof w === 'string' ? w.trim() : (w?.name ?? '').trim();
+
+      // 1) specialRotation: может быть Map<string, {job: string}> или plain
       const specialRotation = Object.fromEntries(
-        Object.entries(this.rotation.specialRotation).map(
-          ([workerName, { job }]) => [workerName.trim(), job]
+        entriesOf(this.rotation.specialRotation).map(
+          ([workerName, val]: any) => [
+            String(workerName).trim(),
+            (val?.job ?? (typeof val === 'string' ? val : '')).trim(),
+          ]
         )
       );
 
+      // 2) highPriorityRotation: Map<string, Employee> | Record<string, Employee | string>
       const highPriorityRotation = Object.fromEntries(
-        Object.entries(this.rotation.highPriorityRotation).map(
-          ([station, workerObj]) => [station, workerObj.name.trim()]
+        entriesOf(this.rotation.highPriorityRotation).map(
+          ([station, w]: any) => [String(station), pickName(w)]
         )
       );
 
-      const cycleRotations = this.rotation.cycleRotations.map((rot) =>
+      // 3) cycleRotations: Array<Record<string, Employee | string>>
+      const cycleRotations = (this.rotation.cycleRotations || []).map((rot) =>
         Object.fromEntries(
-          Object.entries(rot).map(([station, workerObj]) => [
-            station,
-            workerObj.name.trim(),
-          ])
+          entriesOf(rot)
+            .map(([station, w]: any) => [String(station), pickName(w)])
+            .filter(([, name]) => !!name) // выбросим пустые назначения
         )
       );
+
+      // 4) aoRotationQueue: уже plain object (Record<string, IEmployee | string>)
+      const aoRotationQueue = Object.fromEntries(
+        Object.entries(this.rotation.aoRotationQueue || {}).map(
+          ([k, v]: any) => [k, pickName(v)]
+        )
+      );
+
+      const allWorkers = this.rotation.allWorkers;
       const response = await RotationPlanService.confirmRotation(
         allWorkers,
         specialRotation,
         highPriorityRotation,
-        cycleRotations
+        cycleRotations,
+        aoRotationQueue
       );
 
       if (!response.data) {

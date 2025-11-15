@@ -31,13 +31,15 @@ export default class RotationPlanService {
     allWorkers: AllWorkers,
     specialRotation: Record<string, string>,
     highPriorityRotation: Record<string, string>,
-    cycleRotations: Array<Record<string, string>>
+    cycleRotations: Array<Record<string, string>>,
+    aoRotationQueue: Record<string, string>
   ): Promise<AxiosResponse<IConfirmedRotation>> {
     return api.post<IConfirmedRotation>('/confirm-rotation', {
       allWorkers,
       specialRotation,
       highPriorityRotation,
       cycleRotations,
+      aoRotationQueue,
     });
   }
 

@@ -22,6 +22,7 @@ const ConfirmedRotationSchema = new mongoose.Schema(
       highPriorityRotation: { type: Map, of: String, required: true },
       cycleRotations: { type: [{ type: Map, of: String }], required: true },
       allWorkers: { type: [WorkerInfoSchema], required: true },
+      aoRotationQueue: { type: Map, of: String, required: true },
     },
   },
   {

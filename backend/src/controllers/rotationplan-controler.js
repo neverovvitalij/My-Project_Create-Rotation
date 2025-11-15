@@ -14,9 +14,7 @@ class RotationPlanController {
   async getRotationData(req, res, next) {
     try {
       const { specialAssignments, preassigned, cycles } = req.body;
-      const costCenter = req.user.costCenter;
-      const shift = req.user.shift;
-      const plant = req.user.plant;
+      const { costCenter, shift, plant } = req.user;
 
       const service = new RotationPlanService();
       const data = await service.generateRotationData(
@@ -27,6 +25,7 @@ class RotationPlanController {
         shift,
         plant
       );
+
       return res.json(data);
     } catch (error) {
       next(
@@ -44,6 +43,7 @@ class RotationPlanController {
         specialRotation,
         highPriorityRotation,
         cycleRotations,
+        aoRotationQueue,
         allWorkers,
       } = req.body;
 
@@ -53,6 +53,7 @@ class RotationPlanController {
         highPriorityRotation,
         cycleRotations,
         allWorkers,
+        aoRotationQueue,
         costCenter,
         shift,
         plant
@@ -83,6 +84,7 @@ class RotationPlanController {
         highPriorityRotation,
         cycleRotations,
         allWorkers,
+        aoRotationQueue,
       } = req.body;
 
       if (
@@ -97,10 +99,11 @@ class RotationPlanController {
       }
 
       const result = await rotationService.confirmRotation(
+        allWorkers,
         specialRotation,
         highPriorityRotation,
         cycleRotations,
-        allWorkers,
+        aoRotationQueue,
         costCenter,
         shift,
         plant
@@ -139,6 +142,7 @@ class RotationPlanController {
         highPriorityRotation,
         cycleRotations,
         allWorkers,
+        aoRotationQueue,
       } = confirmedRotation.rotation;
       const excelBufferService = new ExcelBufferService();
       const { buffer, fileName } = await excelBufferService.buildExcelBuffer(
@@ -146,9 +150,9 @@ class RotationPlanController {
         highPriorityRotation,
         cycleRotations,
         allWorkers,
+        aoRotationQueue,
         costCenter,
-        shift,
-        plant
+        shift
       );
       res
         .status(200)

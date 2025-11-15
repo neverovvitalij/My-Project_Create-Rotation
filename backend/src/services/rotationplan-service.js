@@ -2,6 +2,8 @@ const WorkerModel = require('../models/worker-model');
 const RotationQueueModel = require('../models/rotationqueue-model');
 const ConfirmedRotation = require('../models/confirmedrotation-model');
 const StationModel = require('../models/station-model');
+const AoRotationQueue = require('../models/aorotationqueue-model');
+const AoModel = require('../models/ao-model');
 
 class RotationPlanService {
   constructor() {
@@ -568,12 +570,131 @@ class RotationPlanService {
       // (5) Assemble final array of all workers for response
       const allWorkers = await WorkerModel.find({ costCenter, shift, plant });
 
+      // (6) Generate daily AOTask for regular rotation
+
+      // Create a new queue or update existing one
+      let rotationQueueForAOTask = await AoRotationQueue.findOne({
+        station: 'AO',
+        costCenter,
+        shift,
+        plant,
+      });
+
+      if (!rotationQueueForAOTask) {
+        rotationQueueForAOTask = new AoRotationQueue({
+          station: 'AO',
+          queue: [],
+          costCenter,
+          shift,
+          plant,
+        });
+      }
+
+      // ---------- синхронизация состава очереди по allWorkers (порядок сохраняем) ----------
+      const existing = rotationQueueForAOTask.queue || [];
+      const byId = new Map(existing.map((e) => [String(e.workerId), e]));
+
+      // обновить/добавить
+      for (const w of allWorkers) {
+        const id = String(w._id);
+        if (byId.has(id)) {
+          const rec = byId.get(id);
+          rec.name = w.name.trim();
+          rec.group = w.group;
+          rec.costCenter = w.costCenter;
+          rec.shift = w.shift;
+          rec.plant = w.plant;
+        } else {
+          existing.push({
+            workerId: w._id,
+            name: w.name.trim(),
+            group: w.group,
+            costCenter: w.costCenter,
+            shift: w.shift,
+            plant: w.plant,
+          });
+        }
+      }
+
+      // удалить уволенных/недоступных
+      const validIds = new Set(allWorkers.map((w) => String(w._id)));
+      rotationQueueForAOTask.queue = existing.filter((e) =>
+        validIds.has(String(e.workerId))
+      );
+
+      // ---------- кандидаты для AO только из cycleRotations ----------
+      const pickName = (w) => (typeof w === 'string' ? w : w?.name || '');
+
+      const useAllCycles = true; // ← если хочешь только 1-й цикл: поставь false
+      const allowedNames = new Set(
+        useAllCycles
+          ? (cycleRotations || []).flatMap((rot) =>
+              Object.values(rot || {}).map(pickName)
+            )
+          : Object.values(cycleRotations?.[0] || {}).map(pickName)
+      );
+      for (const n of Array.from(allowedNames)) {
+        if (!n || !n.trim()) allowedNames.delete(n);
+      }
+      const isAllowed = (name) => allowedNames.has(name);
+
+      // ---------- назначения AO + ротация постоянной очереди ----------
+      const allAoTasksName = await AoModel.find({
+        costCenter,
+        shift,
+        plant,
+      }).lean();
+      const aoRotationQueue = new Map();
+      const queue = rotationQueueForAOTask.queue || [];
+
+      function findIndexForTask(taskGroup) {
+        // 1) allowed + та же группа
+        for (let i = 0; i < queue.length; i++) {
+          const p = queue[i];
+          if (
+            p &&
+            isAllowed(p.name) &&
+            (taskGroup == null || p.group === taskGroup)
+          )
+            return i;
+        }
+        // 2) просто allowed
+        for (let i = 0; i < queue.length; i++) {
+          const p = queue[i];
+          if (p && isAllowed(p.name)) return i;
+        }
+        // 3) без allowed, но совпадает группа (fallback)
+        for (let i = 0; i < queue.length; i++) {
+          const p = queue[i];
+          if (p && (taskGroup == null || p.group === taskGroup)) return i;
+        }
+        // 4) любой (последний fallback)
+        return queue.length ? 0 : -1;
+      }
+
+      for (const task of allAoTasksName) {
+        const taskKey = `Gruppe:${task.group} AO:${task.name}`;
+        const idx = findIndexForTask(task.group);
+        if (idx === -1) continue; // никого нет — пропускаем
+
+        const chosen = queue[idx];
+        aoRotationQueue.set(taskKey, chosen.name);
+
+        // вращаем ровно выбранного
+        queue.push(queue.splice(idx, 1)[0]);
+      }
+
+      // сохранить новый порядок очереди
+      rotationQueueForAOTask.markModified('queue');
+      await rotationQueueForAOTask.save();
+
       // Return full rotation data
       return {
         specialRotation: Object.fromEntries(specialRotation),
         highPriorityRotation: Object.fromEntries(highPriorityRotation),
         cycleRotations,
         allWorkers,
+        aoRotationQueue: Object.fromEntries(aoRotationQueue),
         date: new Date().toISOString().split('T')[0],
       };
     } catch (error) {
@@ -718,10 +839,11 @@ class RotationPlanService {
   }
 
   async confirmRotation(
+    allWorkers,
     specialRotation = null,
     highPriorityRotation,
     cycleRotations,
-    allWorkers,
+    aoRotationQueue,
     costCenter,
     shift,
     plant
@@ -742,6 +864,7 @@ class RotationPlanService {
           highPriorityRotation: { ...highPriorityRotation },
           cycleRotations: cycleRotations.map((rotation) => ({ ...rotation })),
           allWorkers,
+          aoRotationQueue: { ...aoRotationQueue },
         },
       });
 
@@ -778,6 +901,37 @@ class RotationPlanService {
         }
       };
 
+      // AO Queue update
+      const updateAoQueue = async (aoTask, workerName) => {
+        const rotationAoQueue = await AoRotationQueue.findOne({
+          station: 'AO',
+          costCenter,
+          shift,
+          plant,
+        });
+        if (!rotationAoQueue || rotationAoQueue.queue.length === 0) {
+          return;
+        }
+        const worker = await WorkerModel.findOne({ name: workerName });
+        if (!worker) {
+          return;
+        }
+
+        const idx = rotationAoQueue.queue.findIndex(
+          (item) => String(item.workerId) === String(worker._id)
+        );
+
+        if (idx !== -1) {
+          rotationAoQueue.queue.push(rotationAoQueue.queue.splice(idx, 1)[0]);
+          rotationAoQueue.markModified('queue');
+          await rotationAoQueue.save();
+        } else {
+          console.error(
+            `Workers ${workerName} is missing in the queue for AO ${aoTask}.`
+          );
+        }
+      };
+
       for (const [station, workerName] of Object.entries(specialRotation)) {
         await updateQueue(station, workerName);
       }
@@ -792,6 +946,10 @@ class RotationPlanService {
         for (const [station, workerName] of Object.entries(rotation)) {
           await updateQueue(station, workerName);
         }
+      }
+
+      for (const [aoTask, workerName] of Object.entries(aoRotationQueue)) {
+        await updateAoQueue(aoTask, workerName);
       }
 
       this.rotationQueues = null; // Reset local queue

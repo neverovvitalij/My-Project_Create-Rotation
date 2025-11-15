@@ -50,12 +50,15 @@ export type HighPriorityRotation = Map<string, IEmployee>;
 export type CycleRotation = Record<string, IEmployee>;
 export type CycleRotations = CycleRotation[];
 export type AllWorkers = IEmployee[];
+export type AoKey = `Gruppe:${number} AO:${string}`;
+export type AoRotationQueue = Map<AoKey, IEmployee>;
 
 export interface IRotation {
   specialRotation: SpecialRotation;
   highPriorityRotation: HighPriorityRotation;
   cycleRotations: CycleRotations;
   allWorkers: AllWorkers;
+  aoRotationQueue: AoRotationQueue;
 }
 
 export interface IConfirmedRotation {

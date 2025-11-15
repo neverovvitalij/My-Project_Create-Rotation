@@ -26,6 +26,7 @@ const ExcelPreview = forwardRef<ExcelPreviewHandle, ExcelPreviewProps>(
         highPriorityRotation,
         cycleRotations,
         allWorkers,
+        aoRotationQueue,
       } = store.rotation as IRotation;
       // 1) Fetch the file as a Blob
       try {
@@ -34,6 +35,7 @@ const ExcelPreview = forwardRef<ExcelPreviewHandle, ExcelPreviewProps>(
           highPriorityRotation,
           cycleRotations,
           allWorkers,
+          aoRotationQueue,
         });
         // 2) Convert Blob to ArrayBuffer
         const arrayBuffer = await response.data.arrayBuffer();
