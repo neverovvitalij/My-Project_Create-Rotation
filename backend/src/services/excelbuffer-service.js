@@ -5,7 +5,7 @@ class ExcelBufferService {
    * Build an XLSX buffer with:
    * - Left: main rotation by groups and up to 5 cycles
    * - Middle-right: AO-Tätigkeiten (task | employee)
-   * - Far-right: Tagesrotation (employee | station), and below it Abwesend
+   * - Far-right: Tagesrotation (task | employee), and below it Abwesend
    */
   async buildExcelBuffer(
     specialRotation,
@@ -58,8 +58,6 @@ class ExcelBufferService {
 
       ws.properties.defaultRowHeight = 20;
       ws.views = [{ showGridLines: false }];
-      // NOTE: ExcelJS doesn't apply forEach like this globally in all cases; we still set fonts cell-by-cell later.
-      // ws.eachRow((r) => (r.font = fontBase));
 
       // ---------- 3) Safe coercions ----------
       const cyclesArr = Array.isArray(cycleRotations) ? cycleRotations : [];
@@ -78,7 +76,7 @@ class ExcelBufferService {
       const gap1 = 1; // gap between left block and AO panel
       const aoCols = 2; // AO-Tätigkeiten: Aufgabe | Mitarbeiter
       const gap2 = 1; // gap between AO and Tages panel
-      const tagesCols = 2; // Tagesrotation: Mitarbeiter | Station
+      const tagesCols = 2; // Tagesrotation: Aufgabe | Mitarbeiter
 
       // Starting column indices for the two right panels
       const rightStartAO = leftCols + gap1 + 1; // first AO column
@@ -321,11 +319,11 @@ class ExcelBufferService {
 
         // AO header
         const aoHdr = ws.getRow(aoRow + 1);
-        const h1 = aoHdr.getCell(rightStartAO);
-        const h2 = aoHdr.getCell(rightStartAO + 1);
-        h1.value = 'Aufgabe';
-        h2.value = 'Mitarbeiter';
-        [h1, h2].forEach((cell, idx) => {
+        const hEmp = aoHdr.getCell(rightStartAO);
+        const hTask = aoHdr.getCell(rightStartAO + 1);
+        hEmp.value = 'Mitarbeiter';
+        hTask.value = 'Aufgabe';
+        [hEmp, hTask].forEach((cell, idx) => {
           cell.font = { ...fontInverse, bold: true };
           cell.fill = {
             type: 'pattern',
@@ -343,12 +341,13 @@ class ExcelBufferService {
         // AO rows
         aoEntries.forEach((entry, i) => {
           const rr = ws.getRow(aoRow + 2 + i);
-          const cTask = rr.getCell(rightStartAO);
-          const cName = rr.getCell(rightStartAO + 1);
-          cTask.value = entry.task;
-          cName.value = entry.name;
+          const cEmp = rr.getCell(rightStartAO);
+          const cTask = rr.getCell(rightStartAO + 1);
 
-          [cTask, cName].forEach((cell, idx) => {
+          cEmp.value = entry.name; // Mitarbeiter
+          cTask.value = entry.task; // Aufgabe
+
+          [cEmp, cTask].forEach((cell, idx) => {
             cell.font = fontBase;
             cell.alignment = {
               vertical: 'middle',
@@ -362,12 +361,14 @@ class ExcelBufferService {
       }
 
       // === 7.2 Tagesrotation panel (to the right of AO panel) ===
+      // hpEntries: [name, station]; we will render as Aufgabe (station) | Mitarbeiter (name)
       const hpEntries = Object.entries(hpObj).map(([st, w]) => [
         extractName(w) || String(w || ''),
         st,
       ]);
 
       let tgRow = 2;
+
       // Panel title
       {
         const r = ws.getRow(tgRow);
@@ -382,14 +383,37 @@ class ExcelBufferService {
         c.border = { bottom: borderThin };
       }
 
-      // Rows: Mitarbeiter | Station
-      hpEntries.forEach(([nm, st], i) => {
-        const rr = ws.getRow(tgRow + i + 1);
-        const cEmp = rr.getCell(rightStartTages);
-        const cStn = rr.getCell(rightStartTages + 1);
+      // NEW: blue header like AO-Tätigkeiten: Aufgabe | Mitarbeiter
+      const tgHeaderRow = tgRow + 1;
+      {
+        const hr = ws.getRow(tgHeaderRow);
+        const hEmp = hr.getCell(rightStartTages);
+        const hTask = hr.getCell(rightStartTages + 1);
+        hEmp.value = 'Mitarbeiter';
+        hTask.value = 'Aufgabe';
+        [hEmp, hTask].forEach((cell, idx) => {
+          cell.font = { ...fontInverse, bold: true };
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: colorAccent },
+          };
+          cell.border = { top: borderThin, bottom: borderThin };
+          cell.alignment = {
+            vertical: 'middle',
+            horizontal: idx === 0 ? 'left' : 'right',
+          };
+        });
+      }
 
-        cEmp.value = nm;
-        cStn.value = st;
+      // Entries under the header: Aufgabe (station) | Mitarbeiter (name)
+      hpEntries.forEach(([nm, st], i) => {
+        const rr = ws.getRow(tgHeaderRow + 1 + i);
+        const cEmp = rr.getCell(rightStartTages);
+        const cTask = rr.getCell(rightStartTages + 1);
+
+        cEmp.value = nm; // Mitarbeiter
+        cTask.value = st; // Aufgabe (станция)
 
         cEmp.font = { ...fontBase, bold: true };
         cEmp.fill = {
@@ -397,9 +421,9 @@ class ExcelBufferService {
           pattern: 'solid',
           fgColor: { argb: colorAccentSoft },
         };
-        cStn.font = fontMuted;
+        cTask.font = fontMuted;
 
-        [cEmp, cStn].forEach((cell, idx) => {
+        [cEmp, cTask].forEach((cell, idx) => {
           cell.border = { bottom: borderThin };
           cell.alignment = {
             vertical: 'middle',
@@ -413,7 +437,9 @@ class ExcelBufferService {
         .filter((w) => !w.status)
         .map((w) => w.name)
         .filter(Boolean);
-      const absRow0 = tgRow + hpEntries.length + 2; // one blank line after Tages list
+
+      // Start below: title (tgRow) + header (tgHeaderRow) + entries (hpEntries.length) + 2 spacer lines
+      const absRow0 = tgHeaderRow + hpEntries.length + 2;
 
       {
         const r = ws.getRow(absRow0);

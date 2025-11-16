@@ -576,6 +576,7 @@ class RotationPlanService {
       let rotationQueueForAOTask = await AoRotationQueue.findOne({
         station: 'AO',
         costCenter,
+
         shift,
         plant,
       });
@@ -641,6 +642,7 @@ class RotationPlanService {
       // ---------- назначения AO + ротация постоянной очереди ----------
       const allAoTasksName = await AoModel.find({
         costCenter,
+        status: true,
         shift,
         plant,
       }).lean();
