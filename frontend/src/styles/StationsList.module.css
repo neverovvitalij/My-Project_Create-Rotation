@@ -3,11 +3,13 @@
   max-width: 1200px;
   margin: 20px auto;
   padding: 24px;
+
   background: var(--bg-form);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
   border-radius: 20px;
   box-shadow: var(--shadow-elev);
+
   display: flex;
   flex-direction: column;
   gap: 24px;
