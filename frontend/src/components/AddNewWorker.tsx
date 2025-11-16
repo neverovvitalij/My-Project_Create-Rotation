@@ -34,7 +34,6 @@ const AddNewWorker: FC = () => {
     await store.addWorker(candidate);
 
     setCandidateName('');
-    setGroup(1);
     setSelectedStations([]);
   };
 
@@ -67,6 +66,7 @@ const AddNewWorker: FC = () => {
             <li>
               Wählen Sie die Stationen aus, die der Mitarbeiter beherrscht.
             </li>
+            <li>Priorität: GV zuerst, dann Vertreter. </li>
           </ul>
         </InfoTip>
 
