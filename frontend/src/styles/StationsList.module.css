@@ -69,13 +69,16 @@
 
 .toggleButton:hover {
   filter: brightness(1.03);
+  box-shadow: 0 12px 22px rgba(255, 210, 63, 0.28);
 }
+
 .toggleButton:active {
   transform: translateY(1px);
 }
+
 .toggleButton:disabled {
   cursor: not-allowed;
-  filter: grayscale(0.4) opacity(0.8);
+  filter: grayscale(0.5) opacity(0.8);
   box-shadow: none;
 }
 

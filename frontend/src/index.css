@@ -172,20 +172,17 @@ body {
   overflow-x: hidden;
 }
 
-/* Корневой контейнер растягиваем на динамический вьюпорт */
 #root,
 .app {
   min-height: 100dvh;
 }
 
-/* Подложка под всем контентом: fixed-слой, виден даже за пределами основного div */
 html:not([data-theme='light']) body::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  /* тот же тёмный фон, что у тебя на body, но теперь — как подложка */
   background: radial-gradient(
       1200px 600px at 80% -10%,
       rgba(34, 211, 238, 0.25),
@@ -199,7 +196,6 @@ html:not([data-theme='light']) body::before {
     linear-gradient(180deg, #0b0c10, #0f1117 60%, #0b0c10);
 }
 
-/* Светлая тема: даём ровный фон-подложку (можно заменить на свой градиент) */
 :root[data-theme='light'] body::before {
   content: '';
   position: fixed;
